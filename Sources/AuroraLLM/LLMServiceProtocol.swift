@@ -117,11 +117,11 @@ public protocol LLMServiceProtocol {
 }
 
 // MARK: - LLMServiceProtocol Extensions
+
 public extension LLMServiceProtocol {
-    
     /**
      Resolves the effective system prompt using priority: request.systemPrompt > message system > service default.
-     
+
      - Parameters:
        - request: The LLM request
        - serviceSystemPrompt: The service's default system prompt
@@ -131,10 +131,10 @@ public extension LLMServiceProtocol {
         let messageSystemPrompt = request.messages.first(where: { $0.role == .system })?.content
         return request.systemPrompt ?? messageSystemPrompt ?? serviceSystemPrompt
     }
-    
+
     /**
      Prepares messages for API request by handling system prompt priority and removing duplicates.
-     
+
      - Parameters:
        - request: The LLM request
        - serviceSystemPrompt: The service's default system prompt
@@ -142,24 +142,24 @@ public extension LLMServiceProtocol {
      */
     func prepareMessages(from request: LLMRequest, serviceSystemPrompt: String?) -> [LLMMessage] {
         var messages = request.messages
-        
+
         // Resolve the effective system prompt
         let effectiveSystemPrompt = resolveSystemPrompt(from: request, serviceSystemPrompt: serviceSystemPrompt)
-        
+
         // Remove any existing system messages to avoid duplication
         messages = messages.filter { $0.role != .system }
-        
+
         // Add the effective system prompt at the beginning if we have one
         if let systemPrompt = effectiveSystemPrompt {
             messages.insert(LLMMessage(role: .system, content: systemPrompt), at: 0)
         }
-        
+
         return messages
     }
-    
+
     /**
      Prepares messages payload for OpenAI-compatible APIs (OpenAI, Azure OpenAI).
-     
+
      - Parameters:
        - request: The LLM request
        - serviceSystemPrompt: The service's default system prompt
@@ -169,10 +169,10 @@ public extension LLMServiceProtocol {
         let messages = prepareMessages(from: request, serviceSystemPrompt: serviceSystemPrompt)
         return messages.map { ["role": $0.role.rawValue, "content": $0.content] }
     }
-    
+
     /**
      Prepares messages for Anthropic API format (separate system parameter).
-     
+
      - Parameters:
        - request: The LLM request
        - serviceSystemPrompt: The service's default system prompt
@@ -180,21 +180,21 @@ public extension LLMServiceProtocol {
      */
     func prepareAnthropicMessages(from request: LLMRequest, serviceSystemPrompt: String?) -> (systemPrompt: String?, messages: [[String: String]]) {
         let effectiveSystemPrompt = resolveSystemPrompt(from: request, serviceSystemPrompt: serviceSystemPrompt)
-        
+
         // Filter out system messages since Anthropic uses separate system parameter
         let nonSystemMessages = request.messages.filter { $0.role != .system }
         let messagesPayload = nonSystemMessages.map { ["role": $0.role.rawValue, "content": $0.content] }
-        
+
         return (effectiveSystemPrompt, messagesPayload)
     }
-    
+
     /**
      Validates that streaming configuration matches the method being called.
      */
     func validateStreamingConfig(_ request: LLMRequest, expectStreaming: Bool) throws {
-        if expectStreaming && !request.stream {
+        if expectStreaming, !request.stream {
             throw LLMServiceError.custom(message: "Streaming is required. Set request.stream = true.")
-        } else if !expectStreaming && request.stream {
+        } else if !expectStreaming, request.stream {
             throw LLMServiceError.custom(message: "Streaming not supported in this method. Use sendStreamingRequest() instead.")
         }
     }

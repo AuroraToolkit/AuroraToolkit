@@ -33,11 +33,11 @@ public extension String {
     func extractThoughtsAndStripJSON() -> (thoughts: [String], jsonBody: String) {
         let pattern = "(?s)<think>(.*?)</think>"
         guard let regex = try? NSRegularExpression(pattern: pattern) else {
-            let trimmed = self.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmed = trimmingCharacters(in: .whitespacesAndNewlines)
             return ([], trimmed)
         }
 
-        let nsrange = NSRange(self.startIndex..<self.endIndex, in: self)
+        let nsrange = NSRange(startIndex ..< endIndex, in: self)
         // Find all the <think>…</think> matches
         let matches = regex.matches(in: self, options: [], range: nsrange)
         var thoughts: [String] = []
@@ -57,7 +57,7 @@ public extension String {
         let trimmed = withoutThinks.trimmingCharacters(in: .whitespacesAndNewlines)
         let stripped = trimmed.stripMarkdownJSON().trimmingCharacters(in: .whitespacesAndNewlines)
         if let start = stripped.firstIndex(of: "{"), let end = stripped.lastIndex(of: "}") {
-            let jsonBody = String(stripped[start...end])
+            let jsonBody = String(stripped[start ... end])
             return (thoughts, jsonBody)
         }
         return (thoughts, stripped)

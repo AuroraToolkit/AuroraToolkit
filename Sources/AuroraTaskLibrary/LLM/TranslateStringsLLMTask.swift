@@ -148,14 +148,14 @@ public class TranslateStringsLLMTask: WorkflowComponent {
                     return [
                         "translations": wrappedTranslations,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else if let directTranslations = jsonResponse as? [String: String] {
                     // Direct format: {"original": "translated"}
                     return [
                         "translations": directTranslations,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else {
                     throw NSError(

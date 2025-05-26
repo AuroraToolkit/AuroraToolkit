@@ -184,13 +184,13 @@ public class AnalyzeSentimentLLMTask: WorkflowComponent {
                     return [
                         "sentiments": detailedSentiments,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else if let simpleSentiments = sentiments as? [String: String] {
                     return [
                         "sentiments": simpleSentiments,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else {
                     throw NSError(

@@ -135,7 +135,7 @@ public class ExtractRelationsLLMTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
-                throw NSError(
+                    throw NSError(
                         domain: "ExtractRelationsLLMTask",
                         code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
@@ -148,14 +148,14 @@ public class ExtractRelationsLLMTask: WorkflowComponent {
                     return [
                         "relations": wrappedRelations,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else if let directRelations = jsonResponse as? [String: [[String]]] {
                     // Direct format: {"co_founded": [...], "located_in": [...]}
                     return [
                         "relations": directRelations,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else {
                     throw NSError(

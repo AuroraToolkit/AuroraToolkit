@@ -128,14 +128,14 @@ public class AnalyzeTextReadabilityLLMTask: WorkflowComponent {
                     return [
                         "readabilityScores": wrappedScores,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else {
                     // Direct format - jsonResponse IS the readability scores
                     return [
                         "readabilityScores": jsonObject,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 }
             } catch {

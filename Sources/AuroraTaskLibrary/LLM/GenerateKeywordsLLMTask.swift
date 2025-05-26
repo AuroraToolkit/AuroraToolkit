@@ -136,7 +136,7 @@ public class GenerateKeywordsLLMTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
-                throw NSError(
+                    throw NSError(
                         domain: "GenerateKeywordsLLMTask",
                         code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response."]

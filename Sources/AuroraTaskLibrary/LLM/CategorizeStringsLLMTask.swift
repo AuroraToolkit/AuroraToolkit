@@ -122,7 +122,7 @@ public class CategorizeStringsLLMTask: WorkflowComponent {
             \(resolvedStrings.joined(separator: "\n"))
             """
 
-                let request = LLMRequest(
+            let request = LLMRequest(
                 messages: [
                     LLMMessage(role: .system, content: "You are a text categorization expert. Do NOT reveal any reasoning or chain-of-thought. Always respond with a single valid JSON object and nothing else (no markdown, explanations, or code fences)."),
                     LLMMessage(role: .user, content: categorizationPrompt),
@@ -153,14 +153,14 @@ public class CategorizeStringsLLMTask: WorkflowComponent {
                     return [
                         "categorizedStrings": wrappedCategories,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else if let directCategories = jsonResponse as? [String: [String]] {
                     // Direct format: {"Finance": [...], "Technology": [...]}
                     return [
                         "categorizedStrings": directCategories,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else {
                     throw NSError(

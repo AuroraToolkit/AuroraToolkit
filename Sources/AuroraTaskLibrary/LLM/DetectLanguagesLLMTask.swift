@@ -124,7 +124,7 @@ public class DetectLanguagesLLMTask: WorkflowComponent {
                 else {
                     throw NSError(
                         domain: "DetectLanguagesLLMTask",
-                        code: 2, 
+                        code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
                     )
                 }
@@ -135,14 +135,14 @@ public class DetectLanguagesLLMTask: WorkflowComponent {
                     return [
                         "languages": wrappedLanguages,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else if let directLanguages = jsonResponse as? [String: String] {
                     // Direct format: {"text": "en"}
                     return [
                         "languages": directLanguages,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else {
                     throw NSError(

@@ -146,7 +146,7 @@ public class ClusterStringsLLMTask: WorkflowComponent {
                 return [
                     "clusters": clusters,
                     "thoughts": thoughts,
-                    "rawResponse": fullResponse
+                    "rawResponse": fullResponse,
                 ]
             } catch {
                 throw error

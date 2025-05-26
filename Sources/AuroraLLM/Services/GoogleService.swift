@@ -247,10 +247,10 @@ public class GoogleService: LLMServiceProtocol {
     // Maps the internal LLMRequest to the Google API specific request structure.
     private func mapToGoogleRequest(_ request: LLMRequest, serviceSystemPrompt: String?) throws -> GoogleGenerateContentRequest {
         var googleContents: [GoogleContent] = []
-        
+
         // Use helper function for consistent system prompt resolution
         let effectiveSystemPrompt = resolveSystemPrompt(from: request, serviceSystemPrompt: serviceSystemPrompt)
-        
+
         // Process non-system messages
         for message in request.messages {
             let role: String
@@ -264,7 +264,7 @@ public class GoogleService: LLMServiceProtocol {
                 logger?.info("GoogleService: Mapping custom role '\(customRole)' to 'user'.", category: "GoogleService")
                 role = "user"
             }
-            
+
             guard !role.isEmpty else { continue }
             googleContents.append(GoogleContent(role: role, parts: [GooglePart(text: message.content)]))
         }

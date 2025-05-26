@@ -12,18 +12,18 @@ import os.log
 /**
  `OllamaService` implements the `LLMServiceProtocol` to interact with the Ollama models via its API.
  This service supports customizable API base URLs and allows interaction with models using both streaming and non-streaming modes.
- 
+
  ## Timeout Configuration
- 
+
  Local LLM models can vary significantly in loading and inference time depending on their size:
  - **Small models (0.6B-2B parameters)**: Typically respond within 30 seconds
  - **Medium models (7B-8B parameters)**: May take 60-120 seconds on first request
  - **Large models (13B+ parameters)**: Can require 2-5 minutes for initial loading
- 
+
  By default, `OllamaService` uses extended timeouts (5 minutes for requests, 15 minutes total) to accommodate
  large model loading times. For faster models or if you prefer quicker failure detection, you can provide
  a custom `URLSession` with shorter timeouts.
- 
+
  ### Example: Custom Timeout Configuration
  ```swift
  // For faster models - use shorter timeouts
@@ -31,26 +31,26 @@ import os.log
  fastConfig.timeoutIntervalForRequest = 60    // 1 minute
  fastConfig.timeoutIntervalForResource = 300  // 5 minutes
  let fastSession = URLSession(configuration: fastConfig)
- 
+
  let ollamaService = OllamaService(
      name: "FastOllama",
      urlSession: fastSession
  )
- 
+
  // For very large models - use even longer timeouts
  let slowConfig = URLSessionConfiguration.default
  slowConfig.timeoutIntervalForRequest = 600   // 10 minutes
  slowConfig.timeoutIntervalForResource = 1800 // 30 minutes
  let slowSession = URLSession(configuration: slowConfig)
- 
+
  let largeModelService = OllamaService(
-     name: "LargeModelOllama", 
+     name: "LargeModelOllama",
      urlSession: slowSession
  )
  ```
- 
+
  ## Model Performance Tips
- 
+
  - **Pre-warm large models** by running them manually first: `ollama run qwen3:14b "hello"`
  - **Monitor system resources** when using models larger than your available RAM
  - **Use smaller models** for development and testing to reduce wait times
@@ -106,7 +106,7 @@ public class OllamaService: LLMServiceProtocol {
         - systemPrompt: The default system prompt for this service, used to set the behavior or persona of the model.
         - urlSession: The `URLSession` instance used for network requests. If `nil`, creates a session with extended timeouts (5 min request, 15 min total) suitable for large model loading. For faster models or custom timeout requirements, provide your own configured session.
         - logger: An optional logger for recording information and errors. Defaults to `nil`.
-        
+
      - Note: The default timeout configuration is optimized for large models that may take several minutes to load initially. If you're using smaller, faster models or prefer quicker failure detection, consider providing a custom `URLSession` with shorter timeouts.
      */
     public init(
@@ -132,13 +132,13 @@ public class OllamaService: LLMServiceProtocol {
 
         // Create configuration optimized for local LLM model loading times
         if let urlSession = urlSession {
-            self.sessionConfiguration = urlSession.configuration
+            sessionConfiguration = urlSession.configuration
             self.urlSession = urlSession
         } else {
             let config = URLSessionConfiguration.default
-            config.timeoutIntervalForRequest = 300   // 5 minutes - allows for large model loading
-            config.timeoutIntervalForResource = 900  // 15 minutes - total time for complex operations
-            self.sessionConfiguration = config
+            config.timeoutIntervalForRequest = 300 // 5 minutes - allows for large model loading
+            config.timeoutIntervalForResource = 900 // 15 minutes - total time for complex operations
+            sessionConfiguration = config
             self.urlSession = URLSession(configuration: config)
         }
 
@@ -261,7 +261,7 @@ public class OllamaService: LLMServiceProtocol {
 
         // Construct the request body as per Ollama API
         let body: [String: Any] = [
-            "model": request.model ?? defaultModel, 
+            "model": request.model ?? defaultModel,
             "prompt": prompt,
             "max_tokens": request.maxTokens,
             "temperature": request.temperature,

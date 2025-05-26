@@ -118,7 +118,7 @@ public class GenerateTitlesLLMTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
-                throw NSError(domain: "GenerateTitlesLLMTask", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response: \(response.text)"])
+                    throw NSError(domain: "GenerateTitlesLLMTask", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response: \(response.text)"])
                 }
 
                 // Handle both formats: wrapped in "titles" or direct mapping
@@ -126,14 +126,14 @@ public class GenerateTitlesLLMTask: WorkflowComponent {
                     return [
                         "titles": wrappedTitles,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 } else {
                     // Direct format - jsonResponse IS the titles
                     return [
                         "titles": jsonResponse,
                         "thoughts": thoughts,
-                        "rawResponse": fullResponse
+                        "rawResponse": fullResponse,
                     ]
                 }
             } catch {
