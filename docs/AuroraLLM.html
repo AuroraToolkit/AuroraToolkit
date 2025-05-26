@@ -283,43 +283,43 @@
             <a href="AuroraTaskLibrary.html">AuroraTaskLibrary</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a href="AuroraTaskLibrary/Classes/AnalyzeSentimentLLMTask.html">AnalyzeSentimentLLMTask</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="AuroraTaskLibrary/Classes/AnalyzeSentimentMLTask.html">AnalyzeSentimentMLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/AnalyzeSentimentTask.html">AnalyzeSentimentTask</a>
+                <a href="AuroraTaskLibrary/Classes/AnalyzeTextReadabilityLLMTask.html">AnalyzeTextReadabilityLLMTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/AnalyzeTextReadabilityTask.html">AnalyzeTextReadabilityTask</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/CategorizeStringsTask.html">CategorizeStringsTask</a>
+                <a href="AuroraTaskLibrary/Classes/CategorizeStringsLLMTask.html">CategorizeStringsLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="AuroraTaskLibrary/Classes/ClassificationMLTask.html">ClassificationMLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/ClusterStringsTask.html">ClusterStringsTask</a>
+                <a href="AuroraTaskLibrary/Classes/ClusterStringsLLMTask.html">ClusterStringsLLMTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/DetectLanguagesTask.html">DetectLanguagesTask</a>
+                <a href="AuroraTaskLibrary/Classes/DetectLanguagesLLMTask.html">DetectLanguagesLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="AuroraTaskLibrary/Classes/EmbeddingMLTask.html">EmbeddingMLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/ExtractEntitiesTask.html">ExtractEntitiesTask</a>
+                <a href="AuroraTaskLibrary/Classes/ExtractEntitiesLLMTask.html">ExtractEntitiesLLMTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/ExtractRelationsTask.html">ExtractRelationsTask</a>
+                <a href="AuroraTaskLibrary/Classes/ExtractRelationsLLMTask.html">ExtractRelationsLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="AuroraTaskLibrary/Structs/FetchURLTask.html">FetchURLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/GenerateKeywordsTask.html">GenerateKeywordsTask</a>
+                <a href="AuroraTaskLibrary/Classes/GenerateKeywordsLLMTask.html">GenerateKeywordsLLMTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/GenerateTitlesTask.html">GenerateTitlesTask</a>
+                <a href="AuroraTaskLibrary/Classes/GenerateTitlesLLMTask.html">GenerateTitlesLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="AuroraTaskLibrary/Classes/IntentExtractionMLTask.html">IntentExtractionMLTask</a>
@@ -346,16 +346,16 @@
                 <a href="AuroraTaskLibrary/Classes/SemanticSearchMLTask.html">SemanticSearchMLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/SummarizeContextTask.html">SummarizeContextTask</a>
+                <a href="AuroraTaskLibrary/Classes/SummarizeContextLLMTask.html">SummarizeContextLLMTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/SummarizeStringsTask.html">SummarizeStringsTask</a>
+                <a href="AuroraTaskLibrary/Classes/SummarizeStringsLLMTask.html">SummarizeStringsLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="AuroraTaskLibrary/Classes/TaggingMLTask.html">TaggingMLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="AuroraTaskLibrary/Classes/TranslateStringsTask.html">TranslateStringsTask</a>
+                <a href="AuroraTaskLibrary/Classes/TranslateStringsLLMTask.html">TranslateStringsLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="AuroraTaskLibrary/Classes/TrimmingTask.html">TrimmingTask</a>
@@ -1543,6 +1543,49 @@ and provides error handling using <code><a href="AuroraLLM/Enums/LLMServiceError
                       <div class="abstract">
                         <p><code>OllamaService</code> implements the <code><a href="AuroraLLM/Protocols/LLMServiceProtocol.html">LLMServiceProtocol</a></code> to interact with the Ollama models via its API.
 This service supports customizable API base URLs and allows interaction with models using both streaming and non-streaming modes.</p>
+<h2 id='timeout-configuration' class='heading'>Timeout Configuration</h2>
+
+<p>Local LLM models can vary significantly in loading and inference time depending on their size:</p>
+
+<ul>
+<li><strong>Small models (0.6B-2B parameters)</strong>: Typically respond within 30 seconds</li>
+<li><strong>Medium models (7B-8B parameters)</strong>: May take 60-120 seconds on first request</li>
+<li><strong>Large models (13B+ parameters)</strong>: Can require 2-5 minutes for initial loading</li>
+</ul>
+
+<p>By default, <code>OllamaService</code> uses extended timeouts (5 minutes for requests, 15 minutes total) to accommodate
+large model loading times. For faster models or if you prefer quicker failure detection, you can provide
+a custom <code>URLSession</code> with shorter timeouts.</p>
+<h3 id='example-custom-timeout-configuration' class='heading'>Example: Custom Timeout Configuration</h3>
+<pre class="highlight swift"><code><span class="c1">// For faster models - use shorter timeouts</span>
+<span class="k">let</span> <span class="nv">fastConfig</span> <span class="o">=</span> <span class="kt">URLSessionConfiguration</span><span class="o">.</span><span class="k">default</span>
+<span class="n">fastConfig</span><span class="o">.</span><span class="n">timeoutIntervalForRequest</span> <span class="o">=</span> <span class="mi">60</span>    <span class="c1">// 1 minute</span>
+<span class="n">fastConfig</span><span class="o">.</span><span class="n">timeoutIntervalForResource</span> <span class="o">=</span> <span class="mi">300</span>  <span class="c1">// 5 minutes</span>
+<span class="k">let</span> <span class="nv">fastSession</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span><span class="nv">configuration</span><span class="p">:</span> <span class="n">fastConfig</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="nv">ollamaService</span> <span class="o">=</span> <span class="kt">OllamaService</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"FastOllama"</span><span class="p">,</span>
+    <span class="nv">urlSession</span><span class="p">:</span> <span class="n">fastSession</span>
+<span class="p">)</span>
+
+<span class="c1">// For very large models - use even longer timeouts</span>
+<span class="k">let</span> <span class="nv">slowConfig</span> <span class="o">=</span> <span class="kt">URLSessionConfiguration</span><span class="o">.</span><span class="k">default</span>
+<span class="n">slowConfig</span><span class="o">.</span><span class="n">timeoutIntervalForRequest</span> <span class="o">=</span> <span class="mi">600</span>   <span class="c1">// 10 minutes</span>
+<span class="n">slowConfig</span><span class="o">.</span><span class="n">timeoutIntervalForResource</span> <span class="o">=</span> <span class="mi">1800</span> <span class="c1">// 30 minutes</span>
+<span class="k">let</span> <span class="nv">slowSession</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span><span class="nv">configuration</span><span class="p">:</span> <span class="n">slowConfig</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="nv">largeModelService</span> <span class="o">=</span> <span class="kt">OllamaService</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"LargeModelOllama"</span><span class="p">,</span>
+    <span class="nv">urlSession</span><span class="p">:</span> <span class="n">slowSession</span>
+<span class="p">)</span>
+</code></pre>
+<h2 id='model-performance-tips' class='heading'>Model Performance Tips</h2>
+
+<ul>
+<li><strong>Pre-warm large models</strong> by running them manually first: <code>ollama run qwen3:14b &quot;hello&quot;</code></li>
+<li><strong>Monitor system resources</strong> when using models larger than your available RAM</li>
+<li><strong>Use smaller models</strong> for development and testing to reduce wait times</li>
+</ul>
 
                         <a href="AuroraLLM/Classes/OllamaService.html" class="slightly-smaller">See more</a>
                       </div>
@@ -1856,7 +1899,7 @@ This struct encapsulates parameters that influence how the summary is generated.
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">extension</span> <span class="kt">String</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">extension</span> <span class="kt">String</span></code></pre>
 
                         </div>
                       </div>
@@ -1868,7 +1911,7 @@ This struct encapsulates parameters that influence how the summary is generated.
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2025 <a class="link" href="" target="_blank" rel="external noopener"></a>. All rights reserved. (Last updated: 2025-05-18)</p>
+          <p>&copy; 2025 <a class="link" href="" target="_blank" rel="external noopener"></a>. All rights reserved. (Last updated: 2025-05-26)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.1</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>

@@ -285,43 +285,43 @@
             <a href="../../AuroraTaskLibrary.html">AuroraTaskLibrary</a>
             <ul class="nav-group-tasks">
               <li class="nav-group-task">
+                <a href="../../AuroraTaskLibrary/Classes/AnalyzeSentimentLLMTask.html">AnalyzeSentimentLLMTask</a>
+              </li>
+              <li class="nav-group-task">
                 <a href="../../AuroraTaskLibrary/Classes/AnalyzeSentimentMLTask.html">AnalyzeSentimentMLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/AnalyzeSentimentTask.html">AnalyzeSentimentTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/AnalyzeTextReadabilityLLMTask.html">AnalyzeTextReadabilityLLMTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/AnalyzeTextReadabilityTask.html">AnalyzeTextReadabilityTask</a>
-              </li>
-              <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/CategorizeStringsTask.html">CategorizeStringsTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/CategorizeStringsLLMTask.html">CategorizeStringsLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="../../AuroraTaskLibrary/Classes/ClassificationMLTask.html">ClassificationMLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/ClusterStringsTask.html">ClusterStringsTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/ClusterStringsLLMTask.html">ClusterStringsLLMTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/DetectLanguagesTask.html">DetectLanguagesTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/DetectLanguagesLLMTask.html">DetectLanguagesLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="../../AuroraTaskLibrary/Classes/EmbeddingMLTask.html">EmbeddingMLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/ExtractEntitiesTask.html">ExtractEntitiesTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/ExtractEntitiesLLMTask.html">ExtractEntitiesLLMTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/ExtractRelationsTask.html">ExtractRelationsTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/ExtractRelationsLLMTask.html">ExtractRelationsLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="../../AuroraTaskLibrary/Structs/FetchURLTask.html">FetchURLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/GenerateKeywordsTask.html">GenerateKeywordsTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/GenerateKeywordsLLMTask.html">GenerateKeywordsLLMTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/GenerateTitlesTask.html">GenerateTitlesTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/GenerateTitlesLLMTask.html">GenerateTitlesLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="../../AuroraTaskLibrary/Classes/IntentExtractionMLTask.html">IntentExtractionMLTask</a>
@@ -348,16 +348,16 @@
                 <a href="../../AuroraTaskLibrary/Classes/SemanticSearchMLTask.html">SemanticSearchMLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/SummarizeContextTask.html">SummarizeContextTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/SummarizeContextLLMTask.html">SummarizeContextLLMTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/SummarizeStringsTask.html">SummarizeStringsTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/SummarizeStringsLLMTask.html">SummarizeStringsLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="../../AuroraTaskLibrary/Classes/TaggingMLTask.html">TaggingMLTask</a>
               </li>
               <li class="nav-group-task">
-                <a href="../../AuroraTaskLibrary/Classes/TranslateStringsTask.html">TranslateStringsTask</a>
+                <a href="../../AuroraTaskLibrary/Classes/TranslateStringsLLMTask.html">TranslateStringsLLMTask</a>
               </li>
               <li class="nav-group-task">
                 <a href="../../AuroraTaskLibrary/Classes/TrimmingTask.html">TrimmingTask</a>
@@ -379,6 +379,49 @@
               </div>
             <p><code>OllamaService</code> implements the <code><a href="../../AuroraLLM/Protocols/LLMServiceProtocol.html">LLMServiceProtocol</a></code> to interact with the Ollama models via its API.
 This service supports customizable API base URLs and allows interaction with models using both streaming and non-streaming modes.</p>
+<h2 id='timeout-configuration' class='heading'>Timeout Configuration</h2>
+
+<p>Local LLM models can vary significantly in loading and inference time depending on their size:</p>
+
+<ul>
+<li><strong>Small models (0.6B-2B parameters)</strong>: Typically respond within 30 seconds</li>
+<li><strong>Medium models (7B-8B parameters)</strong>: May take 60-120 seconds on first request</li>
+<li><strong>Large models (13B+ parameters)</strong>: Can require 2-5 minutes for initial loading</li>
+</ul>
+
+<p>By default, <code>OllamaService</code> uses extended timeouts (5 minutes for requests, 15 minutes total) to accommodate
+large model loading times. For faster models or if you prefer quicker failure detection, you can provide
+a custom <code>URLSession</code> with shorter timeouts.</p>
+<h3 id='example-custom-timeout-configuration' class='heading'>Example: Custom Timeout Configuration</h3>
+<pre class="highlight swift"><code><span class="c1">// For faster models - use shorter timeouts</span>
+<span class="k">let</span> <span class="nv">fastConfig</span> <span class="o">=</span> <span class="kt">URLSessionConfiguration</span><span class="o">.</span><span class="k">default</span>
+<span class="n">fastConfig</span><span class="o">.</span><span class="n">timeoutIntervalForRequest</span> <span class="o">=</span> <span class="mi">60</span>    <span class="c1">// 1 minute</span>
+<span class="n">fastConfig</span><span class="o">.</span><span class="n">timeoutIntervalForResource</span> <span class="o">=</span> <span class="mi">300</span>  <span class="c1">// 5 minutes</span>
+<span class="k">let</span> <span class="nv">fastSession</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span><span class="nv">configuration</span><span class="p">:</span> <span class="n">fastConfig</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="nv">ollamaService</span> <span class="o">=</span> <span class="kt">OllamaService</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"FastOllama"</span><span class="p">,</span>
+    <span class="nv">urlSession</span><span class="p">:</span> <span class="n">fastSession</span>
+<span class="p">)</span>
+
+<span class="c1">// For very large models - use even longer timeouts</span>
+<span class="k">let</span> <span class="nv">slowConfig</span> <span class="o">=</span> <span class="kt">URLSessionConfiguration</span><span class="o">.</span><span class="k">default</span>
+<span class="n">slowConfig</span><span class="o">.</span><span class="n">timeoutIntervalForRequest</span> <span class="o">=</span> <span class="mi">600</span>   <span class="c1">// 10 minutes</span>
+<span class="n">slowConfig</span><span class="o">.</span><span class="n">timeoutIntervalForResource</span> <span class="o">=</span> <span class="mi">1800</span> <span class="c1">// 30 minutes</span>
+<span class="k">let</span> <span class="nv">slowSession</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span><span class="nv">configuration</span><span class="p">:</span> <span class="n">slowConfig</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="nv">largeModelService</span> <span class="o">=</span> <span class="kt">OllamaService</span><span class="p">(</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="s">"LargeModelOllama"</span><span class="p">,</span>
+    <span class="nv">urlSession</span><span class="p">:</span> <span class="n">slowSession</span>
+<span class="p">)</span>
+</code></pre>
+<h2 id='model-performance-tips' class='heading'>Model Performance Tips</h2>
+
+<ul>
+<li><strong>Pre-warm large models</strong> by running them manually first: <code>ollama run qwen3:14b &quot;hello&quot;</code></li>
+<li><strong>Monitor system resources</strong> when using models larger than your available RAM</li>
+<li><strong>Use smaller models</strong> for development and testing to reduce wait times</li>
+</ul>
 
           </section>
           <section class="section task-group-section">
@@ -603,9 +646,9 @@ This service supports customizable API base URLs and allows interaction with mod
                 <li class="item">
                   <div>
                     <code>
-                    <a name="/s:9AuroraLLM13OllamaServiceC6vendor4name7baseURL17contextWindowSize15maxOutputTokens16inputTokenPolicy06outputpQ012systemPrompt10urlSession6loggerACSS_S2SS2iAA0p10AdjustmentQ0OAOSSSgSo12NSURLSessionC0A4Core12CustomLoggerCSgtcfc"></a>
+                    <a name="/s:9AuroraLLM13OllamaServiceC6vendor4name7baseURL17contextWindowSize15maxOutputTokens16inputTokenPolicy06outputpQ012systemPrompt10urlSession6loggerACSS_S2SS2iAA0p10AdjustmentQ0OAOSSSgSo12NSURLSessionCSg0A4Core12CustomLoggerCSgtcfc"></a>
                     <a name="//apple_ref/swift/Method/init(vendor:name:baseURL:contextWindowSize:maxOutputTokens:inputTokenPolicy:outputTokenPolicy:systemPrompt:urlSession:logger:)" class="dashAnchor"></a>
-                    <a class="token" href="#/s:9AuroraLLM13OllamaServiceC6vendor4name7baseURL17contextWindowSize15maxOutputTokens16inputTokenPolicy06outputpQ012systemPrompt10urlSession6loggerACSS_S2SS2iAA0p10AdjustmentQ0OAOSSSgSo12NSURLSessionC0A4Core12CustomLoggerCSgtcfc">init(vendor:<wbr>name:<wbr>baseURL:<wbr>contextWindowSize:<wbr>maxOutputTokens:<wbr>inputTokenPolicy:<wbr>outputTokenPolicy:<wbr>systemPrompt:<wbr>urlSession:<wbr>logger:<wbr>)</a>
+                    <a class="token" href="#/s:9AuroraLLM13OllamaServiceC6vendor4name7baseURL17contextWindowSize15maxOutputTokens16inputTokenPolicy06outputpQ012systemPrompt10urlSession6loggerACSS_S2SS2iAA0p10AdjustmentQ0OAOSSSgSo12NSURLSessionCSg0A4Core12CustomLoggerCSgtcfc">init(vendor:<wbr>name:<wbr>baseURL:<wbr>contextWindowSize:<wbr>maxOutputTokens:<wbr>inputTokenPolicy:<wbr>outputTokenPolicy:<wbr>systemPrompt:<wbr>urlSession:<wbr>logger:<wbr>)</a>
                     </code>
                   </div>
                   <div class="height-container">
@@ -614,13 +657,29 @@ This service supports customizable API base URLs and allows interaction with mod
                       <div class="pointer"></div>
                       <div class="abstract">
                         <p>Initializes a new <code>OllamaService</code> instance.</p>
+<div class="aside aside-note">
+    <p class="aside-title">Note</p>
+    <p>The default timeout configuration is optimized for large models that may take several minutes to load initially. If you&rsquo;re using smaller, faster models or prefer quicker failure detection, consider providing a custom <code>URLSession</code> with shorter timeouts.</p>
+
+</div>
 
                       </div>
                       <div class="declaration">
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span><span class="nv">vendor</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"Ollama"</span><span class="p">,</span> <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"Ollama"</span><span class="p">,</span> <span class="nv">baseURL</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"http://localhost:11434"</span><span class="p">,</span> <span class="nv">contextWindowSize</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">4096</span><span class="p">,</span> <span class="nv">maxOutputTokens</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">4096</span><span class="p">,</span> <span class="nv">inputTokenPolicy</span><span class="p">:</span> <span class="kt"><a href="../../AuroraLLM/Enums/TokenAdjustmentPolicy.html">TokenAdjustmentPolicy</a></span> <span class="o">=</span> <span class="o">.</span><span class="n">adjustToServiceLimits</span><span class="p">,</span> <span class="nv">outputTokenPolicy</span><span class="p">:</span> <span class="kt"><a href="../../AuroraLLM/Enums/TokenAdjustmentPolicy.html">TokenAdjustmentPolicy</a></span> <span class="o">=</span> <span class="o">.</span><span class="n">adjustToServiceLimits</span><span class="p">,</span> <span class="nv">systemPrompt</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span> <span class="nv">urlSession</span><span class="p">:</span> <span class="kt">URLSession</span> <span class="o">=</span> <span class="kt">URLSession</span><span class="p">(</span><span class="nv">configuration</span><span class="p">:</span> <span class="o">.</span><span class="k">default</span><span class="p">),</span> <span class="nv">logger</span><span class="p">:</span> <span class="kt"><a href="../../AuroraCore/Classes/CustomLogger.html">CustomLogger</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="nf">init</span><span class="p">(</span>
+    <span class="nv">vendor</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"Ollama"</span><span class="p">,</span>
+    <span class="nv">name</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"Ollama"</span><span class="p">,</span>
+    <span class="nv">baseURL</span><span class="p">:</span> <span class="kt">String</span> <span class="o">=</span> <span class="s">"http://localhost:11434"</span><span class="p">,</span>
+    <span class="nv">contextWindowSize</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">4096</span><span class="p">,</span>
+    <span class="nv">maxOutputTokens</span><span class="p">:</span> <span class="kt">Int</span> <span class="o">=</span> <span class="mi">4096</span><span class="p">,</span>
+    <span class="nv">inputTokenPolicy</span><span class="p">:</span> <span class="kt"><a href="../../AuroraLLM/Enums/TokenAdjustmentPolicy.html">TokenAdjustmentPolicy</a></span> <span class="o">=</span> <span class="o">.</span><span class="n">adjustToServiceLimits</span><span class="p">,</span>
+    <span class="nv">outputTokenPolicy</span><span class="p">:</span> <span class="kt"><a href="../../AuroraLLM/Enums/TokenAdjustmentPolicy.html">TokenAdjustmentPolicy</a></span> <span class="o">=</span> <span class="o">.</span><span class="n">adjustToServiceLimits</span><span class="p">,</span>
+    <span class="nv">systemPrompt</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+    <span class="nv">urlSession</span><span class="p">:</span> <span class="kt">URLSession</span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">,</span>
+    <span class="nv">logger</span><span class="p">:</span> <span class="kt"><a href="../../AuroraCore/Classes/CustomLogger.html">CustomLogger</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span>
+<span class="p">)</span></code></pre>
 
                         </div>
                       </div>
@@ -661,18 +720,6 @@ This service supports customizable API base URLs and allows interaction with mod
                               <td>
                                 <div>
                                   <p>The base URL for the Ollama API (default is <code>&quot;http://localhost:11434&quot;</code>).</p>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <td>
-                                <code>
-                                <em>apiKey</em>
-                                </code>
-                              </td>
-                              <td>
-                                <div>
-                                  <p>An optional API key, though not required for local Ollama instances.</p>
                                 </div>
                               </td>
                             </tr>
@@ -744,7 +791,7 @@ This service supports customizable API base URLs and allows interaction with mod
                               </td>
                               <td>
                                 <div>
-                                  <p>The <code>URLSession</code> instance used for network requests. Defaults to a <code>.default</code> configuration.</p>
+                                  <p>The <code>URLSession</code> instance used for network requests. If <code>nil</code>, creates a session with extended timeouts (5 min request, 15 min total) suitable for large model loading. For faster models or custom timeout requirements, provide your own configured session.</p>
                                 </div>
                               </td>
                             </tr>
@@ -878,7 +925,7 @@ This service supports customizable API base URLs and allows interaction with mod
                         <h4>Declaration</h4>
                         <div class="language">
                           <p class="aside-title">Swift</p>
-                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">sendStreamingRequest</span><span class="p">(</span><span class="n">_</span> <span class="nv">request</span><span class="p">:</span> <span class="kt"><a href="../../AuroraLLM/Structs/LLMRequest.html">LLMRequest</a></span><span class="p">,</span> <span class="nv">onPartialResponse</span><span class="p">:</span> <span class="p">((</span><span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../../AuroraLLM/Protocols/LLMResponseProtocol.html">LLMResponseProtocol</a></span></code></pre>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">sendStreamingRequest</span><span class="p">(</span><span class="n">_</span> <span class="nv">request</span><span class="p">:</span> <span class="kt"><a href="../../AuroraLLM/Structs/LLMRequest.html">LLMRequest</a></span><span class="p">,</span> <span class="nv">onPartialResponse</span><span class="p">:</span> <span class="p">((</span><span class="kt">String</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="p">)?)</span> <span class="k">async</span> <span class="k">throws</span> <span class="o">-&gt;</span> <span class="kt"><a href="../../AuroraLLM/Protocols/LLMResponseProtocol.html">LLMResponseProtocol</a></span></code></pre>
 
                         </div>
                       </div>
@@ -925,7 +972,7 @@ This service supports customizable API base URLs and allows interaction with mod
           </section>
         </section>
         <section id="footer">
-          <p>&copy; 2025 <a class="link" href="" target="_blank" rel="external noopener"></a>. All rights reserved. (Last updated: 2025-05-18)</p>
+          <p>&copy; 2025 <a class="link" href="" target="_blank" rel="external noopener"></a>. All rights reserved. (Last updated: 2025-05-26)</p>
           <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external noopener">jazzy ♪♫ v0.15.1</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external noopener">Realm</a> project.</p>
         </section>
       </article>
