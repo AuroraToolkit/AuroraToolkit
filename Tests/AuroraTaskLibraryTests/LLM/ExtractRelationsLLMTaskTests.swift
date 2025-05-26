@@ -1,5 +1,5 @@
 //
-//  ExtractRelationsTaskTests.swift
+//  ExtractRelationsLLMTaskTests.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/4/25.
@@ -10,9 +10,9 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class ExtractRelationsTaskTests: XCTestCase {
+final class ExtractRelationsLLMTaskTests: XCTestCase {
 
-    func testExtractRelationsTaskSuccess() async throws {
+    func testExtractRelationsLLMTaskSuccess() async throws {
         // Given
         let mockResponseText = """
     {
@@ -27,7 +27,7 @@ final class ExtractRelationsTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = ExtractRelationsTask(
+        let task = ExtractRelationsLLMTask(
             llmService: mockService,
             strings: [
                 "Steve Jobs was the co-founder of Apple, headquartered in Cupertino, California.",
@@ -54,14 +54,14 @@ final class ExtractRelationsTaskTests: XCTestCase {
         XCTAssertEqual(relations["located_in"]?.count, 1, "Expected 1 located_in relation.")
     }
 
-    func testExtractRelationsTaskEmptyInput() async {
+    func testExtractRelationsLLMTaskEmptyInput() async {
         // Given
         let mockService = MockLLMService(
             name: "Mock Relation Extractor",
             expectedResult: .failure(NSError(domain: "ExtractRelationsTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for extraction."]))
         )
 
-        let task = ExtractRelationsTask(
+        let task = ExtractRelationsLLMTask(
             llmService: mockService,
             strings: [],
             relationTypes: ["co_founded", "located_in"]
@@ -77,12 +77,12 @@ final class ExtractRelationsTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for empty input, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "ExtractRelationsTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "ExtractRelationsLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for empty input.")
         }
     }
 
-    func testExtractRelationsTaskIntegrationWithOllama() async throws {
+    func testExtractRelationsLLMTaskIntegrationWithOllama() async throws {
         // Given
         let stringsToExtractFrom = [
             "Steve Jobs was the co-founder of Apple, headquartered in Cupertino, California.",
@@ -90,7 +90,7 @@ final class ExtractRelationsTaskTests: XCTestCase {
         ]
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = ExtractRelationsTask(
+        let task = ExtractRelationsLLMTask(
             llmService: ollamaService,
             strings: stringsToExtractFrom,
             relationTypes: ["co_founded", "located_in"]

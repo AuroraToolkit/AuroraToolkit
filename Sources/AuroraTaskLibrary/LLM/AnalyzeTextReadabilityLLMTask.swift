@@ -1,5 +1,5 @@
 //
-//  AnalyzeTextReadabilityTask.swift
+//  AnalyzeTextReadabilityLLMTask.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/4/25.
@@ -26,12 +26,12 @@ import Foundation
  - Pre-process content to ensure it meets accessibility standards.
  - Compare readability metrics across different content pieces.
  */
-public class AnalyzeTextReadabilityTask: WorkflowComponent {
+public class AnalyzeTextReadabilityLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
     /**
-     Initializes a new `AnalyzeTextReadabilityTask`.
+     Initializes a new `AnalyzeTextReadabilityLLMTask`.
 
      - Parameters:
         - name: The name of the task.
@@ -57,7 +57,7 @@ public class AnalyzeTextReadabilityTask: WorkflowComponent {
 
             guard !resolvedStrings.isEmpty else {
                 throw NSError(
-                    domain: "AnalyzeTextReadabilityTask",
+                    domain: "AnalyzeTextReadabilityLLMTask",
                     code: 1,
                     userInfo: [NSLocalizedDescriptionKey: "No strings provided for readability analysis."]
                 )
@@ -117,7 +117,7 @@ public class AnalyzeTextReadabilityTask: WorkflowComponent {
                       let jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
                     throw NSError(
-                        domain: "AnalyzeTextReadabilityTask",
+                        domain: "AnalyzeTextReadabilityLLMTask",
                         code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response: \(response.text)"]
                     )
@@ -144,7 +144,7 @@ public class AnalyzeTextReadabilityTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `AnalyzeTextReadabilityTask` to a `Workflow.Component`.
+    /// Converts this `AnalyzeTextReadabilityLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

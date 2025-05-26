@@ -1,5 +1,5 @@
 //
-//  CategorizeStringsTask.swift
+//  CategorizeStringsLLMTask.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/1/25.
@@ -46,7 +46,7 @@ import Foundation
  ### Notes
  The task leverages a language model to handle flexible and nuanced categorization needs. When predefined categories are not supplied, the model dynamically determines suitable groupings, making it highly adaptable for unstructured or semi-structured data scenarios.
  */
-public class CategorizeStringsTask: WorkflowComponent {
+public class CategorizeStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
@@ -77,7 +77,7 @@ public class CategorizeStringsTask: WorkflowComponent {
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
                 throw NSError(
-                    domain: "CategorizeStringsTask",
+                    domain: "CategorizeStringsLLMTask",
                     code: 1,
                     userInfo: [NSLocalizedDescriptionKey: "No strings provided for categorization."]
                 )
@@ -122,7 +122,7 @@ public class CategorizeStringsTask: WorkflowComponent {
             \(resolvedStrings.joined(separator: "\n"))
             """
 
-            let request = LLMRequest(
+                let request = LLMRequest(
                 messages: [
                     LLMMessage(role: .system, content: "You are a text categorization expert. Do NOT reveal any reasoning or chain-of-thought. Always respond with a single valid JSON object and nothing else (no markdown, explanations, or code fences)."),
                     LLMMessage(role: .user, content: categorizationPrompt),
@@ -141,7 +141,7 @@ public class CategorizeStringsTask: WorkflowComponent {
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
                     throw NSError(
-                        domain: "CategorizeStringsTask",
+                        domain: "CategorizeStringsLLMTask",
                         code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
                     )
@@ -164,7 +164,7 @@ public class CategorizeStringsTask: WorkflowComponent {
                     ]
                 } else {
                     throw NSError(
-                        domain: "CategorizeStringsTask",
+                        domain: "CategorizeStringsLLMTask",
                         code: 3,
                         userInfo: [NSLocalizedDescriptionKey: "Unexpected format for categorization response."]
                     )
@@ -175,7 +175,7 @@ public class CategorizeStringsTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `CategorizeStringsTask` to a `Workflow.Component`.
+    /// Converts this `CategorizeStringsLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

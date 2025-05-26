@@ -77,7 +77,7 @@ struct CustomerFeedbackAnalysisWorkflow {
             }
 
             // Step 3: Detect Languages of the Reviews
-            DetectLanguagesTask(
+            DetectLanguagesLLMTask(
                 name: "DetectReviewLanguages",
                 llmService: llmService,
                 maxTokens: 1000,
@@ -85,7 +85,7 @@ struct CustomerFeedbackAnalysisWorkflow {
             )
 
             // Step 4: Analyze Sentiment
-            AnalyzeSentimentTask(
+            AnalyzeSentimentLLMTask(
                 name: "AnalyzeReviewSentiment",
                 llmService: llmService,
                 detailed: true,
@@ -94,7 +94,7 @@ struct CustomerFeedbackAnalysisWorkflow {
             )
 
             // Step 5: Extract Keywords from Reviews
-            GenerateKeywordsTask(
+            GenerateKeywordsLLMTask(
                 name: "ExtractReviewKeywords",
                 llmService: llmService,
                 maxTokens: 1000,
@@ -102,7 +102,7 @@ struct CustomerFeedbackAnalysisWorkflow {
             )
 
             // Step 6: Generate Actionable Suggestions
-            GenerateTitlesTask(
+            GenerateTitlesLLMTask(
                 name: "GenerateReviewSuggestions",
                 llmService: llmService,
                 languages: ["en"],
@@ -111,7 +111,7 @@ struct CustomerFeedbackAnalysisWorkflow {
             )
 
             // Step 7: Summarize Findings
-            SummarizeStringsTask(
+            SummarizeStringsLLMTask(
                 name: "SummarizeReviewFindings",
                 summarizer: summarizer,
                 summaryType: .multiple,

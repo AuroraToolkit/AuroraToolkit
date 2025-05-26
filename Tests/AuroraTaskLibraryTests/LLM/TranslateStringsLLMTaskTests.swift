@@ -1,5 +1,5 @@
 //
-//  TranslateStringsTaskTests.swift
+//  TranslateStringsLLMTaskTests.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 12/29/24.
@@ -10,9 +10,9 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class TranslateStringsTaskTests: XCTestCase {
+final class TranslateStringsLLMTaskTests: XCTestCase {
 
-    func testTranslateStringsTaskSuccess() async throws {
+    func testTranslateStringsLLMTaskSuccess() async throws {
         // Given
         let mockResponseText = """
         {
@@ -25,7 +25,7 @@ final class TranslateStringsTaskTests: XCTestCase {
             expectedResult: .success(mockResponse)
         )
 
-        let task = TranslateStringsTask(
+        let task = TranslateStringsLLMTask(
             llmService: mockService,
             strings: ["Hello world"],
             targetLanguage: "fr"
@@ -47,14 +47,14 @@ final class TranslateStringsTaskTests: XCTestCase {
         XCTAssertEqual(translations["Hello world"], "Bonjour tout le monde", "The translations should match the expected output.")
     }
 
-    func testTranslateStringsTaskEmptyInput() async {
+    func testTranslateStringsLLMTaskEmptyInput() async {
         // Given
         let mockService = MockLLMService(
             name: "Mock Translator",
             expectedResult: .failure(NSError(domain: "TranslateStringsTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid input text"]))
         )
 
-        let task = TranslateStringsTask(
+        let task = TranslateStringsLLMTask(
             llmService: mockService,
             strings: [],
             targetLanguage: "fr"
@@ -70,19 +70,19 @@ final class TranslateStringsTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for empty input, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "TranslateStringsTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "TranslateStringsLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for empty input.")
         }
     }
 
-    func testTranslateStringsTaskInvalidInputs() async {
+    func testTranslateStringsLLMTaskInvalidInputs() async {
         // Given
         let mockService = MockLLMService(
             name: "Mock Translator",
-            expectedResult: .failure(NSError(domain: "TranslateStringsTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid inputs"]))
+            expectedResult: .failure(NSError(domain: "TranslateStringsLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid inputs"]))
         )
 
-        let task = TranslateStringsTask(
+        let task = TranslateStringsLLMTask(
             llmService: mockService,
             strings: ["Hello world"],
             targetLanguage: "fr"
@@ -98,12 +98,12 @@ final class TranslateStringsTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute(inputs: ["strings": [123]]) // Invalid input type
             XCTFail("Expected an error to be thrown for invalid inputs, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "TranslateStringsTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "TranslateStringsLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for invalid input.")
         }
     }
 
-    func testTranslateStringsTaskServiceFailure() async {
+    func testTranslateStringsLLMTaskServiceFailure() async {
         // Given
         let expectedError = NSError(domain: "MockLLMService", code: 42, userInfo: [NSLocalizedDescriptionKey: "Simulated service error"])
         let mockService = MockLLMService(
@@ -111,7 +111,7 @@ final class TranslateStringsTaskTests: XCTestCase {
             expectedResult: .failure(expectedError)
         )
 
-        let task = TranslateStringsTask(
+        let task = TranslateStringsLLMTask(
             llmService: mockService,
             strings: ["Hello world"],
             targetLanguage: "fr"
@@ -132,10 +132,10 @@ final class TranslateStringsTaskTests: XCTestCase {
         }
     }
 
-    func testTranslateStringsTaskIntegrationWithOllama() async throws {
+    func testTranslateStringsLLMTaskIntegrationWithOllama() async throws {
         // Given
         let ollamaService = OllamaService(name: "Ollama Translator")
-        let task = TranslateStringsTask(
+        let task = TranslateStringsLLMTask(
             llmService: ollamaService,
             strings: [
                 "Bonjour tout le monde",

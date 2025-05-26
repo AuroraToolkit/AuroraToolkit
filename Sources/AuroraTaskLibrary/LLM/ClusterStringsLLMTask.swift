@@ -1,5 +1,5 @@
 //
-//  ClusterStringsTask.swift
+//  ClusterStringsLLMTask.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/1/25.
@@ -40,7 +40,7 @@ import Foundation
   }
   ```
  */
-public class ClusterStringsTask: WorkflowComponent {
+public class ClusterStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
@@ -71,7 +71,7 @@ public class ClusterStringsTask: WorkflowComponent {
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
                 throw NSError(
-                    domain: "ClusterStringsTask",
+                    domain: "ClusterStringsLLMTask",
                     code: 1,
                     userInfo: [NSLocalizedDescriptionKey: "No strings provided for clustering."]
                 )
@@ -138,7 +138,7 @@ public class ClusterStringsTask: WorkflowComponent {
                       let clusters = try? JSONSerialization.jsonObject(with: data) as? [String: [String]]
                 else {
                     throw NSError(
-                        domain: "ClusterStringsTask",
+                        domain: "ClusterStringsLLMTask",
                         code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response."]
                     )
@@ -154,7 +154,7 @@ public class ClusterStringsTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `ClusterStringsTask` to a `Workflow.Component`.
+    /// Converts this `ClusterStringsLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

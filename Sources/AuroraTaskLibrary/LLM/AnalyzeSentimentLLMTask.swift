@@ -1,5 +1,5 @@
 //
-//  AnalyzeSentimentTask.swift
+//  AnalyzeSentimentLLMTask.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/2/25.
@@ -10,55 +10,49 @@ import AuroraLLM
 import Foundation
 
 /**
- `AnalyzeSentimentTask` analyzes the sentiment of a list of strings using an LLM service.
+ `AnalyzeSentimentLLMTask` is a workflow component that analyzes the sentiment of text strings using a Large Language Model (LLM).
+
+ This task leverages LLM capabilities to perform nuanced sentiment analysis, going beyond simple positive/negative classifications
+ to provide detailed sentiment insights including confidence levels and reasoning.
 
  - **Inputs**
-    - `strings`: The list of strings to analyze.
-    - `detailed`: Boolean indicating whether to return detailed sentiment analysis. Defaults to `false`.
+   - `strings`: An array of text strings to analyze for sentiment.
+   - `options`: Optional sentiment analysis options (detailed vs. simple analysis, confidence thresholds, etc.).
+
  - **Outputs**
-    - `sentiments`: A dictionary where keys are the input strings and values are their respective sentiments.
-    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-    - `rawResponse`: The original unmodified raw response text from the LLM.
+   - `sentiments`: An array of sentiment analysis results, each containing sentiment label, confidence score, and optional reasoning.
+   - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+   - `rawResponse`: The original unmodified raw response text from the LLM.
 
  ### Use Cases:
- - Understand the emotional tone of user feedback, social media posts, or reviews.
- - Categorize content into positive, neutral, or negative sentiment for analytics or moderation.
- - Identify emotional trends over time in a dataset.
+ - **Customer Feedback Analysis**: Analyzing customer reviews, support tickets, or survey responses.
+ - **Social Media Monitoring**: Understanding public sentiment around brands, products, or events.
+ - **Content Moderation**: Identifying potentially harmful or negative content.
+ - **Market Research**: Analyzing sentiment trends in user-generated content or feedback.
 
  ### Example:
- **Input Strings**
- - "I love this product!"
- - "The service was okay."
- - "I’m very disappointed with the quality."
+ **Input Strings:**
+ - "I absolutely love this new product! It's amazing."
+ - "The service was okay, nothing special."
+ - "This is the worst experience I've ever had."
 
- **Output JSON:**
+ **Output:**
  ```
  {
-   "sentiments": {
-     "I love this product!": "Positive",
-     "The service was okay.": "Neutral",
-     "I’m very disappointed with the quality.": "Negative"
-   }
- }
- ```
-
- **Output JSON with detailed analysis:**
- ```
- {
-   "sentiments": {
-     "I love this product!": {"sentiment": "Positive", "confidence": 95},
-     "The service was okay.": {"sentiment": "Neutral", "confidence": 70},
-     "I’m very disappointed with the quality.": {"sentiment": "Negative", "confidence": 90}
-   }
+   "sentiments": [
+     {"text": "I absolutely love this new product! It's amazing.", "sentiment": "positive", "confidence": 0.95},
+     {"text": "The service was okay, nothing special.", "sentiment": "neutral", "confidence": 0.78},
+     {"text": "This is the worst experience I've ever had.", "sentiment": "negative", "confidence": 0.92}
+   ]
  }
  ```
  */
-public class AnalyzeSentimentTask: WorkflowComponent {
+public class AnalyzeSentimentLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
     /**
-     Initializes a new `AnalyzeSentimentTask`.
+     Initializes a new `AnalyzeSentimentLLMTask`.
 
      - Parameters:
         - name: The name of the task.
@@ -84,7 +78,7 @@ public class AnalyzeSentimentTask: WorkflowComponent {
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
                 throw NSError(
-                    domain: "AnalyzeSentimentTask",
+                    domain: "AnalyzeSentimentLLMTask",
                     code: 1,
                     userInfo: [NSLocalizedDescriptionKey: "No strings provided for sentiment analysis."]
                 )
@@ -169,7 +163,7 @@ public class AnalyzeSentimentTask: WorkflowComponent {
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
                     throw NSError(
-                        domain: "AnalyzeSentimentTask",
+                        domain: "AnalyzeSentimentLLMTask",
                         code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
                     )
@@ -200,7 +194,7 @@ public class AnalyzeSentimentTask: WorkflowComponent {
                     ]
                 } else {
                     throw NSError(
-                        domain: "AnalyzeSentimentTask",
+                        domain: "AnalyzeSentimentLLMTask",
                         code: 3,
                         userInfo: [NSLocalizedDescriptionKey: "Unexpected format for sentiment analysis response."]
                     )
@@ -211,7 +205,7 @@ public class AnalyzeSentimentTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `AnalyzeSentimentTask` to a `Workflow.Component`.
+    /// Converts this `AnalyzeSentimentLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

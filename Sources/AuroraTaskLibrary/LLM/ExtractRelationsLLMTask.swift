@@ -1,5 +1,5 @@
 //
-//  ExtractRelationsTask.swift
+//  ExtractRelationsLLMTask.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/4/25.
@@ -45,7 +45,7 @@ import Foundation
  ```
 
  */
-public class ExtractRelationsTask: WorkflowComponent {
+public class ExtractRelationsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
@@ -76,7 +76,7 @@ public class ExtractRelationsTask: WorkflowComponent {
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
                 throw NSError(
-                    domain: "ExtractRelationsTask",
+                    domain: "ExtractRelationsLLMTask",
                     code: 1,
                     userInfo: [NSLocalizedDescriptionKey: "No strings provided for relationship extraction."]
                 )
@@ -135,8 +135,8 @@ public class ExtractRelationsTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
-                    throw NSError(
-                        domain: "ExtractRelationsTask",
+                throw NSError(
+                        domain: "ExtractRelationsLLMTask",
                         code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
                     )
@@ -159,7 +159,7 @@ public class ExtractRelationsTask: WorkflowComponent {
                     ]
                 } else {
                     throw NSError(
-                        domain: "ExtractRelationsTask",
+                        domain: "ExtractRelationsLLMTask",
                         code: 3,
                         userInfo: [NSLocalizedDescriptionKey: "Unexpected format for relation extraction response."]
                     )
@@ -170,7 +170,7 @@ public class ExtractRelationsTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `ExtractRelationsTask` to a `Workflow.Component`.
+    /// Converts this `ExtractRelationsLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

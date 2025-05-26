@@ -1,5 +1,5 @@
 //
-//  ExtractEntitiesTaskTests.swift
+//  ExtractEntitiesLLMTaskTests.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/3/25.
@@ -10,9 +10,9 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class ExtractEntitiesTaskTests: XCTestCase {
+final class ExtractEntitiesLLMTaskTests: XCTestCase {
 
-    func testExtractEntitiesTaskSuccess() async throws {
+    func testExtractEntitiesLLMTaskSuccess() async throws {
         // Given
         let mockResponseText = """
         {
@@ -28,7 +28,7 @@ final class ExtractEntitiesTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = ExtractEntitiesTask(
+        let task = ExtractEntitiesLLMTask(
             llmService: mockService,
             strings: ["Sam Altman works at OpenAI in San Francisco."],
             entityTypes: ["Person", "Organization", "Location"]
@@ -53,14 +53,14 @@ final class ExtractEntitiesTaskTests: XCTestCase {
         XCTAssertEqual(entities["Location"], ["San Francisco"], "Extracted locations should match.")
     }
 
-    func testExtractEntitiesTaskEmptyInput() async {
+    func testExtractEntitiesLLMTaskEmptyInput() async {
         // Given
         let mockService = MockLLMService(
             name: "Mock Entity Extractor",
-            expectedResult: .failure(NSError(domain: "ExtractEntitiesTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for extraction."]))
+            expectedResult: .failure(NSError(domain: "ExtractEntitiesLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for extraction."]))
         )
 
-        let task = ExtractEntitiesTask(
+        let task = ExtractEntitiesLLMTask(
             llmService: mockService,
             strings: [],
             entityTypes: ["Person", "Organization"]
@@ -76,12 +76,12 @@ final class ExtractEntitiesTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for empty input, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "ExtractEntitiesTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "ExtractEntitiesLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for empty input.")
         }
     }
 
-    func testExtractEntitiesTaskInvalidLLMResponse() async {
+    func testExtractEntitiesLLMTaskInvalidLLMResponse() async {
         // Given
         let mockResponseText = "Invalid JSON"
         let mockService = MockLLMService(
@@ -89,7 +89,7 @@ final class ExtractEntitiesTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = ExtractEntitiesTask(
+        let task = ExtractEntitiesLLMTask(
             llmService: mockService,
             strings: ["Sam Altman works at OpenAI in San Francisco."],
             entityTypes: ["Person", "Organization", "Location"]
@@ -109,7 +109,7 @@ final class ExtractEntitiesTaskTests: XCTestCase {
         }
     }
 
-    func testExtractEntitiesTaskIntegrationWithOllama() async throws {
+    func testExtractEntitiesLLMTaskIntegrationWithOllama() async throws {
         // Given
         let stringsToExtractFrom = [
             "Sam Altman works at OpenAI in San Francisco.",
@@ -123,7 +123,7 @@ final class ExtractEntitiesTaskTests: XCTestCase {
 
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = ExtractEntitiesTask(
+        let task = ExtractEntitiesLLMTask(
             llmService: ollamaService,
             strings: stringsToExtractFrom,
             entityTypes: ["Person", "Organization", "Location"]
@@ -148,7 +148,7 @@ final class ExtractEntitiesTaskTests: XCTestCase {
         }
     }
 
-    func testExtractEntitiesTaskAmbiguousEntitiesWithOllama() async throws {
+    func testExtractEntitiesLLMTaskAmbiguousEntitiesWithOllama() async throws {
         // Given
         let stringsToExtractFrom = [
             "Serena Williams won her final match at the US Open.",
@@ -163,7 +163,7 @@ final class ExtractEntitiesTaskTests: XCTestCase {
 
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = ExtractEntitiesTask(
+        let task = ExtractEntitiesLLMTask(
             llmService: ollamaService,
             strings: stringsToExtractFrom,
             entityTypes: ["Person", "Organization", "Location"]
@@ -189,7 +189,7 @@ final class ExtractEntitiesTaskTests: XCTestCase {
         }
     }
 
-    func testExtractEntitiesTaskNoEntitiesFound() async throws {
+    func testExtractEntitiesLLMTaskNoEntitiesFound() async throws {
         // Given
         let inputStrings = ["This is a random string without any entities."]
         let expectedEntities: [String: [String]] = [
@@ -211,7 +211,7 @@ final class ExtractEntitiesTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = ExtractEntitiesTask(
+        let task = ExtractEntitiesLLMTask(
             llmService: mockService,
             strings: inputStrings,
             entityTypes: ["Person", "Organization", "Location"]
@@ -251,7 +251,7 @@ final class ExtractEntitiesTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = ExtractEntitiesTask(
+        let task = ExtractEntitiesLLMTask(
             llmService: mockService,
             strings: inputStrings,
             entityTypes: ["Person"] // Restrict to "Person" only
@@ -295,7 +295,7 @@ final class ExtractEntitiesTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = ExtractEntitiesTask(
+        let task = ExtractEntitiesLLMTask(
             llmService: mockService,
             strings: inputStrings,
             entityTypes: ["Person", "Organization", "Location"]

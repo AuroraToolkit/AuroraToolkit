@@ -1,5 +1,5 @@
 //
-//  ExtractEntitiesTask.swift
+//  ExtractEntitiesLLMTask.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/3/25.
@@ -43,7 +43,7 @@ import Foundation
  }
  ```
  */
-public class ExtractEntitiesTask: WorkflowComponent {
+public class ExtractEntitiesLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
@@ -74,7 +74,7 @@ public class ExtractEntitiesTask: WorkflowComponent {
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
                 throw NSError(
-                    domain: "ExtractEntitiesTask",
+                    domain: "ExtractEntitiesLLMTask",
                     code: 1,
                     userInfo: [NSLocalizedDescriptionKey: "No strings provided for entity extraction."]
                 )
@@ -140,8 +140,8 @@ public class ExtractEntitiesTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
-                    throw NSError(
-                        domain: "ExtractEntitiesTask",
+                throw NSError(
+                        domain: "ExtractEntitiesLLMTask",
                         code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
                     )
@@ -164,7 +164,7 @@ public class ExtractEntitiesTask: WorkflowComponent {
                     ]
                 } else {
                     throw NSError(
-                        domain: "ExtractEntitiesTask",
+                        domain: "ExtractEntitiesLLMTask",
                         code: 3,
                         userInfo: [NSLocalizedDescriptionKey: "Unexpected format for entity extraction response."]
                     )
@@ -175,7 +175,7 @@ public class ExtractEntitiesTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `ExtractEntitiesTask` to a `Workflow.Component`.
+    /// Converts this `ExtractEntitiesLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

@@ -1,5 +1,5 @@
 //
-//  GenerateKeywordsTaskTests.swift
+//  GenerateKeywordsLLMTaskTests.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/2/25.
@@ -10,9 +10,9 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class GenerateKeywordsTaskTests: XCTestCase {
+final class GenerateKeywordsLLMTaskTests: XCTestCase {
 
-    func testGenerateKeywordsTaskSuccess() async throws {
+    func testGenerateKeywordsLLMTaskSuccess() async throws {
         // Given
         let stringsToAnalyze = ["AI is transforming the healthcare industry.", "Quantum computing will revolutionize cryptography."]
         let expectedKeywords = [
@@ -32,7 +32,7 @@ final class GenerateKeywordsTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = GenerateKeywordsTask(
+        let task = GenerateKeywordsLLMTask(
             llmService: mockService,
             strings: stringsToAnalyze
         )
@@ -52,7 +52,7 @@ final class GenerateKeywordsTaskTests: XCTestCase {
         XCTAssertEqual(keywords, expectedKeywords, "The generated keywords should match the expected output.")
     }
 
-    func testGenerateKeywordsTaskWithCategories() async throws {
+    func testGenerateKeywordsLLMTaskWithCategories() async throws {
         // Given
         let stringsToAnalyze = ["AI is transforming the healthcare industry.", "Quantum computing will revolutionize cryptography."]
         let predefinedCategories = ["Technology", "Healthcare"]
@@ -73,7 +73,7 @@ final class GenerateKeywordsTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = GenerateKeywordsTask(
+        let task = GenerateKeywordsLLMTask(
             llmService: mockService,
             strings: stringsToAnalyze,
             categories: predefinedCategories
@@ -95,13 +95,13 @@ final class GenerateKeywordsTaskTests: XCTestCase {
         XCTAssertEqual(categorizedKeywords["Healthcare"], ["healthcare", "industry", "transformation"], "Healthcare keywords should match.")
     }
 
-    func testGenerateKeywordsTaskEmptyInput() async {
+    func testGenerateKeywordsLLMTaskEmptyInput() async {
         // Given
         let mockService = MockLLMService(
             name: "MockService",
             expectedResult: .success(MockLLMResponse(text: "{}"))
         )
-        let task = GenerateKeywordsTask(
+        let task = GenerateKeywordsLLMTask(
             llmService: mockService,
             strings: []
         )
@@ -115,12 +115,12 @@ final class GenerateKeywordsTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for empty input, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "GenerateKeywordsTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "GenerateKeywordsLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for empty input.")
         }
     }
 
-    func testGenerateKeywordsTaskIntegrationWithOllama() async throws {
+    func testGenerateKeywordsLLMTaskIntegrationWithOllama() async throws {
         // Given
         let stringsToAnalyze = [
             "Self-driving cars are shaping the future of transportation.",
@@ -128,7 +128,7 @@ final class GenerateKeywordsTaskTests: XCTestCase {
         ]
 
         let ollamaService = OllamaService(name: "OllamaTest")
-        let task = GenerateKeywordsTask(llmService: ollamaService, strings: stringsToAnalyze)
+        let task = GenerateKeywordsLLMTask(llmService: ollamaService, strings: stringsToAnalyze)
 
         // When
         guard case let .task(unwrappedTask) = task.toComponent() else {

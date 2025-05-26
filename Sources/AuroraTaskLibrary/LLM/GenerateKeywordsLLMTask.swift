@@ -1,5 +1,5 @@
 //
-//  GenerateKeywordsTask.swift
+//  GenerateKeywordsLLMTask.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/2/25.
@@ -27,7 +27,7 @@ import Foundation
  - Organize keywords into logical categories for better interpretation.
  - Extract key terms from user feedback or reviews for data analysis.
  */
-public class GenerateKeywordsTask: WorkflowComponent {
+public class GenerateKeywordsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
@@ -60,7 +60,7 @@ public class GenerateKeywordsTask: WorkflowComponent {
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
                 throw NSError(
-                    domain: "GenerateKeywordsTask",
+                    domain: "GenerateKeywordsLLMTask",
                     code: 1,
                     userInfo: [NSLocalizedDescriptionKey: "No strings provided for keyword generation."]
                 )
@@ -136,8 +136,8 @@ public class GenerateKeywordsTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
-                    throw NSError(
-                        domain: "GenerateKeywordsTask",
+                throw NSError(
+                        domain: "GenerateKeywordsLLMTask",
                         code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response."]
                     )
@@ -160,7 +160,7 @@ public class GenerateKeywordsTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `GenerateKeywordsTask` to a `Workflow.Component`.
+    /// Converts this `GenerateKeywordsLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

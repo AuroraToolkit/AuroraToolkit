@@ -1,5 +1,5 @@
 //
-//  AnalyzeSentimentTaskTests.swift
+//  AnalyzeSentimentLLMTaskTests.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/2/25.
@@ -10,9 +10,9 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class AnalyzeSentimentTaskTests: XCTestCase {
+final class AnalyzeSentimentLLMTaskTests: XCTestCase {
 
-    func testAnalyzeSentimentTaskSuccess() async throws {
+    func testAnalyzeSentimentLLMTaskSuccess() async throws {
         // Given
         let stringsToAnalyze = ["I love this!", "It’s okay.", "I’m very disappointed."]
         let mockResponseText = """
@@ -29,7 +29,7 @@ final class AnalyzeSentimentTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = AnalyzeSentimentTask(
+        let task = AnalyzeSentimentLLMTask(
             llmService: mockService,
             strings: stringsToAnalyze
         )
@@ -51,13 +51,13 @@ final class AnalyzeSentimentTaskTests: XCTestCase {
         XCTAssertEqual(sentiments["I’m very disappointed."], "Negative")
     }
 
-    func testAnalyzeSentimentTaskEmptyInput() async {
+    func testAnalyzeSentimentLLMTaskEmptyInput() async {
         // Given
         let mockService = MockLLMService(
             name: "MockService",
             expectedResult: .success(MockLLMResponse(text: "{}"))
         )
-        let task = AnalyzeSentimentTask(
+        let task = AnalyzeSentimentLLMTask(
             llmService: mockService,
             strings: []
         )
@@ -71,17 +71,17 @@ final class AnalyzeSentimentTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for empty input, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "AnalyzeSentimentTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "AnalyzeSentimentLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for empty input.")
         }
     }
 
-    func testAnalyzeSentimentTaskIntegrationWithOllama() async throws {
+    func testAnalyzeSentimentLLMTaskIntegrationWithOllama() async throws {
         // Given
         let stringsToAnalyze = ["This is fantastic!", "Not bad, could be better.", "I hate this."]
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = AnalyzeSentimentTask(
+        let task = AnalyzeSentimentLLMTask(
             llmService: ollamaService,
             strings: stringsToAnalyze
         )
@@ -104,7 +104,7 @@ final class AnalyzeSentimentTaskTests: XCTestCase {
         XCTAssertEqual(sentiments["I hate this."], "Negative")
     }
 
-    func testAnalyzeSentimentTaskExpectedSentimentsWithOllama() async throws {
+    func testAnalyzeSentimentLLMTaskExpectedSentimentsWithOllama() async throws {
         // Given
         let stringsToAnalyze = ["I love this!", "It’s okay.", "I’m very disappointed."]
         let expectedSentiments = [
@@ -115,7 +115,7 @@ final class AnalyzeSentimentTaskTests: XCTestCase {
 
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = AnalyzeSentimentTask(
+        let task = AnalyzeSentimentLLMTask(
             llmService: ollamaService,
             strings: stringsToAnalyze
         )
@@ -141,7 +141,7 @@ final class AnalyzeSentimentTaskTests: XCTestCase {
         print("Integration test results: \(sentiments)")
     }
 
-    func testAnalyzeSentimentTaskDetailedMock() async throws {
+    func testAnalyzeSentimentLLMTaskDetailedMock() async throws {
         // Given
         let stringsToAnalyze = ["I love this!", "It’s okay.", "I’m very disappointed."]
         let expectedSentiments = [
@@ -164,7 +164,7 @@ final class AnalyzeSentimentTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = AnalyzeSentimentTask(
+        let task = AnalyzeSentimentLLMTask(
             llmService: mockService,
             strings: stringsToAnalyze,
             detailed: true
@@ -189,12 +189,12 @@ final class AnalyzeSentimentTaskTests: XCTestCase {
         }
     }
 
-    func testAnalyzeSentimentTaskDetailedIntegrationWithOllama() async throws {
+    func testAnalyzeSentimentLLMTaskDetailedIntegrationWithOllama() async throws {
         // Given
         let stringsToAnalyze = ["I love this!", "It’s okay.", "I’m very disappointed."]
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = AnalyzeSentimentTask(
+        let task = AnalyzeSentimentLLMTask(
             llmService: ollamaService,
             strings: stringsToAnalyze,
             detailed: true

@@ -1,5 +1,5 @@
 //
-//  DetectLanguagesTask.swift
+//  DetectLanguagesLLMTask.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/4/25.
@@ -40,7 +40,7 @@ import Foundation
  }
  ```
  */
-public class DetectLanguagesTask: WorkflowComponent {
+public class DetectLanguagesLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
@@ -70,7 +70,7 @@ public class DetectLanguagesTask: WorkflowComponent {
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
 
             guard !resolvedStrings.isEmpty else {
-                throw NSError(domain: "DetectLanguagesTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for language detection."])
+                throw NSError(domain: "DetectLanguagesLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for language detection."])
             }
 
             // Build the detection prompt
@@ -123,7 +123,7 @@ public class DetectLanguagesTask: WorkflowComponent {
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
                     throw NSError(
-                        domain: "DetectLanguagesTask", 
+                        domain: "DetectLanguagesLLMTask",
                         code: 2, 
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
                     )
@@ -146,7 +146,7 @@ public class DetectLanguagesTask: WorkflowComponent {
                     ]
                 } else {
                     throw NSError(
-                        domain: "DetectLanguagesTask",
+                        domain: "DetectLanguagesLLMTask",
                         code: 3,
                         userInfo: [NSLocalizedDescriptionKey: "Unexpected format for language detection response."]
                     )
@@ -157,7 +157,7 @@ public class DetectLanguagesTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `DetectLanguagesTask` to a `Workflow.Component`.
+    /// Converts this `DetectLanguagesLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

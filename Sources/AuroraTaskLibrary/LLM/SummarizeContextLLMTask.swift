@@ -1,5 +1,5 @@
 //
-//  SummarizeContextTask.swift
+//  SummarizeContextLLMTask.swift
 //
 //
 //  Created by Dan Murrell Jr on 9/2/24.
@@ -21,12 +21,12 @@ import Foundation
 
  This task can be integrated in a workflow where context items need to be summarized.
  */
-public class SummarizeContextTask: WorkflowComponent {
+public class SummarizeContextLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
     /**
-     Initializes a new `SummarizeContextTask` instance.
+     Initializes a new `SummarizeContextLLMTask` instance.
 
      - Parameters:
         - name: Optionally pass the name of the task.
@@ -78,7 +78,7 @@ public class SummarizeContextTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `LoadContextTask` to a `Workflow.Component`.
+    /// Converts this `SummarizeContextLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

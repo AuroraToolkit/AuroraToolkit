@@ -1,5 +1,5 @@
 //
-//  SummarizeContextTaskTests.swift
+//  SummarizeContextLLMTaskTests.swift
 //  AuroraTests
 //
 //  Created by Dan Murrell Jr on 9/2/24.
@@ -10,11 +10,11 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class SummarizeContextTaskTests: XCTestCase {
+final class SummarizeContextLLMTaskTests: XCTestCase {
 
     var contextController: ContextController!
     var mockService: MockLLMService!
-    var task: SummarizeContextTask!
+    var task: SummarizeContextLLMTask!
 
     override func setUp() {
         super.setUp()
@@ -29,10 +29,10 @@ final class SummarizeContextTaskTests: XCTestCase {
         super.tearDown()
     }
 
-    func testSummarizeTaskSingleItem() async throws {
+    func testSummarizeContextLLMTaskSingleItem() async throws {
         // Given
         contextController.addItem(content: "This is a test content.")
-        task = SummarizeContextTask(contextController: contextController, summaryType: .single)
+        task = SummarizeContextLLMTask(contextController: contextController, summaryType: .single)
 
         // When
         guard case let .task(unwrappedTask) = task.toComponent() else {
@@ -48,11 +48,11 @@ final class SummarizeContextTaskTests: XCTestCase {
         XCTAssertEqual(contextController.getItems().last?.text, "Summary", "The summary text should match the LLM response.")
     }
 
-    func testSummarizeTaskMultipleItems() async throws {
+    func testSummarizeContextLLMTaskMultipleItems() async throws {
         // Given
         contextController.addItem(content: "First piece of content.")
         contextController.addItem(content: "Second piece of content.")
-        task = SummarizeContextTask(contextController: contextController, summaryType: .single)
+        task = SummarizeContextLLMTask(contextController: contextController, summaryType: .single)
 
         // When
         guard case let .task(unwrappedTask) = task.toComponent() else {
@@ -68,9 +68,9 @@ final class SummarizeContextTaskTests: XCTestCase {
         XCTAssertEqual(contextController.getItems().last?.text, "Summary", "The summary text should match the LLM response.")
     }
 
-    func testSummarizeTaskEmptyContext() async throws {
+    func testSummarizeContextLLMTaskEmptyContext() async throws {
         // Given
-        task = SummarizeContextTask(contextController: contextController, summaryType: .single)
+        task = SummarizeContextLLMTask(contextController: contextController, summaryType: .single)
 
         // When
         guard case let .task(unwrappedTask) = task.toComponent() else {
@@ -85,12 +85,12 @@ final class SummarizeContextTaskTests: XCTestCase {
         XCTAssertEqual(contextController.summarizedContext().count, 0, "There should be no summaries.")
     }
 
-    func testSummarizeTaskWithFailureResponse() async throws {
+    func testSummarizeContextLLMTaskWithFailureResponse() async throws {
         // Given
         let failingService = MockLLMService(name: "FailingService", maxOutputTokens: 4096, expectedResult: .failure(NSError(domain: "Test", code: -1, userInfo: nil)))
         contextController = ContextController(llmService: failingService)
         contextController.addItem(content: "Content that will not be summarized.")
-        task = SummarizeContextTask(contextController: contextController, summaryType: .single)
+        task = SummarizeContextLLMTask(contextController: contextController, summaryType: .single)
 
         // When/Then
         guard case let .task(unwrappedTask) = task.toComponent() else {
@@ -108,12 +108,12 @@ final class SummarizeContextTaskTests: XCTestCase {
         }
     }
 
-    func testSummarizeTaskMultipleItemsWithBoundaryCondition() async throws {
+    func testSummarizeContextLLMTaskMultipleItemsWithBoundaryCondition() async throws {
         // Given
         let content = String(repeating: "A", count: 4095) // One token short of the limit
         contextController.addItem(content: content)
         contextController.addItem(content: content)
-        task = SummarizeContextTask(contextController: contextController, summaryType: .single)
+        task = SummarizeContextLLMTask(contextController: contextController, summaryType: .single)
 
         // When
         guard case let .task(unwrappedTask) = task.toComponent() else {
@@ -129,11 +129,11 @@ final class SummarizeContextTaskTests: XCTestCase {
         XCTAssertEqual(contextController.getItems().last?.text, "Summary", "The summary text should match the LLM response.")
     }
 
-    func testSummarizeTaskMultipleExecutions() async throws {
+    func testSummarizeContextLLMTaskMultipleExecutions() async throws {
         // Given
         contextController.addItem(content: "Content 1")
         contextController.addItem(content: "Content 2")
-        task = SummarizeContextTask(contextController: contextController, summaryType: .single)
+        task = SummarizeContextLLMTask(contextController: contextController, summaryType: .single)
 
         // When
         guard case let .task(unwrappedTask) = task.toComponent() else {

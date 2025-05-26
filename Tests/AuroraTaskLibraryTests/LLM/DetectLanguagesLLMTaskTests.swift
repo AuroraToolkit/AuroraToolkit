@@ -1,5 +1,5 @@
 //
-//  DetectLanguagesTaskTests.swift
+//  DetectLanguagesLLMTaskTests.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/4/25.
@@ -10,9 +10,9 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class DetectLanguagesTaskTests: XCTestCase {
+final class DetectLanguagesLLMTaskTests: XCTestCase {
 
-    func testDetectLanguagesTaskSuccess() async throws {
+    func testDetectLanguagesLLMTaskSuccess() async throws {
         // Given
         let mockResponseText = """
         {
@@ -28,7 +28,7 @@ final class DetectLanguagesTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = DetectLanguagesTask(
+        let task = DetectLanguagesLLMTask(
             llmService: mockService,
             strings: ["Hola, ¿cómo estás?", "Bonjour tout le monde", "Hello, how are you?"],
             maxTokens: 500
@@ -53,14 +53,14 @@ final class DetectLanguagesTaskTests: XCTestCase {
         XCTAssertEqual(languages["Hello, how are you?"], "en", "Expected English (en) for the third string.")
     }
 
-    func testDetectLanguagesTaskEmptyInput() async {
+    func testDetectLanguagesLLMTaskEmptyInput() async {
         // Given
         let mockService = MockLLMService(
             name: "Mock Language Detector",
-            expectedResult: .failure(NSError(domain: "DetectLanguagesTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for detection."]))
+            expectedResult: .failure(NSError(domain: "DetectLanguagesLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for detection."]))
         )
 
-        let task = DetectLanguagesTask(
+        let task = DetectLanguagesLLMTask(
             llmService: mockService,
             strings: [],
             maxTokens: 500
@@ -76,12 +76,12 @@ final class DetectLanguagesTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for empty input, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "DetectLanguagesTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "DetectLanguagesLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for empty input.")
         }
     }
 
-    func testDetectLanguagesTaskIntegrationWithOllama() async throws {
+    func testDetectLanguagesLLMTaskIntegrationWithOllama() async throws {
         // Given
         let stringsToDetect = [
             "Hola, ¿cómo estás?",
@@ -96,7 +96,7 @@ final class DetectLanguagesTaskTests: XCTestCase {
 
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = DetectLanguagesTask(
+        let task = DetectLanguagesLLMTask(
             llmService: ollamaService,
             strings: stringsToDetect,
             maxTokens: 500
@@ -125,7 +125,7 @@ final class DetectLanguagesTaskTests: XCTestCase {
         }
     }
 
-    func testDetectLanguagesTaskInvalidLLMResponse() async {
+    func testDetectLanguagesLLMTaskInvalidLLMResponse() async {
         // Given
         let mockResponseText = "Invalid JSON"
         let mockService = MockLLMService(
@@ -133,7 +133,7 @@ final class DetectLanguagesTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = DetectLanguagesTask(
+        let task = DetectLanguagesLLMTask(
             llmService: mockService,
             strings: ["Hola, ¿cómo estás?"],
             maxTokens: 500

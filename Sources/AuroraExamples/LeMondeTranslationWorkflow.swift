@@ -60,7 +60,7 @@ struct LeMondeTranslationWorkflow {
 
                 let articlesToTranslate = articles.map { $0.description }
 
-                let task = TranslateStringsTask(
+                let task = TranslateStringsLLMTask(
                     llmService: llmService,
                     strings: articlesToTranslate,
                     targetLanguage: "en",
@@ -68,7 +68,7 @@ struct LeMondeTranslationWorkflow {
                     maxTokens: 1500
                 )
                 guard case let .task(unwrappedTask) = task.toComponent() else {
-                    throw NSError(domain: "TranslateArticles", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to create TranslateStringsTask."])
+                    throw NSError(domain: "TranslateArticles", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to create TranslateStringsLLMTask."])
                 }
 
                 let outputs = try await unwrappedTask.execute()
@@ -80,7 +80,7 @@ struct LeMondeTranslationWorkflow {
             }
 
             // Step 5: Summarize the translated articles
-            SummarizeStringsTask(
+            SummarizeStringsLLMTask(
                 summarizer: summarizer,
                 summaryType: .multiple,
                 inputs: ["strings": "{TranslateArticles.articles}"]
@@ -94,7 +94,7 @@ struct LeMondeTranslationWorkflow {
         await workflow.start()
 
         // Print the workflow outputs
-        if let summaries = workflow.outputs["SummarizeStringsTask.summaries"] as? [String] {
+        if let summaries = workflow.outputs["SummarizeStringsLLMTask.summaries"] as? [String] {
             print("Generated Summaries:\n")
             for (index, summary) in summaries.enumerated() {
                 print("\(index + 1): \(summary)")

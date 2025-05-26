@@ -1,5 +1,5 @@
 //
-//  GenerateTitlesTaskTests.swift
+//  GenerateTitlesLLMTaskTests.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/4/25.
@@ -10,9 +10,9 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class GenerateTitlesTaskTests: XCTestCase {
+final class GenerateTitlesLLMTaskTests: XCTestCase {
 
-    func testGenerateTitlesTaskSuccess() async throws {
+    func testGenerateTitlesLLMTaskSuccess() async throws {
         // Given
         let mockResponseText = """
         {
@@ -29,7 +29,7 @@ final class GenerateTitlesTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = GenerateTitlesTask(
+        let task = GenerateTitlesLLMTask(
             llmService: mockService,
             strings: ["The stock market saw significant gains today."],
             languages: ["en", "es"]
@@ -53,14 +53,14 @@ final class GenerateTitlesTaskTests: XCTestCase {
         XCTAssertEqual(titles["The stock market saw significant gains today."]?["es"], "El Mercado Bursátil Registra Grandes Ganancias", "The generated title in Spanish should match.")
     }
 
-    func testGenerateTitlesTaskEmptyInput() async {
+    func testGenerateTitlesLLMTaskEmptyInput() async {
         // Given
         let mockService = MockLLMService(
             name: "Mock Title Generator",
             expectedResult: .failure(NSError(domain: "GenerateTitlesTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for title generation."]))
         )
 
-        let task = GenerateTitlesTask(
+        let task = GenerateTitlesLLMTask(
             llmService: mockService,
             strings: [],
             languages: ["en"]
@@ -76,12 +76,12 @@ final class GenerateTitlesTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for empty input, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "GenerateTitlesTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "GenerateTitlesLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for empty input.")
         }
     }
 
-    func testGenerateTitlesTaskIntegrationWithOllama() async throws {
+    func testGenerateTitlesLLMTaskIntegrationWithOllama() async throws {
         // Given
         let stringsToTitle = [
             "Scientists discover a new element with groundbreaking properties.",
@@ -89,7 +89,7 @@ final class GenerateTitlesTaskTests: XCTestCase {
         ]
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = GenerateTitlesTask(
+        let task = GenerateTitlesLLMTask(
             llmService: ollamaService,
             strings: stringsToTitle,
             languages: ["en", "es"]

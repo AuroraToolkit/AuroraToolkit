@@ -1,5 +1,5 @@
 //
-//  GenerateTitlesTask.swift
+//  GenerateTitlesLLMTask.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/4/25.
@@ -26,7 +26,7 @@ import Foundation
  - Suggest titles for user-generated content or creative works in different locales.
  - Simplify and condense complex information into concise titles.
  */
-public class GenerateTitlesTask: WorkflowComponent {
+public class GenerateTitlesLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
@@ -59,7 +59,7 @@ public class GenerateTitlesTask: WorkflowComponent {
             let resolvedMaxTokens = inputs.resolve(key: "maxTokens", fallback: maxTokens)
 
             guard !resolvedStrings.isEmpty else {
-                throw NSError(domain: "GenerateTitlesTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for title generation."])
+                throw NSError(domain: "GenerateTitlesLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for title generation."])
             }
 
             // Build the prompt
@@ -118,7 +118,7 @@ public class GenerateTitlesTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
-                    throw NSError(domain: "GenerateTitlesTask", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response: \(response.text)"])
+                throw NSError(domain: "GenerateTitlesLLMTask", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response: \(response.text)"])
                 }
 
                 // Handle both formats: wrapped in "titles" or direct mapping
@@ -142,7 +142,7 @@ public class GenerateTitlesTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `GenerateTitlesTask` to a `Workflow.Component`.
+    /// Converts this `GenerateTitlesLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

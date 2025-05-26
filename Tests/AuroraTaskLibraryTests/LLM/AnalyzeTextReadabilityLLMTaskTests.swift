@@ -1,5 +1,5 @@
 //
-//  AnalyzeTextReadabilityTaskTests.swift
+//  AnalyzeTextReadabilityLLMTaskTests.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/4/25.
@@ -10,9 +10,9 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class AnalyzeTextReadabilityTaskTests: XCTestCase {
+final class AnalyzeTextReadabilityLLMTaskTests: XCTestCase {
 
-    func testAnalyzeTextReadabilityTaskSuccess() async throws {
+    func testAnalyzeTextReadabilityLLMTaskSuccess() async throws {
         // Given
         let mockResponseText = """
         {
@@ -33,7 +33,7 @@ final class AnalyzeTextReadabilityTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = AnalyzeTextReadabilityTask(
+        let task = AnalyzeTextReadabilityLLMTask(
             llmService: mockService,
             strings: [
                 "This is a simple sentence.",
@@ -67,14 +67,14 @@ final class AnalyzeTextReadabilityTaskTests: XCTestCase {
         )
     }
 
-    func testAnalyzeTextReadabilityTaskEmptyInput() async {
+    func testAnalyzeTextReadabilityLLMTaskEmptyInput() async {
         // Given
         let mockService = MockLLMService(
             name: "Mock Readability Analyzer",
-            expectedResult: .failure(NSError(domain: "AnalyzeTextReadabilityTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for readability analysis."]))
+            expectedResult: .failure(NSError(domain: "AnalyzeTextReadabilityLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for readability analysis."]))
         )
 
-        let task = AnalyzeTextReadabilityTask(
+        let task = AnalyzeTextReadabilityLLMTask(
             llmService: mockService,
             strings: []
         )
@@ -89,12 +89,12 @@ final class AnalyzeTextReadabilityTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for empty input, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "AnalyzeTextReadabilityTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "AnalyzeTextReadabilityLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for empty input.")
         }
     }
 
-    func testAnalyzeTextReadabilityTaskIntegrationWithOllama() async throws {
+    func testAnalyzeTextReadabilityLLMTaskIntegrationWithOllama() async throws {
         // Given
         let stringsToAnalyze = [
             "This is a simple sentence.",
@@ -103,7 +103,7 @@ final class AnalyzeTextReadabilityTaskTests: XCTestCase {
 
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = AnalyzeTextReadabilityTask(
+        let task = AnalyzeTextReadabilityLLMTask(
             llmService: ollamaService,
             strings: stringsToAnalyze
         )

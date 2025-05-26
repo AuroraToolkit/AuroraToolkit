@@ -1,5 +1,5 @@
 //
-//  SummarizeStringsTask.swift
+//  SummarizeStringsLLMTask.swift
 //  AuroraCore
 //
 //  Created by Dan Murrell Jr on 12/6/24.
@@ -22,7 +22,7 @@ import Foundation
 
  This task can be integrated in a workflow where context items need to be summarized.
  */
-public class SummarizeStringsTask: WorkflowComponent {
+public class SummarizeStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
@@ -56,7 +56,7 @@ public class SummarizeStringsTask: WorkflowComponent {
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
 
             guard !resolvedStrings.isEmpty else {
-                throw NSError(domain: "SummarizeStringsTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for summarization."])
+                throw NSError(domain: "SummarizeStringsLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for summarization."])
             }
 
             let summaries = try await summarizer.summarizeGroup(resolvedStrings, type: summaryType, options: options)
@@ -64,7 +64,7 @@ public class SummarizeStringsTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `LoadContextTask` to a `Workflow.Component`.
+    /// Converts this `SummarizeStringsLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

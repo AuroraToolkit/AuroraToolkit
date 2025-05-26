@@ -1,5 +1,5 @@
 //
-//  ClusterStringsTaskTests.swift
+//  ClusterStringsLLMTaskTests.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/1/25.
@@ -10,9 +10,9 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class ClusterStringsTaskTests: XCTestCase {
+final class ClusterStringsLLMTaskTests: XCTestCase {
 
-    func testClusterStringsTaskSuccess() async throws {
+    func testClusterStringsLLMTaskSuccess() async throws {
         // Given
         let stringsToCluster = ["Apple is a tech company.", "The sun is a star.", "Oranges are fruits."]
         let expectedClusters = [
@@ -32,7 +32,7 @@ final class ClusterStringsTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = ClusterStringsTask(
+        let task = ClusterStringsLLMTask(
             llmService: mockService,
             strings: stringsToCluster,
             maxClusters: 3
@@ -53,13 +53,13 @@ final class ClusterStringsTaskTests: XCTestCase {
         XCTAssertEqual(clusters, expectedClusters, "The clusters should match the expected output.")
     }
 
-    func testClusterStringsTaskEmptyInput() async {
+    func testClusterStringsLLMTaskEmptyInput() async {
         // Given
         let mockService = MockLLMService(
             name: "MockService",
             expectedResult: .success(MockLLMResponse(text: "{}"))
         )
-        let task = ClusterStringsTask(
+        let task = ClusterStringsLLMTask(
             llmService: mockService,
             strings: [],
             maxClusters: 3
@@ -74,17 +74,17 @@ final class ClusterStringsTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for empty input, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "ClusterStringsTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "ClusterStringsLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for empty input.")
         }
     }
 
-    func testClusterStringsTaskIntegrationWithOllama() async throws {
+    func testClusterStringsLLMTaskIntegrationWithOllama() async throws {
         // Given
         let stringsToCluster = ["AI is transforming the world.", "The stock market dropped today."]
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = ClusterStringsTask(
+        let task = ClusterStringsLLMTask(
             llmService: ollamaService,
             strings: stringsToCluster,
             maxClusters: 2
@@ -107,7 +107,7 @@ final class ClusterStringsTaskTests: XCTestCase {
         print("Integration test results: \(clusters)")
     }
 
-    func testClusterStringsTaskExpectedClustersWithOllama() async throws {
+    func testClusterStringsLLMTaskExpectedClustersWithOllama() async throws {
         // Given
         let stringsToCluster = [
             "AI is transforming the world.",
@@ -122,7 +122,7 @@ final class ClusterStringsTaskTests: XCTestCase {
 
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = ClusterStringsTask(
+        let task = ClusterStringsLLMTask(
             llmService: ollamaService,
             strings: stringsToCluster,
             maxClusters: 2

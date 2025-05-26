@@ -1,5 +1,5 @@
 //
-//  TranslateStringsTask 2.swift
+//  TranslateStringsLLMTask.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/3/25.
@@ -10,7 +10,7 @@ import AuroraLLM
 import Foundation
 
 /**
-  `TranslateStringsTask` translates a list of strings into a specified target language using an LLM service.
+  `TranslateStringsLLMTask` translates a list of strings into a specified target language using an LLM service.
 
   - **Inputs**
      - `strings`: The list of strings to translate.
@@ -44,12 +44,12 @@ import Foundation
  ```
 
  */
-public class TranslateStringsTask: WorkflowComponent {
+public class TranslateStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
     /**
-     Initializes a new `TranslateStringsTask`.
+     Initializes a new `TranslateStringsLLMTask`.
 
      - Parameters:
         - name: The name of the task.
@@ -77,7 +77,7 @@ public class TranslateStringsTask: WorkflowComponent {
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
                 throw NSError(
-                    domain: "TranslateStringsTask",
+                    domain: "TranslateStringsLLMTask",
                     code: 1,
                     userInfo: [NSLocalizedDescriptionKey: "No strings provided for translation."]
                 )
@@ -136,7 +136,7 @@ public class TranslateStringsTask: WorkflowComponent {
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
                     throw NSError(
-                        domain: "TranslateStringsTask",
+                        domain: "TranslateStringsLLMTask",
                         code: 2,
                         userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
                     )
@@ -159,7 +159,7 @@ public class TranslateStringsTask: WorkflowComponent {
                     ]
                 } else {
                     throw NSError(
-                        domain: "TranslateStringsTask",
+                        domain: "TranslateStringsLLMTask",
                         code: 3,
                         userInfo: [NSLocalizedDescriptionKey: "Unexpected format for translation response."]
                     )
@@ -170,7 +170,7 @@ public class TranslateStringsTask: WorkflowComponent {
         }
     }
 
-    /// Converts this `TranslateStringsTask` to a `Workflow.Component`.
+    /// Converts this `TranslateStringsLLMTask` to a `Workflow.Component`.
     public func toComponent() -> Workflow.Component {
         .task(task)
     }

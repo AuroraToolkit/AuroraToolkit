@@ -1,5 +1,5 @@
 //
-//  CategorizeStringsTaskTests.swift
+//  CategorizeStringsLLMTaskTests.swift
 //  AuroraToolkit
 //
 //  Created by Dan Murrell Jr on 1/1/25.
@@ -10,9 +10,9 @@ import XCTest
 @testable import AuroraLLM
 @testable import AuroraTaskLibrary
 
-final class CategorizeStringsTaskTests: XCTestCase {
+final class CategorizeStringsLLMTaskTests: XCTestCase {
 
-    func testCategorizeStringsTaskSuccess() async throws {
+    func testCategorizeStringsLLMTaskSuccess() async throws {
         // Given
         let stringsToCategorize = ["Apple is a tech company.", "The sun is a star."]
         let expectedCategories: [String: [String]] = [
@@ -32,7 +32,7 @@ final class CategorizeStringsTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = CategorizeStringsTask(
+        let task = CategorizeStringsLLMTask(
             llmService: mockService,
             strings: stringsToCategorize,
             categories: ["Technology", "Astronomy", "Biology"]
@@ -53,13 +53,13 @@ final class CategorizeStringsTaskTests: XCTestCase {
         XCTAssertEqual(categorizedStrings, expectedCategories, "The categories should match the expected output.")
     }
 
-    func testCategorizeStringsTaskEmptyInput() async {
+    func testCategorizeStringsLLMTaskEmptyInput() async {
         // Given
         let mockService = MockLLMService(
             name: "MockService",
             expectedResult: .success(MockLLMResponse(text: "{}"))
         )
-        let task = CategorizeStringsTask(
+        let task = CategorizeStringsLLMTask(
             llmService: mockService,
             strings: [],
             categories: ["Technology", "Astronomy", "Biology"]
@@ -74,12 +74,12 @@ final class CategorizeStringsTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for empty input, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "CategorizeStringsTask", "Error domain should match.")
+        XCTAssertEqual((error as NSError).domain, "CategorizeStringsLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 1, "Error code should match for empty input.")
         }
     }
 
-    func testCategorizeStringsTaskInvalidLLMResponse() async {
+    func testCategorizeStringsLLMTaskInvalidLLMResponse() async {
         // Given
         let stringsToCategorize = ["This is a test string."]
         let mockResponseText = "Invalid JSON"
@@ -88,7 +88,7 @@ final class CategorizeStringsTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = CategorizeStringsTask(
+        let task = CategorizeStringsLLMTask(
             llmService: mockService,
             strings: stringsToCategorize,
             categories: ["CategoryA", "CategoryB"]
@@ -103,19 +103,19 @@ final class CategorizeStringsTaskTests: XCTestCase {
             _ = try await unwrappedTask.execute()
             XCTFail("Expected an error to be thrown for invalid LLM response, but no error was thrown.")
         } catch {
-            XCTAssertEqual((error as NSError).domain, "CategorizeStringsTask", "Error domain should match.")
+            XCTAssertEqual((error as NSError).domain, "CategorizeStringsLLMTask", "Error domain should match.")
             XCTAssertEqual((error as NSError).code, 2, "Error code should match for invalid LLM response.")
         }
     }
 
-    func testCategorizeStringsTaskIntegrationWithOllama() async throws {
+    func testCategorizeStringsLLMTaskIntegrationWithOllama() async throws {
         // Given
         let stringsToCategorize = ["Water is essential for life.", "E=mc^2 is a famous equation."]
         let categories = ["Science", "Mathematics", "Philosophy"]
 
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = CategorizeStringsTask(
+        let task = CategorizeStringsLLMTask(
             llmService: ollamaService,
             strings: stringsToCategorize,
             categories: categories
@@ -138,7 +138,7 @@ final class CategorizeStringsTaskTests: XCTestCase {
         print("Integration test results: \(categorizedStrings)")
     }
 
-    func testCategorizeStringsTaskExpectedCategoriesWithOllama() async throws {
+    func testCategorizeStringsLLMTaskExpectedCategoriesWithOllama() async throws {
         // Given
         let stringsToCategorize = [
             "Water is essential for life.",
@@ -148,7 +148,7 @@ final class CategorizeStringsTaskTests: XCTestCase {
 
         let ollamaService = OllamaService(name: "OllamaTest")
 
-        let task = CategorizeStringsTask(
+        let task = CategorizeStringsLLMTask(
             llmService: ollamaService,
             strings: stringsToCategorize,
             categories: categories
@@ -194,7 +194,7 @@ final class CategorizeStringsTaskTests: XCTestCase {
         print("Categorization results: \(categorizedStrings)")
     }
 
-    func testCategorizeStringsTaskHandlesEmptyCategories() async throws {
+    func testCategorizeStringsLLMTaskHandlesEmptyCategories() async throws {
         // Given
         let stringsToCategorize = ["Apple is a tech company.", "The sun is a star."]
         let mockResponseText = """
@@ -208,7 +208,7 @@ final class CategorizeStringsTaskTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: mockResponseText))
         )
 
-        let task = CategorizeStringsTask(
+        let task = CategorizeStringsLLMTask(
             llmService: mockService,
             strings: stringsToCategorize,
             categories: [] // Empty array should infer categories
