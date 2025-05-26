@@ -62,6 +62,8 @@ import Foundation
 public class TaggingMLTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
 
     /**
         Initializes a new `TaggingTask`.
@@ -72,6 +74,8 @@ public class TaggingMLTask: WorkflowComponent {
             - service: The ML service to use for tagging.
             - strings: The list of strings to tag.
             - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+            - logger: An optional logger for logging task execution details.
+
         - throws: An error if the input strings are empty or if the `tags` output is missing from the ML response.
      */
     public init(
@@ -79,8 +83,11 @@ public class TaggingMLTask: WorkflowComponent {
         description: String? = nil,
         service: MLServiceProtocol,
         strings: [String]? = nil,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: description ?? "Run token tagging using an MLServiceProtocol",
@@ -88,11 +95,13 @@ public class TaggingMLTask: WorkflowComponent {
         ) { inputs in
             let texts = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !texts.isEmpty else {
+                logger?.error("No strings provided for tagging", category: "TaggingMLTask")
                 throw NSError(domain: "TaggingMLTask", code: 1,
                               userInfo: [NSLocalizedDescriptionKey: "No strings provided"])
             }
             let response = try await service.run(request: MLRequest(inputs: ["strings": texts]))
             guard let tags = response.outputs["tags"] as? [[Tag]] else {
+                logger?.error("Missing 'tags' in ML response", category: "TaggingMLTask")
                 throw NSError(domain: "TaggingMLTask", code: 2,
                               userInfo: [NSLocalizedDescriptionKey: "Missing 'tags' in ML response"])
             }

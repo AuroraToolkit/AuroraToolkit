@@ -22,6 +22,9 @@ public struct FetchURLTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
+
     /// The URLSession used to fetch the URL.
     private let session: URLSession
 
@@ -34,6 +37,7 @@ public struct FetchURLTask: WorkflowComponent {
         - headers: An optional dictionary of headers to include in the request.
         - session: The `URLSession` to use for the request. Defaults to `.shared`.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: An optional logger for logging task execution details.
 
      - Throws: An error if the `url` parameter is invalid.
      - Note: The `inputs` array can contain direct values for keys like `url` and `headers`, or dynamic references that will be resolved at runtime.
@@ -43,8 +47,11 @@ public struct FetchURLTask: WorkflowComponent {
         url: String? = nil,
         headers: [String: String]? = nil,
         session: URLSession = .shared,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         self.session = session
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
@@ -55,6 +62,7 @@ public struct FetchURLTask: WorkflowComponent {
             let resolvedUrl = inputs.resolve(key: "url", fallback: url)
 
             guard let urlString = resolvedUrl else {
+                logger?.error("URL input is missing or not a valid string.", category: "FetchURLTask")
                 throw NSError(
                     domain: "FetchURLTask",
                     code: 1,
@@ -62,6 +70,7 @@ public struct FetchURLTask: WorkflowComponent {
                 )
             }
             guard let url = URL(string: urlString) else {
+                logger?.error("Invalid URL string: \(urlString)", category: "FetchURLTask")
                 throw NSError(
                     domain: "FetchURLTask",
                     code: 2,

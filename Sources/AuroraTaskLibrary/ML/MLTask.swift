@@ -12,15 +12,19 @@ import Foundation
 public class MLTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
 
     /**
         Initializes a new `MLTask`.
 
         - Parameters:
             - name: The name of the task.
+            - description: An optional description for the task.
             - mlService: The ML service to use for the task.
             - request: The `MLRequest` object containing the input data.
             - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+            - logger: An optional logger for logging task execution details.
 
      - Note: The `inputs` array can contain direct values for keys like `request`, or dynamic references that will be resolved at runtime.
      */
@@ -29,8 +33,11 @@ public class MLTask: WorkflowComponent {
         description: String? = nil,
         mlService: MLServiceProtocol,
         request: MLRequest? = nil,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: description ?? "Run on an on-device ML model",
@@ -39,6 +46,7 @@ public class MLTask: WorkflowComponent {
             // Resolve MLRequest from inputs or fallback to provided request
             let resolved = inputs["request"] as? MLRequest ?? request
             guard let mlRequest = resolved else {
+                logger?.error("MLRequest is missing from inputs or provided request.", category: "MLTask \(name ?? name ?? "")")
                 throw NSError(
                     domain: "MLTask",
                     code: 1,

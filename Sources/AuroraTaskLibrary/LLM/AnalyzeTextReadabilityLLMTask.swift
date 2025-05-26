@@ -29,6 +29,8 @@ import Foundation
 public class AnalyzeTextReadabilityLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Logger for debugging and monitoring.
+    private let logger: CustomLogger?
 
     /**
      Initializes a new `AnalyzeTextReadabilityLLMTask`.
@@ -39,14 +41,18 @@ public class AnalyzeTextReadabilityLLMTask: WorkflowComponent {
         - strings: The list of strings to analyze for readability. Defaults to `nil` (can be resolved dynamically).
         - maxTokens: The maximum number of tokens allowed for the response. Defaults to 500.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
      */
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,
         strings: [String]? = nil,
         maxTokens: Int = 500,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Analyze the readability of input strings using an LLM service.",
@@ -54,8 +60,8 @@ public class AnalyzeTextReadabilityLLMTask: WorkflowComponent {
         ) { inputs in
             // Resolve the inputs
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
-
             guard !resolvedStrings.isEmpty else {
+                logger?.error("AnalyzeTextReadabilityLLMTask [execute] No strings provided for readability analysis", category: "AnalyzeTextReadabilityLLMTask")
                 throw NSError(
                     domain: "AnalyzeTextReadabilityLLMTask",
                     code: 1,
@@ -114,17 +120,18 @@ public class AnalyzeTextReadabilityLLMTask: WorkflowComponent {
 
                 // Parse the response into a dictionary (assumes LLM returns JSON-like structure).
                 guard let data = rawResponse.data(using: .utf8),
-                      let jsonObject = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+                      let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
+                    logger?.error("AnalyzeTextReadabilityLLMTask [execute] Failed to parse JSON response: \(rawResponse)", category: "AnalyzeTextReadabilityLLMTask")
                     throw NSError(
                         domain: "AnalyzeTextReadabilityLLMTask",
                         code: 2,
-                        userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response: \(response.text)"]
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
                     )
                 }
 
                 // Handle both formats: wrapped in "readabilityScores" or direct mapping
-                if let wrappedScores = jsonObject["readabilityScores"] {
+                if let wrappedScores = jsonResponse["readabilityScores"] {
                     return [
                         "readabilityScores": wrappedScores,
                         "thoughts": thoughts,
@@ -133,7 +140,7 @@ public class AnalyzeTextReadabilityLLMTask: WorkflowComponent {
                 } else {
                     // Direct format - jsonResponse IS the readability scores
                     return [
-                        "readabilityScores": jsonObject,
+                        "readabilityScores": jsonResponse,
                         "thoughts": thoughts,
                         "rawResponse": fullResponse,
                     ]

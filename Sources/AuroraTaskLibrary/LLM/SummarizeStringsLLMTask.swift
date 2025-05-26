@@ -25,6 +25,8 @@ import Foundation
 public class SummarizeStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Logger for debugging and monitoring.
+    private let logger: CustomLogger?
 
     /**
      Initializes a `SummarizeStringsTask` with the required parameters.
@@ -36,6 +38,7 @@ public class SummarizeStringsLLMTask: WorkflowComponent {
         - strings: The list of strings to be summarized.
         - options: Optional `SummarizerOptions` to provide additional configuration options (e.g., model, temperature).
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
 
      - Note: The `inputs` array can contain direct values for keys like `strings`, or dynamic references that will be resolved at runtime.
      */
@@ -45,21 +48,24 @@ public class SummarizeStringsLLMTask: WorkflowComponent {
         summaryType: SummaryType,
         strings: [String]? = nil,
         options: SummarizerOptions? = SummarizerOptions(),
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Summarize a list of strings using the LLM service",
             inputs: inputs
         ) { inputs in
-            /// Resolve the strings from the inputs if it exists, otherwise use the provided `strings` parameter or an empty array
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
 
             guard !resolvedStrings.isEmpty else {
+                logger?.error("SummarizeStringsLLMTask [execute] No strings provided for summarization", category: "SummarizeStringsLLMTask")
                 throw NSError(domain: "SummarizeStringsLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for summarization."])
             }
 
-            let summaries = try await summarizer.summarizeGroup(resolvedStrings, type: summaryType, options: options)
+            let summaries = try await summarizer.summarizeGroup(resolvedStrings, type: summaryType, options: options, logger: logger)
             return ["summaries": summaries]
         }
     }

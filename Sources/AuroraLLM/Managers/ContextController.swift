@@ -5,6 +5,7 @@
 //  Created by Dan Murrell Jr on 8/21/24.
 //
 
+import AuroraCore
 import Foundation
 
 /**
@@ -26,6 +27,9 @@ public class ContextController {
     /// Summarizer instance responsible for summarizing context items.
     private var summarizer: SummarizerProtocol
 
+    /// Optional logger for logging events and errors.
+    private var logger: CustomLogger?
+
     /**
      Initializes a new `ContextController` instance.
 
@@ -34,11 +38,17 @@ public class ContextController {
         - llmService: The LLM service to be used for summarization.
         - summarizer: Optional `Summarizer` instance. If none is provided, a default summarizer will be created.
      */
-    public init(context: Context? = nil, llmService: LLMServiceProtocol, summarizer: SummarizerProtocol? = nil) {
+    public init(
+        context: Context? = nil,
+        llmService: LLMServiceProtocol,
+        summarizer: SummarizerProtocol? = nil,
+        logger: CustomLogger? = nil
+    ) {
         self.context = context ?? Context(llmServiceVendor: llmService.vendor)
         id = self.context.id // Use the context's ID as the controller ID
         self.llmService = llmService
-        self.summarizer = summarizer ?? Summarizer(llmService: llmService)
+        self.logger = logger
+        self.summarizer = summarizer ?? Summarizer(llmService: llmService, logger: logger)
     }
 
     /**
@@ -124,12 +134,12 @@ public class ContextController {
         let summaries: [String]
         if group.count == 1 {
             // Summarize a single item
-            let summary = try await summarizer.summarize(group[0].text, options: options)
+            let summary = try await summarizer.summarize(group[0].text, options: options, logger: logger)
             summaries = [summary]
         } else {
             // Summarize multiple items
             let texts = group.map { $0.text }
-            summaries = try await summarizer.summarizeGroup(texts, type: .single, options: options)
+            summaries = try await summarizer.summarizeGroup(texts, type: .single, options: options, logger: logger)
         }
 
         // Create a new summary item

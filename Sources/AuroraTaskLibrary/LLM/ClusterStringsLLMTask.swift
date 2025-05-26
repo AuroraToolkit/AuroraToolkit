@@ -43,9 +43,11 @@ import Foundation
 public class ClusterStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Logger for debugging and monitoring.
+    private let logger: CustomLogger?
 
     /**
-     Initializes a new `ClusterStringsTask`.
+     Initializes a new `ClusterStringsLLMTask`.
 
      - Parameters:
         - name: The name of the task.
@@ -54,6 +56,7 @@ public class ClusterStringsLLMTask: WorkflowComponent {
         - maxClusters: Optional maximum number of clusters to create.
         - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
      */
     public init(
         name: String? = nil,
@@ -61,8 +64,11 @@ public class ClusterStringsLLMTask: WorkflowComponent {
         strings: [String]? = nil,
         maxClusters: Int? = nil,
         maxTokens: Int = 500,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Cluster strings into groups based on semantic similarity.",
@@ -70,6 +76,7 @@ public class ClusterStringsLLMTask: WorkflowComponent {
         ) { inputs in
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
+                logger?.error("ClusterStringsLLMTask [execute] No strings provided for clustering", category: "ClusterStringsLLMTask")
                 throw NSError(
                     domain: "ClusterStringsLLMTask",
                     code: 1,
@@ -133,14 +140,14 @@ public class ClusterStringsLLMTask: WorkflowComponent {
                 let fullResponse = response.text
                 let (thoughts, rawResponse) = fullResponse.extractThoughtsAndStripJSON()
 
-                // Parse the response into a dictionary (assumes LLM returns JSON-like structure).
                 guard let data = rawResponse.data(using: .utf8),
                       let clusters = try? JSONSerialization.jsonObject(with: data) as? [String: [String]]
                 else {
+                    logger?.error("ClusterStringsLLMTask [execute] Failed to parse JSON response: \(rawResponse)", category: "ClusterStringsLLMTask")
                     throw NSError(
                         domain: "ClusterStringsLLMTask",
                         code: 2,
-                        userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response."]
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
                     )
                 }
                 return [

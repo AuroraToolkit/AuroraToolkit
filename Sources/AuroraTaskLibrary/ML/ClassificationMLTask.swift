@@ -44,7 +44,10 @@ import Foundation
  ```
   */
 public class ClassificationMLTask: WorkflowComponent {
+    /// The wrapped task.
     private let task: Workflow.Task
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
 
     /**
      - Parameters:
@@ -53,14 +56,18 @@ public class ClassificationMLTask: WorkflowComponent {
         - service: An `MLServiceProtocol` that emits `["tags": [Tag]]`.
         - strings: Fallback array of strings to classify.
         - inputs: Additional inputs to the task.
+        - logger: An optional logger to capture task execution details.
      */
     public init(
         name: String? = nil,
         description: String? = nil,
         service: MLServiceProtocol,
         strings: [String]? = nil,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: description ?? "Run text classification using an MLServiceProtocol",
@@ -68,6 +75,7 @@ public class ClassificationMLTask: WorkflowComponent {
         ) { inputs in
             let texts = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !texts.isEmpty else {
+                logger?.error("No strings provided", category: "ClassificationMLTask")
                 throw NSError(
                     domain: "ClassificationMLTask",
                     code: 1,
@@ -78,6 +86,7 @@ public class ClassificationMLTask: WorkflowComponent {
                 request: MLRequest(inputs: ["strings": texts])
             )
             guard let tags = response.outputs["tags"] as? [Tag] else {
+                logger?.error("Missing 'tags' in response", category: "ClassificationMLTask")
                 throw NSError(
                     domain: "ClassificationMLTask",
                     code: 2,

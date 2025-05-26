@@ -46,7 +46,10 @@ import Foundation
  ```
   */
 public class SemanticSearchMLTask: WorkflowComponent {
+    /// The wrapped task.
     private let task: Workflow.Task
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
 
     /**
      - Parameters:
@@ -56,6 +59,7 @@ public class SemanticSearchMLTask: WorkflowComponent {
         - query: Fallback `String` query to use if not provided at execution time.
         - vector: Fallback raw embedding if not providing a query.
         - inputs: Additional inputs to the task.
+        - logger: Optional logger for logging task execution details.
      */
     public init(
         name: String? = nil,
@@ -63,8 +67,11 @@ public class SemanticSearchMLTask: WorkflowComponent {
         service: MLServiceProtocol,
         query: String? = nil,
         vector: [Double]? = nil,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: description ?? "Run semantic search over documents",
@@ -74,6 +81,7 @@ public class SemanticSearchMLTask: WorkflowComponent {
             let useQuery: String? = inputs.resolve(key: "query", fallback: query)
             let useVector: [Double]? = inputs.resolve(key: "vector", fallback: vector)
             guard useQuery != nil || useVector != nil else {
+                logger?.error("Missing 'query' or 'vector' input", category: "SemanticSearchMLTask")
                 throw NSError(
                     domain: "SemanticSearchMLTask",
                     code: 1,
@@ -89,6 +97,7 @@ public class SemanticSearchMLTask: WorkflowComponent {
             }
 
             guard let results = resp.outputs["results"] as? [[String: Any]] else {
+                logger?.error("Missing 'results' in ML response", category: "SemanticSearchMLTask")
                 throw NSError(
                     domain: "SemanticSearchMLTask",
                     code: 2,

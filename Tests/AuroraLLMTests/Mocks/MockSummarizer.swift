@@ -19,20 +19,22 @@ class MockSummarizer: SummarizerProtocol, Equatable {
         self.expectedResult = expectedResult ?? .success(expectedSummaries)
     }
 
-    func summarize(_ text: String, options: SummarizerOptions? = nil) async throws -> String {
+    func summarize(_ text: String, options: SummarizerOptions? = nil, logger: CustomLogger? = nil) async throws -> String {
         switch expectedResult {
         case .success(let summaries):
             return summaries.first ?? "Summary"
         case .failure(let error):
+            logger?.error("Summarization failed: \(error.localizedDescription)")
             throw error
         }
     }
 
-    func summarizeGroup(_ texts: [String], type: SummaryType, options: SummarizerOptions? = nil) async throws -> [String] {
+    func summarizeGroup(_ texts: [String], type: SummaryType, options: SummarizerOptions? = nil, logger: CustomLogger? = nil) async throws -> [String] {
         switch expectedResult {
         case .success(let summaries):
             return summaries
         case .failure(let error):
+            logger?.error("Summarization failed: \(error.localizedDescription)")
             throw error
         }
     }

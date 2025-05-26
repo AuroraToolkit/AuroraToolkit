@@ -10,7 +10,7 @@ import AuroraLLM
 import Foundation
 
 /**
-  `ExtractRelationsTask` extracts relationships between entities mentioned in the input strings.
+  `ExtractRelationsLLMTask` extracts relationships between entities mentioned in the input strings.
 
   - **Inputs**
      - `strings`: The list of strings to analyze for relationships.
@@ -48,6 +48,8 @@ import Foundation
 public class ExtractRelationsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Logger for debugging and monitoring.
+    private let logger: CustomLogger?
 
     /**
      Initializes a new `ExtractRelationsTask`.
@@ -59,6 +61,7 @@ public class ExtractRelationsLLMTask: WorkflowComponent {
         - relationTypes: Optional predefined types of relationships to extract.
         - maxTokens: The maximum number of tokens allowed for the LLM response. Defaults to 500.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
      */
     public init(
         name: String? = nil,
@@ -66,8 +69,11 @@ public class ExtractRelationsLLMTask: WorkflowComponent {
         strings: [String]? = nil,
         relationTypes: [String]? = nil,
         maxTokens: Int = 500,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Extract relationships from a list of strings.",
@@ -75,6 +81,7 @@ public class ExtractRelationsLLMTask: WorkflowComponent {
         ) { inputs in
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
+                logger?.error("ExtractRelationsLLMTask [execute] No strings provided for relationship extraction", category: "ExtractRelationsLLMTask")
                 throw NSError(
                     domain: "ExtractRelationsLLMTask",
                     code: 1,
@@ -135,6 +142,7 @@ public class ExtractRelationsLLMTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
+                    logger?.error("ExtractRelationsLLMTask [execute] Failed to parse JSON response: \(rawResponse)", category: "ExtractRelationsLLMTask")
                     throw NSError(
                         domain: "ExtractRelationsLLMTask",
                         code: 2,
@@ -158,6 +166,7 @@ public class ExtractRelationsLLMTask: WorkflowComponent {
                         "rawResponse": fullResponse,
                     ]
                 } else {
+                    logger?.error("ExtractRelationsLLMTask [execute] Unexpected format for relation extraction response.", category: "ExtractRelationsLLMTask")
                     throw NSError(
                         domain: "ExtractRelationsLLMTask",
                         code: 3,

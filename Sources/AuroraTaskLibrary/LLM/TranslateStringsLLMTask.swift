@@ -47,6 +47,8 @@ import Foundation
 public class TranslateStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Logger for debugging and monitoring.
+    private let logger: CustomLogger?
 
     /**
      Initializes a new `TranslateStringsLLMTask`.
@@ -59,6 +61,7 @@ public class TranslateStringsLLMTask: WorkflowComponent {
         - sourceLanguage: The source language of the strings (optional). Defaults to `nil` (infers the language if not provided).
         - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
      */
     public init(
         name: String? = nil,
@@ -67,15 +70,20 @@ public class TranslateStringsLLMTask: WorkflowComponent {
         targetLanguage: String,
         sourceLanguage: String? = nil,
         maxTokens: Int = 500,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Translate strings into the target language using the LLM service",
             inputs: inputs
         ) { inputs in
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
+
             guard !resolvedStrings.isEmpty else {
+                logger?.error("TranslateStringsLLMTask [execute] No strings provided for translation", category: "TranslateStringsLLMTask")
                 throw NSError(
                     domain: "TranslateStringsLLMTask",
                     code: 1,
@@ -135,10 +143,11 @@ public class TranslateStringsLLMTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
+                    logger?.error("TranslateStringsLLMTask [execute] Failed to parse JSON response: \(rawResponse)", category: "TranslateStringsLLMTask")
                     throw NSError(
                         domain: "TranslateStringsLLMTask",
                         code: 2,
-                        userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response: \(response.text)"]
                     )
                 }
 

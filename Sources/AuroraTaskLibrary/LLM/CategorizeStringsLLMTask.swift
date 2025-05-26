@@ -50,6 +50,9 @@ public class CategorizeStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
+    // Add logger property and parameter, error logging only
+    private let logger: CustomLogger?
+
     /**
      Initializes a new `CategorizeStringsTask`.
 
@@ -67,8 +70,10 @@ public class CategorizeStringsLLMTask: WorkflowComponent {
         strings: [String]? = nil,
         categories: [String]? = nil,
         maxTokens: Int = 500,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Categorize strings using predefined or inferred categories",
@@ -140,6 +145,7 @@ public class CategorizeStringsLLMTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
+                    logger?.error("Failed to parse JSON response: \(rawResponse)", category: "CategorizeStringsLLMTask")
                     throw NSError(
                         domain: "CategorizeStringsLLMTask",
                         code: 2,
@@ -163,6 +169,7 @@ public class CategorizeStringsLLMTask: WorkflowComponent {
                         "rawResponse": fullResponse,
                     ]
                 } else {
+                    logger?.error("Unexpected format for categorization response: \(rawResponse)")
                     throw NSError(
                         domain: "CategorizeStringsLLMTask",
                         code: 3,

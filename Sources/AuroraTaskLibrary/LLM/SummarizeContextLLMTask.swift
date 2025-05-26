@@ -24,6 +24,8 @@ import Foundation
 public class SummarizeContextLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Optional logger for logging events and errors.
+    private var logger: CustomLogger?
 
     /**
      Initializes a new `SummarizeContextLLMTask` instance.
@@ -34,14 +36,18 @@ public class SummarizeContextLLMTask: WorkflowComponent {
         - summaryType: The type of summary to be performed (`single` or `multiple`).
         - options: Optional `SummarizerOptions` to provide additional configuration options (e.g., model, temperature).
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional `CustomLogger` for logging events and errors.
      */
     public init(
         name: String? = nil,
         contextController: ContextController,
         summaryType: SummaryType = .multiple,
         options: SummarizerOptions? = nil,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Summarize the content in the context controller",
@@ -52,6 +58,7 @@ public class SummarizeContextLLMTask: WorkflowComponent {
 
             // If there are no items, do nothing
             guard !itemsToSummarize.isEmpty else {
+                logger?.debug("SummarizeContextLLMTask [execute] No context items to summarize", category: "SummarizeContextLLMTask")
                 return [:]
             }
 
@@ -63,13 +70,13 @@ public class SummarizeContextLLMTask: WorkflowComponent {
             switch summaryType {
             case .single:
                 // Create a single combined summary
-                let combinedSummary = try await summarizer.summarize(itemsToSummarize.joined(separator: "\n"), options: options)
+                let combinedSummary = try await summarizer.summarize(itemsToSummarize.joined(separator: "\n"), options: options, logger: logger)
                 contextController.addItem(content: combinedSummary, isSummary: true)
                 return ["summarizedContext": [combinedSummary]]
 
             case .multiple:
                 // Create individual summaries for each item
-                let summaries = try await summarizer.summarizeGroup(itemsToSummarize, type: .multiple, options: options)
+                let summaries = try await summarizer.summarizeGroup(itemsToSummarize, type: .multiple, options: options, logger: logger)
                 for summary in summaries {
                     contextController.addItem(content: summary, isSummary: true)
                 }

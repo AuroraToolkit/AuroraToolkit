@@ -22,6 +22,8 @@ import os.log
 public class JSONParsingTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
 
     /**
      Initializes the `JSONParsingTask`.
@@ -30,12 +32,16 @@ public class JSONParsingTask: WorkflowComponent {
         - name: The name of the task (default is `JSONParsingTask`).
         - jsonData: The JSON data to parse.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: An optional logger for logging task execution details.
      */
     public init(
         name: String? = nil,
         jsonData: Data? = nil,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Parse JSON data into a nested structure",
@@ -46,6 +52,7 @@ public class JSONParsingTask: WorkflowComponent {
 
             // Validate input
             guard let jsonData = resolvedJSONData, !jsonData.isEmpty else {
+                logger?.error("Missing or invalid JSON data", category: "JSONParsingTask")
                 throw NSError(domain: "JSONParsingTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing or invalid JSON data"])
             }
 

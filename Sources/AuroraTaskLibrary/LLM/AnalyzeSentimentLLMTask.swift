@@ -50,6 +50,8 @@ import Foundation
 public class AnalyzeSentimentLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Logger for debugging and monitoring.
+    private let logger: CustomLogger?
 
     /**
      Initializes a new `AnalyzeSentimentLLMTask`.
@@ -61,6 +63,7 @@ public class AnalyzeSentimentLLMTask: WorkflowComponent {
         - detailed: Whether to return detailed sentiment analysis (e.g., confidence scores). Defaults to `false`.
         - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
      */
     public init(
         name: String? = nil,
@@ -68,8 +71,11 @@ public class AnalyzeSentimentLLMTask: WorkflowComponent {
         strings: [String]? = nil,
         detailed: Bool = false,
         maxTokens: Int = 500,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Analyze the sentiment of a list of strings using an LLM service",
@@ -77,6 +83,7 @@ public class AnalyzeSentimentLLMTask: WorkflowComponent {
         ) { inputs in
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
+                logger?.error("AnalyzeSentimentLLMTask [execute] No strings provided", category: "AnalyzeSentimentLLMTask")
                 throw NSError(
                     domain: "AnalyzeSentimentLLMTask",
                     code: 1,
@@ -162,6 +169,7 @@ public class AnalyzeSentimentLLMTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
+                    logger?.error("AnalyzeSentimentLLMTask [execute] Failed to parse JSON response: \(rawResponse)", category: "AnalyzeSentimentLLMTask")
                     throw NSError(
                         domain: "AnalyzeSentimentLLMTask",
                         code: 2,
@@ -200,6 +208,7 @@ public class AnalyzeSentimentLLMTask: WorkflowComponent {
                     )
                 }
             } catch {
+                logger?.error("AnalyzeSentimentLLMTask [execute] Failed: \(error.localizedDescription)", category: "AnalyzeSentimentLLMTask")
                 throw error
             }
         }

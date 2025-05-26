@@ -47,6 +47,9 @@ public class ExtractEntitiesLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
+    // Add logger property and parameter, error logging only
+    private let logger: CustomLogger?
+
     /**
      Initializes a new `ExtractEntitiesTask`.
 
@@ -64,8 +67,10 @@ public class ExtractEntitiesLLMTask: WorkflowComponent {
         strings: [String]? = nil,
         entityTypes: [String]? = nil,
         maxTokens: Int = 500,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Extract named entities from strings using an LLM service",
@@ -140,6 +145,9 @@ public class ExtractEntitiesLLMTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
+                    // Log the error using the provided logger, if available
+                    logger?.error("Failed to parse LLM response as JSON: \(rawResponse)")
+
                     throw NSError(
                         domain: "ExtractEntitiesLLMTask",
                         code: 2,
@@ -163,6 +171,7 @@ public class ExtractEntitiesLLMTask: WorkflowComponent {
                         "rawResponse": fullResponse,
                     ]
                 } else {
+                    logger?.error("Unexpected format for entity extraction response: \(rawResponse)")
                     throw NSError(
                         domain: "ExtractEntitiesLLMTask",
                         code: 3,

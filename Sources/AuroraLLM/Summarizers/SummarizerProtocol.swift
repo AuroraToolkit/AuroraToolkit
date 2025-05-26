@@ -5,6 +5,7 @@
 //  Created by Dan Murrell Jr on 9/1/24.
 //
 
+import AuroraCore
 import Foundation
 
 /**
@@ -17,10 +18,11 @@ public protocol SummarizerProtocol {
      - Parameters:
         - text: The text to be summarized.
         - options: Optional `SummarizerOptions` to modify the request parameters.
+        - logger: An optional `CustomLogger` for logging purposes.
 
      - Returns: A summarized version of the text.
      */
-    func summarize(_ text: String, options: SummarizerOptions?) async throws -> String
+    func summarize(_ text: String, options: SummarizerOptions?, logger: CustomLogger?) async throws -> String
 
     /**
      Summarizes a group of text strings using the LLM service.
@@ -29,12 +31,13 @@ public protocol SummarizerProtocol {
         - texts: An array of strings to be summarized.
         - type: The type of summary to be performed (`.single` or `.multiple`).
         - options: Optional `SummarizerOptions` to modify the request parameters.
+        - logger: An optional `CustomLogger` for logging purposes.
 
      - Returns: An array of summarized texts corresponding to the input texts.
 
      - Note: If `type` is `.single`, the return value will be an array of one summary.
      */
-    func summarizeGroup(_ texts: [String], type: SummaryType, options: SummarizerOptions?) async throws -> [String]
+    func summarizeGroup(_ texts: [String], type: SummaryType, options: SummarizerOptions?, logger: CustomLogger?) async throws -> [String]
 }
 
 /**

@@ -24,6 +24,8 @@ import Foundation
 public class TrimmingTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
 
     /**
      - Parameters:
@@ -33,6 +35,7 @@ public class TrimmingTask: WorkflowComponent {
         - buffer: A buffer percentage to apply when calculating the token limit (default is 5%).
         - strategy: The trimming strategy to apply (default is `.middle`).
         - inputs: Additional inputs for the task. If a value for a key is provided, it will overwritten by the parameter.
+        - logger: An optional logger for logging task execution details.
      */
     public init(
         name: String? = nil,
@@ -40,8 +43,11 @@ public class TrimmingTask: WorkflowComponent {
         tokenLimit: Int = 1024,
         buffer: Double = 0.05,
         strategy: String.TrimmingStrategy = .middle,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         let stringsCount = strings?.count ?? 0
         let description = stringsCount <= 1 ? "Trim string to fit within the token limit using \(strategy) strategy" : "Trim multiple strings to fit within the token limit using \(strategy) strategy"
         task = Workflow.Task(
@@ -54,6 +60,7 @@ public class TrimmingTask: WorkflowComponent {
 
             // Validate required inputs
             guard !resolvedStrings.isEmpty else {
+                logger?.error("No strings provided for trimming task.", category: "TrimmingTask")
                 throw NSError(domain: "TrimmingTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid inputs for TrimmingTask"])
             }
 

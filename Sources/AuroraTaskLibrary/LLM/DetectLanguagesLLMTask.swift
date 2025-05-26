@@ -43,9 +43,11 @@ import Foundation
 public class DetectLanguagesLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Logger for debugging and monitoring.
+    private let logger: CustomLogger?
 
     /**
-     Initializes a `DetectLanguagesTask` with the required parameters.
+     Initializes a `DetectLanguagesLLMTask` with the required parameters.
 
      - Parameters:
         - name: Optionally pass the name of the task.
@@ -53,14 +55,18 @@ public class DetectLanguagesLLMTask: WorkflowComponent {
         - strings: The list of strings to analyze. Defaults to `nil` (can be resolved dynamically).
         - maxTokens: The maximum number of tokens allowed for the response. Defaults to 500.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
      */
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,
         strings: [String]? = nil,
         maxTokens: Int = 500,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Detect languages for the provided strings",
@@ -70,6 +76,7 @@ public class DetectLanguagesLLMTask: WorkflowComponent {
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
 
             guard !resolvedStrings.isEmpty else {
+                logger?.error("DetectLanguagesLLMTask [execute] No strings provided for language detection", category: "DetectLanguagesLLMTask")
                 throw NSError(domain: "DetectLanguagesLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for language detection."])
             }
 
@@ -122,6 +129,7 @@ public class DetectLanguagesLLMTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
+                    logger?.error("DetectLanguagesLLMTask [execute] Failed to parse JSON response: \(rawResponse)", category: "DetectLanguagesLLMTask")
                     throw NSError(
                         domain: "DetectLanguagesLLMTask",
                         code: 2,

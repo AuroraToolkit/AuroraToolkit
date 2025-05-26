@@ -38,7 +38,10 @@ import Foundation
  // vectors[0].count == sentenceEmbedder.dimension
  */
 public class EmbeddingMLTask: WorkflowComponent {
+    /// The wrapped task.
     private let task: Workflow.Task
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
 
     /**
      - Parameters:
@@ -47,14 +50,18 @@ public class EmbeddingMLTask: WorkflowComponent {
         - embeddingService: Any `MLServiceProtocol` that returns `[[Double]]` under `"embeddings"`.
         - strings: The texts to embed.
         - inputs: Additional inputs (fallbacks).
+        - logger: An optional logger to capture task execution details.
      */
     public init(
         name: String? = nil,
         description: String? = nil,
         embeddingService: MLServiceProtocol,
         strings: [String]? = nil,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: description ?? "Embed text strings into vector representations",
@@ -62,6 +69,7 @@ public class EmbeddingMLTask: WorkflowComponent {
         ) { inputs in
             let texts = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !texts.isEmpty else {
+                logger?.error("No strings provided for embedding task", category: "EmbeddingMLTask")
                 throw NSError(
                     domain: "EmbeddingMLTask",
                     code: 1,
@@ -72,6 +80,7 @@ public class EmbeddingMLTask: WorkflowComponent {
                 request: MLRequest(inputs: ["strings": texts])
             )
             guard let emb = resp.outputs["embeddings"] as? [[Double]] else {
+                logger?.error("Missing 'embeddings' in ML response", category: "EmbeddingMLTask")
                 throw NSError(
                     domain: "EmbeddingMLTask",
                     code: 2,

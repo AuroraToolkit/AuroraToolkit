@@ -29,9 +29,11 @@ import Foundation
 public class GenerateTitlesLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Logger for debugging and monitoring.
+    private let logger: CustomLogger?
 
     /**
-     Initializes a `GenerateTitlesTask` with the required parameters.
+     Initializes a new `GenerateTitlesLLMTask`.
 
      - Parameters:
         - name: Optionally pass the name of the task.
@@ -40,6 +42,7 @@ public class GenerateTitlesLLMTask: WorkflowComponent {
         - languages: An optional array of languages (ISO 639-1 format) for the titles. Defaults to English if not provided.
         - maxTokens: The maximum number of tokens for each title. Defaults to `100`.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
      */
     public init(
         name: String? = nil,
@@ -47,8 +50,11 @@ public class GenerateTitlesLLMTask: WorkflowComponent {
         strings: [String]? = nil,
         languages: [String]? = nil,
         maxTokens: Int = 100,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Generate succinct and informative titles for a list of strings using an LLM service.",
@@ -59,7 +65,12 @@ public class GenerateTitlesLLMTask: WorkflowComponent {
             let resolvedMaxTokens = inputs.resolve(key: "maxTokens", fallback: maxTokens)
 
             guard !resolvedStrings.isEmpty else {
-                throw NSError(domain: "GenerateTitlesLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for title generation."])
+                logger?.error("GenerateTitlesLLMTask [execute] No strings provided for title generation", category: "GenerateTitlesLLMTask")
+                throw NSError(
+                    domain: "GenerateTitlesLLMTask",
+                    code: 1,
+                    userInfo: [NSLocalizedDescriptionKey: "No strings provided for title generation."]
+                )
             }
 
             // Build the prompt
@@ -114,11 +125,15 @@ public class GenerateTitlesLLMTask: WorkflowComponent {
                 let fullResponse = response.text
                 let (thoughts, rawResponse) = fullResponse.extractThoughtsAndStripJSON()
 
-                // Parse the response
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
-                    throw NSError(domain: "GenerateTitlesLLMTask", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response: \(response.text)"])
+                    logger?.error("GenerateTitlesLLMTask [execute] Failed to parse JSON response: \(rawResponse)", category: "GenerateTitlesLLMTask")
+                    throw NSError(
+                        domain: "GenerateTitlesLLMTask",
+                        code: 2,
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
+                    )
                 }
 
                 // Handle both formats: wrapped in "titles" or direct mapping

@@ -48,7 +48,10 @@ import Foundation
 
  */
 public class AnalyzeSentimentMLTask: WorkflowComponent {
+    /// The wrapped task.
     private let task: Workflow.Task
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
 
     /**
      - Parameters:
@@ -59,6 +62,7 @@ public class AnalyzeSentimentMLTask: WorkflowComponent {
         - positiveThreshold: Scores above this are “positive” (defaults to `0.1`).
         - negativeThreshold: Scores below this are “negative” (defaults to `-0.1`).
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: An optional logger for logging task execution details.
      */
     public init(
         name: String? = nil,
@@ -67,8 +71,11 @@ public class AnalyzeSentimentMLTask: WorkflowComponent {
         detailed: Bool = false,
         positiveThreshold: Double = 0.1,
         negativeThreshold: Double = -0.1,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Analyze sentiment of strings via ML",
@@ -76,6 +83,7 @@ public class AnalyzeSentimentMLTask: WorkflowComponent {
         ) { inputs in
             let texts = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !texts.isEmpty else {
+                logger?.error("No strings provided for sentiment analysis.", category: "AnalyzeSentimentMLTask")
                 throw NSError(
                     domain: "AnalyzeSentimentMLTask", code: 1,
                     userInfo: [NSLocalizedDescriptionKey: "No strings provided for sentiment analysis."]
@@ -87,6 +95,7 @@ public class AnalyzeSentimentMLTask: WorkflowComponent {
             )
 
             guard let tagArrays = resp.outputs["tags"] as? [[Tag]] else {
+                logger?.error("Missing 'tags' in ML response.", category: "AnalyzeSentimentMLTask")
                 throw NSError(
                     domain: "AnalyzeSentimentMLTask", code: 2,
                     userInfo: [NSLocalizedDescriptionKey: "Missing 'tags' in ML response."]

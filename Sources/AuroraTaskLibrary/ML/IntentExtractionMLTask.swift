@@ -46,16 +46,21 @@ import NaturalLanguage
  ```
  */
 public class IntentExtractionMLTask: WorkflowComponent {
+    /// The wrapped task.
     private let task: Workflow.Task
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
 
     /**
      - Parameters:
         - name: Optional override for the workflow task name.
         - description: Optional override for description.
         - model: The `NLModel` to use for intent extraction.
+        - slotSchemes: The tagging schemes to use for extracting parameters (default is `.nameType` and `.lexicalClass`).
         - maxResults: The maximum number of results to return.
         - strings: The texts to extract intents from.
         - inputs: Any additional inputs (fallbacks).
+        - logger: An optional logger for logging task execution details.
      */
     public init(
         name: String? = nil,
@@ -64,8 +69,11 @@ public class IntentExtractionMLTask: WorkflowComponent {
         slotSchemes: [NLTagScheme] = [.nameType, .lexicalClass],
         maxResults: Int = 3,
         strings: [String]? = nil,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         let intentService = IntentExtractionService(
             name: name ?? "IntentExtractionService",
             model: model,
@@ -86,6 +94,7 @@ public class IntentExtractionMLTask: WorkflowComponent {
         ) { inputs in
             let texts = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !texts.isEmpty else {
+                logger?.error("No strings provided for intent extraction", category: "IntentExtractionMLTask")
                 throw NSError(
                     domain: "IntentExtractionMLTask",
                     code: 1,
@@ -104,6 +113,7 @@ public class IntentExtractionMLTask: WorkflowComponent {
                 )
 
                 guard let intents = intentResponse.outputs["intents"] as? [[String: Any]] else {
+                    logger?.error("Missing 'intents' in ML response", category: "IntentExtractionMLTask")
                     throw NSError(
                         domain: "IntentExtractionMLTask",
                         code: 2,
@@ -112,6 +122,7 @@ public class IntentExtractionMLTask: WorkflowComponent {
                 }
 
                 guard let slotTags = slotsResponse.outputs["tags"] as? [[Tag]] else {
+                    logger?.error("Missing 'slots' in ML response", category: "IntentExtractionMLTask")
                     throw NSError(
                         domain: "IntentExtractionMLTask",
                         code: 3,

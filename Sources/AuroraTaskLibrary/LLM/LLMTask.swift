@@ -24,6 +24,8 @@ import Foundation
 public class LLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Logger for debugging and monitoring.
+    private let logger: CustomLogger?
 
     /**
      Initializes a new `LLMTask`.
@@ -34,6 +36,7 @@ public class LLMTask: WorkflowComponent {
         - llmService: The LLM service that will handle the request.
         - request: The `LLMRequest` containing the prompt and configuration for the LLM service.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
 
      - Note: The `inputs` array can contain direct values for keys like `request`, or dynamic references that will be resolved at runtime.
      */
@@ -42,17 +45,20 @@ public class LLMTask: WorkflowComponent {
         description: String? = nil,
         llmService: LLMServiceProtocol,
         request: LLMRequest? = nil,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: description ?? "Send a prompt to the LLM service",
             inputs: inputs
         ) { inputs in
-            /// Resolve the request from the inputs if it exists, otherwise use the provided `request` parameter
             let resolvedRequest = inputs["request"] as? LLMRequest ?? request
 
             guard let request = resolvedRequest else {
+                logger?.error("LLMTask [execute] No LLMRequest provided", category: "LLMTask")
                 throw NSError(
                     domain: "LLMTask",
                     code: 1,

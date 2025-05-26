@@ -30,9 +30,11 @@ import Foundation
 public class GenerateKeywordsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// Logger for debugging and monitoring.
+    private let logger: CustomLogger?
 
     /**
-      Initializes a new `GenerateKeywordsTask`.
+     Initializes a new `GenerateKeywordsLLMTask`.
 
       - Parameters:
          - name: The name of the task.
@@ -42,6 +44,7 @@ public class GenerateKeywordsLLMTask: WorkflowComponent {
          - maxKeywords: The maximum number of keywords per string. Defaults to 5.
          - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
          - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
      */
     public init(
         name: String? = nil,
@@ -50,8 +53,11 @@ public class GenerateKeywordsLLMTask: WorkflowComponent {
         categories: [String]? = nil,
         maxKeywords: Int = 5,
         maxTokens: Int = 500,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Generate and categorize keywords from a list of strings",
@@ -59,6 +65,7 @@ public class GenerateKeywordsLLMTask: WorkflowComponent {
         ) { inputs in
             let resolvedStrings = inputs.resolve(key: "strings", fallback: strings) ?? []
             guard !resolvedStrings.isEmpty else {
+                logger?.error("GenerateKeywordsLLMTask [execute] No strings provided for keyword generation", category: "GenerateKeywordsLLMTask")
                 throw NSError(
                     domain: "GenerateKeywordsLLMTask",
                     code: 1,
@@ -136,10 +143,11 @@ public class GenerateKeywordsLLMTask: WorkflowComponent {
                 guard let data = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
                 else {
+                    logger?.error("GenerateKeywordsLLMTask [execute] Failed to parse JSON response: \(rawResponse)", category: "GenerateKeywordsLLMTask")
                     throw NSError(
                         domain: "GenerateKeywordsLLMTask",
                         code: 2,
-                        userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response."]
+                        userInfo: [NSLocalizedDescriptionKey: "Failed to parse LLM response as JSON."]
                     )
                 }
 

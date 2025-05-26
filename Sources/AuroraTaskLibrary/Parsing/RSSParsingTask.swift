@@ -22,6 +22,8 @@ import os.log
 public class RSSParsingTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
+    /// An optional logger for logging task execution details.
+    private let logger: CustomLogger?
 
     private var articleLinks: [String] = []
     private var currentElement: String = ""
@@ -34,14 +36,18 @@ public class RSSParsingTask: WorkflowComponent {
         - name: The name of the task (default is `RSSParsingTask`).
         - feedData: The data of the RSS feed to parse.
         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+        - logger: An optional logger for logging task execution details.
 
      - Note: The `inputs` array can contain direct values for keys like `feedData`, or dynamic references that will be resolved at runtime.
      */
     public init(
         name: String? = nil,
         feedData: Data? = nil,
-        inputs: [String: Any?] = [:]
+        inputs: [String: Any?] = [:],
+        logger: CustomLogger? = nil
     ) {
+        self.logger = logger
+
         task = Workflow.Task(
             name: name ?? String(describing: Self.self),
             description: "Extract article links from the RSS feed",
@@ -52,6 +58,7 @@ public class RSSParsingTask: WorkflowComponent {
 
             // Validate the input data
             guard let feedData = resolvedFeedData, !feedData.isEmpty else {
+                logger?.error("Missing or invalid RSS feed data", category: "RSSParsingTask")
                 throw NSError(domain: "RSSParsingTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing or invalid RSS feed data"])
             }
 
@@ -63,6 +70,7 @@ public class RSSParsingTask: WorkflowComponent {
             // Start parsing
             guard parser.parse() else {
                 let parseError = parser.parserError?.localizedDescription ?? "Unknown error"
+                logger?.error("Failed to parse RSS feed: \(parseError)", category: "RSSParsingTask")
                 throw NSError(domain: "RSSParsingTask", code: 2, userInfo: [NSLocalizedDescriptionKey: "Failed to parse RSS feed: \(parseError)"])
             }
 
