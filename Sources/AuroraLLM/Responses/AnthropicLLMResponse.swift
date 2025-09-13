@@ -7,11 +7,9 @@
 
 import Foundation
 
-/**
- Represents the response from Anthropic's LLM models, conforming to `LLMResponseProtocol`.
-
- This struct captures relevant fields from the response, including generated content, message metadata, and token usage statistics if provided by the API.
- */
+/// Represents the response from Anthropic's LLM models, conforming to `LLMResponseProtocol`.
+///
+/// This struct captures relevant fields from the response, including generated content, message metadata, and token usage statistics if provided by the API.
 public struct AnthropicLLMResponse: LLMResponseProtocol, Codable {
     /// The ID of the message returned by the Anthropic API.
     public let id: String
@@ -31,13 +29,12 @@ public struct AnthropicLLMResponse: LLMResponseProtocol, Codable {
     /// The content returned by the Anthropic API.
     public let content: [Content]
 
-    /** The reason why the response was stopped (optional).
-
-     - `end_turn`: the model reached a natural stopping point
-     - `max_tokens`: we exceeded the requested `max_tokens` or the model's maximum
-     - `stop_sequence`: one of your provided custom stop_sequences was generated
-     - `tool_use`: the model invoked one or more tools
-     */
+    /// The reason why the response was stopped (optional).
+    ///
+    /// - `end_turn`: the model reached a natural stopping point
+    /// - `max_tokens`: we exceeded the requested `max_tokens` or the model's maximum
+    /// - `stop_sequence`: one of your provided custom stop_sequences was generated
+    /// - `tool_use`: the model invoked one or more tools
     public let stopReason: String?
 
     /// Token usage statistics (optional).

@@ -9,49 +9,46 @@ import AuroraCore
 import AuroraML
 import Foundation
 
-/**
- `EmbeddingMLTask` wraps  wraps any `MLServiceProtocol` that produces embeddings into a `WorkflowComponent`.
-
- - **Inputs**
-    - `strings`: `[String]` of texts to embed.
- - **Outputs**
-    - `embeddings`: `[[Double]]` — an array (one per input string) of floating-point vectors.
-
- ### Example
- ```swift
- // load the built-in sentence embedding for English
- guard let sentenceEmbedder = NLEmbedding.sentenceEmbedding(for: .english) else {
-    fatalError("Embedding model unavailable")
- }
- let embedSvc = EmbeddingService(
-    name: "EnglishSentenceEmbedding",
-    embedding: sentenceEmbedder
- )
- let task = EmbeddingMLTask(
-    name: "EmbedSentences",
-    embeddingService: embedSvc,
-    strings: ["Hello world", "How are you?"]
- )
- guard case let .task(wrapped) = task.toComponent() else { return }
- let outputs = try await wrapped.execute()
- let vectors = outputs["embeddings"] as! [[Double]]
- // vectors[0].count == sentenceEmbedder.dimension
- */
+/// `EmbeddingMLTask` wraps  wraps any `MLServiceProtocol` that produces embeddings into a `WorkflowComponent`.
+///
+/// - **Inputs**
+///    - `strings`: `[String]` of texts to embed.
+/// - **Outputs**
+///    - `embeddings`: `[[Double]]` — an array (one per input string) of floating-point vectors.
+///
+/// ### Example
+/// ```swift
+/// // load the built-in sentence embedding for English
+/// guard let sentenceEmbedder = NLEmbedding.sentenceEmbedding(for: .english) else {
+///    fatalError("Embedding model unavailable")
+/// }
+/// let embedSvc = EmbeddingService(
+///    name: "EnglishSentenceEmbedding",
+///    embedding: sentenceEmbedder
+/// )
+/// let task = EmbeddingMLTask(
+///    name: "EmbedSentences",
+///    embeddingService: embedSvc,
+///    strings: ["Hello world", "How are you?"]
+/// )
+/// guard case let .task(wrapped) = task.toComponent() else { return }
+/// let outputs = try await wrapped.execute()
+/// let vectors = outputs["embeddings"] as! [[Double]]
+/// // vectors[0].count == sentenceEmbedder.dimension
+///
 public class EmbeddingMLTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.
     private let logger: CustomLogger?
 
-    /**
-     - Parameters:
-        - name: Optional override for the workflow task name.
-        - description: Optional override for the task description.
-        - embeddingService: Any `MLServiceProtocol` that returns `[[Double]]` under `"embeddings"`.
-        - strings: The texts to embed.
-        - inputs: Additional inputs (fallbacks).
-        - logger: An optional logger to capture task execution details.
-     */
+    /// - Parameters:
+    ///    - name: Optional override for the workflow task name.
+    ///    - description: Optional override for the task description.
+    ///    - embeddingService: Any `MLServiceProtocol` that returns `[[Double]]` under `"embeddings"`.
+    ///    - strings: The texts to embed.
+    ///    - inputs: Additional inputs (fallbacks).
+    ///    - logger: An optional logger to capture task execution details.
     public init(
         name: String? = nil,
         description: String? = nil,

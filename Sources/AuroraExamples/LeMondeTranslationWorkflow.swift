@@ -10,10 +10,8 @@ import AuroraLLM
 import AuroraTaskLibrary
 import Foundation
 
-/**
- Example workflow demonstrating fetching news articles from Le Monde, translating them into English,
- and summarizing them using AuroraCore.
- */
+/// Example workflow demonstrating fetching news articles from Le Monde, translating them into English,
+/// and summarizing them using AuroraCore.
 
 struct LeMondeTranslationWorkflow {
     func execute() async {

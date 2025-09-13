@@ -7,11 +7,9 @@
 
 import Foundation
 
-/**
- Represents the response from Ollama's LLM models, conforming to `LLMResponseProtocol`.
-
- The Ollama API returns a generated text directly in the `response` field, along with model metadata.
- */
+/// Represents the response from Ollama's LLM models, conforming to `LLMResponseProtocol`.
+///
+/// The Ollama API returns a generated text directly in the `response` field, along with model metadata.
 public struct OllamaLLMResponse: LLMResponseProtocol, Codable {
     /// The vendor associated with the response.
     public var vendor: String? = "Ollama"

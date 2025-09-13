@@ -10,9 +10,7 @@ import AuroraLLM
 import AuroraTaskLibrary
 import Foundation
 
-/**
- Example workflow demonstrating fetching an RSS feed, summarizing articles, and generating a news anchor script using AuroraCore.
- */
+/// Example workflow demonstrating fetching an RSS feed, summarizing articles, and generating a news anchor script using AuroraCore.
 
 struct TVScriptWorkflowExample {
     func execute() async {

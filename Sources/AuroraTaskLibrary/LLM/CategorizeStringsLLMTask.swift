@@ -9,43 +9,41 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
- `CategorizeStringsTask` is a versatile task that categorizes strings into predefined or inferred categories using a language model.
-
- - **Inputs**
-    - `strings`: The list of strings to categorize. This input represents the content you wish to organize into logical groups or topics.
-    - `categories`: Optional predefined categories for classification. If provided, the task ensures all strings are grouped into these categories. If not provided, the language model will infer suitable categories based on the content of the strings.
-
- - **Outputs**
-    - `categorizedStrings`: A dictionary where keys are the category names, and values are lists of strings belonging to each category. This output provides a structured way to analyze and use the categorized data.
-    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-    - `rawResponse`: The original unmodified raw response text from the LLM.
-
- ### Use Cases
- - **Content Organization**: Automatically group articles, headlines, or other textual content by topic or theme for easier processing.
- - **Knowledge Management**: Categorize knowledge base entries or customer support tickets for efficient searching and retrieval.
- - **Data Analysis**: Pre-process datasets by grouping entries into logical categories for downstream tasks like visualization or reporting.
- - **Dynamic Tagging**: Infer or apply tags/categories to user-generated content in applications like social media or e-commerce platforms.
- - **Custom Applications**: Useful in workflows where contextual grouping or classification of text is a key step.
-
- ### Example:
- **Input Strings:**
- - "Researchers discover a breakthrough in cancer treatment."
- - "The stock market experienced a significant downturn yesterday."
-
- **Output JSON:**
- ```
- {
-   "categories": {
-     "Health": ["Researchers discover a breakthrough in cancer treatment."],
-     "Finance": ["The stock market experienced a significant downturn yesterday."]
-   }
- }
- ```
-
- ### Notes
- The task leverages a language model to handle flexible and nuanced categorization needs. When predefined categories are not supplied, the model dynamically determines suitable groupings, making it highly adaptable for unstructured or semi-structured data scenarios.
- */
+/// `CategorizeStringsTask` is a versatile task that categorizes strings into predefined or inferred categories using a language model.
+///
+/// - **Inputs**
+///    - `strings`: The list of strings to categorize. This input represents the content you wish to organize into logical groups or topics.
+///    - `categories`: Optional predefined categories for classification. If provided, the task ensures all strings are grouped into these categories. If not provided, the language model will infer suitable categories based on the content of the strings.
+///
+/// - **Outputs**
+///    - `categorizedStrings`: A dictionary where keys are the category names, and values are lists of strings belonging to each category. This output provides a structured way to analyze and use the categorized data.
+///    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+///    - `rawResponse`: The original unmodified raw response text from the LLM.
+///
+/// ### Use Cases
+/// - **Content Organization**: Automatically group articles, headlines, or other textual content by topic or theme for easier processing.
+/// - **Knowledge Management**: Categorize knowledge base entries or customer support tickets for efficient searching and retrieval.
+/// - **Data Analysis**: Pre-process datasets by grouping entries into logical categories for downstream tasks like visualization or reporting.
+/// - **Dynamic Tagging**: Infer or apply tags/categories to user-generated content in applications like social media or e-commerce platforms.
+/// - **Custom Applications**: Useful in workflows where contextual grouping or classification of text is a key step.
+///
+/// ### Example:
+/// **Input Strings:**
+/// - "Researchers discover a breakthrough in cancer treatment."
+/// - "The stock market experienced a significant downturn yesterday."
+///
+/// **Output JSON:**
+/// ```
+/// {
+///   "categories": {
+///     "Health": ["Researchers discover a breakthrough in cancer treatment."],
+///     "Finance": ["The stock market experienced a significant downturn yesterday."]
+///   }
+/// }
+/// ```
+///
+/// ### Notes
+/// The task leverages a language model to handle flexible and nuanced categorization needs. When predefined categories are not supplied, the model dynamically determines suitable groupings, making it highly adaptable for unstructured or semi-structured data scenarios.
 public class CategorizeStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
@@ -53,17 +51,15 @@ public class CategorizeStringsLLMTask: WorkflowComponent {
     // Add logger property and parameter, error logging only
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `CategorizeStringsTask`.
-
-     - Parameters:
-        - name: The name of the task.
-        - llmService: The LLM service used for categorization.
-        - strings: The list of strings to categorize.
-        - categories: Optional predefined categories.
-        - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-     */
+    /// Initializes a new `CategorizeStringsTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - llmService: The LLM service used for categorization.
+    ///    - strings: The list of strings to categorize.
+    ///    - categories: Optional predefined categories.
+    ///    - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

@@ -9,19 +9,17 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
- An example demonstrating a Siri-style, privacy-focused domain routing scenario.
-
-    This example uses a CoreML model to classify user prompts into three domains:
-    - Private: Prompts that should be handled locally on the device.
-    - Public: Prompts that can be sent to a server for processing.
-    - Unsure: Prompts that are ambiguous and should be handled locally.
-
-    The example includes a set of test cases to evaluate the model's performance.
-    The model is expected to classify prompts correctly based on their context.
-
-    This example aims for 100% accuracy in domain classification, for user safety.
- */
+/// An example demonstrating a Siri-style, privacy-focused domain routing scenario.
+///
+///    This example uses a CoreML model to classify user prompts into three domains:
+///    - Private: Prompts that should be handled locally on the device.
+///    - Public: Prompts that can be sent to a server for processing.
+///    - Unsure: Prompts that are ambiguous and should be handled locally.
+///
+///    The example includes a set of test cases to evaluate the model's performance.
+///    The model is expected to classify prompts correctly based on their context.
+///
+///    This example aims for 100% accuracy in domain classification, for user safety.
 struct SiriStyleDomainRoutingExample {
     private func modelPath(for filename: String) -> URL {
         URL(fileURLWithPath: #file)

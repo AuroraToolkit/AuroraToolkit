@@ -6,18 +6,16 @@
 import AuroraCore
 import Foundation
 
-/**
- `FetchURLTask` fetches the contents of a specified URL and returns the raw data.
-
- - **Inputs**
-    - `url`: The string for the `URL` to fetch.
-    - `headers`: An optional dictionary of headers to include in the request.
- - **Outputs**
-    - `data`: The raw data fetched from the URL.
-
- This task wraps `Workflow.Task` and can be used in workflows where external data needs to be retrieved, such as downloading files,
- fetching JSON, or reading RSS feeds.
- */
+/// `FetchURLTask` fetches the contents of a specified URL and returns the raw data.
+///
+/// - **Inputs**
+///    - `url`: The string for the `URL` to fetch.
+///    - `headers`: An optional dictionary of headers to include in the request.
+/// - **Outputs**
+///    - `data`: The raw data fetched from the URL.
+///
+/// This task wraps `Workflow.Task` and can be used in workflows where external data needs to be retrieved, such as downloading files,
+/// fetching JSON, or reading RSS feeds.
 public struct FetchURLTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
@@ -28,20 +26,18 @@ public struct FetchURLTask: WorkflowComponent {
     /// The URLSession used to fetch the URL.
     private let session: URLSession
 
-    /**
-     Initializes a `FetchURLTask`.
-
-     - Parameters:
-        - name: The name of the task (default is `FetchURLTask`).
-        - url: The string for the `URL` to fetch.
-        - headers: An optional dictionary of headers to include in the request.
-        - session: The `URLSession` to use for the request. Defaults to `.shared`.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: An optional logger for logging task execution details.
-
-     - Throws: An error if the `url` parameter is invalid.
-     - Note: The `inputs` array can contain direct values for keys like `url` and `headers`, or dynamic references that will be resolved at runtime.
-     */
+    /// Initializes a `FetchURLTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task (default is `FetchURLTask`).
+    ///    - url: The string for the `URL` to fetch.
+    ///    - headers: An optional dictionary of headers to include in the request.
+    ///    - session: The `URLSession` to use for the request. Defaults to `.shared`.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: An optional logger for logging task execution details.
+    ///
+    /// - Throws: An error if the `url` parameter is invalid.
+    /// - Note: The `inputs` array can contain direct values for keys like `url` and `headers`, or dynamic references that will be resolved at runtime.
     public init(
         name: String? = nil,
         url: String? = nil,

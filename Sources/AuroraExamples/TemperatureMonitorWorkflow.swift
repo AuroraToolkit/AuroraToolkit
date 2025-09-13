@@ -10,17 +10,15 @@ import AuroraLLM
 import AuroraTaskLibrary
 import Foundation
 
-/**
- Example workflow demonstrating a conditional subflow for temperature monitoring.
-
- The workflow simulates reading a temperature value, then conditionally executes a subflow:
- - If the temperature is above a safe threshold, an alert subflow is run.
- - Otherwise, a normal log subflow is run.
-
- A trigger component re-inserts the logic check periodically, allowing the workflow to continuously monitor the temperature.
- This version limits the trigger to fire a maximum of 10 times with a 6‑second delay between checks.
- Finally, a task analyzes the temperature history, computing average, median, normal count, and abnormal count.
- */
+/// Example workflow demonstrating a conditional subflow for temperature monitoring.
+///
+/// The workflow simulates reading a temperature value, then conditionally executes a subflow:
+/// - If the temperature is above a safe threshold, an alert subflow is run.
+/// - Otherwise, a normal log subflow is run.
+///
+/// A trigger component re-inserts the logic check periodically, allowing the workflow to continuously monitor the temperature.
+/// This version limits the trigger to fire a maximum of 10 times with a 6‑second delay between checks.
+/// Finally, a task analyzes the temperature history, computing average, median, normal count, and abnormal count.
 struct TemperatureMonitorWorkflow {
     // A simulated safe temperature threshold.
     let safeThreshold: Double = 75.0

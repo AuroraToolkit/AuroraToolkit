@@ -6,10 +6,8 @@
 
 import Foundation
 
-/**
- `LLMRequestOptions` provides a way to configure additional options for LLM requests in a structured manner.
- This struct encapsulates less common parameters that can be used to further customize the behavior of the language model.
- */
+/// `LLMRequestOptions` provides a way to configure additional options for LLM requests in a structured manner.
+/// This struct encapsulates less common parameters that can be used to further customize the behavior of the language model.
 public struct LLMRequestOptions {
     /// Nucleus sampling parameter that limits sampling to the top percentile of tokens. Lower values narrow the scope of the sampling to the most likely tokens.
     public var topP: Double?
@@ -35,19 +33,17 @@ public struct LLMRequestOptions {
     /// Preferred domains for the request, used for selecting the most suitable service during routing.
     public var preferredDomains: [String]?
 
-    /**
-     Initializes a new `LLMRequestOptions` with default values for all fields.
-
-     - Parameters:
-        -  topP: The top probability value used for nucleus sampling.
-        -  frequencyPenalty: A penalty to discourage token repetition in the response.
-        -  presencePenalty: A penalty to encourage the introduction of new tokens in the response.
-        -  stopSequences: An optional array of strings that will stop the response generation when encountered.
-        -  logitBias: An optional dictionary that maps tokens to biases, allowing adjustment of token probabilities.
-        -  user: An optional string representing a user identifier for tracking purposes.
-        -  suffix: An optional string that will be added after the model's response.
-        -  preferredDomains: An optional array of strings representing preferred domains for routing.
-     */
+    /// Initializes a new `LLMRequestOptions` with default values for all fields.
+    ///
+    /// - Parameters:
+    ///    -  topP: The top probability value used for nucleus sampling.
+    ///    -  frequencyPenalty: A penalty to discourage token repetition in the response.
+    ///    -  presencePenalty: A penalty to encourage the introduction of new tokens in the response.
+    ///    -  stopSequences: An optional array of strings that will stop the response generation when encountered.
+    ///    -  logitBias: An optional dictionary that maps tokens to biases, allowing adjustment of token probabilities.
+    ///    -  user: An optional string representing a user identifier for tracking purposes.
+    ///    -  suffix: An optional string that will be added after the model's response.
+    ///    -  preferredDomains: An optional array of strings representing preferred domains for routing.
     public init(
         topP: Double? = nil,
         frequencyPenalty: Double? = nil,

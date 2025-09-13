@@ -9,55 +9,51 @@ import AuroraCore
 import AuroraML
 import Foundation
 
-/**
-  `ClassificationMLTask` wraps any `MLServiceProtocol` (e.g. `ClassificationService`)
-  into a `WorkflowComponent`.
-
-  - **Inputs**
-     - `strings`: `[String]` — an array of texts to classify.
-  - **Outputs**
-     - `tags`: `[Tag]` — a flat array of `Tag` objects, one per predicted label. Each `Tag` includes:
-         - `token`: the substring that was tagged
-         - `label`: the tag or category
-         - `scheme`: the tagging scheme identifier
-         - `confidence`: optional confidence score
-         - `start`: starting index of the tagged token in the source string
-         - `length`: length of the tagged token in the source string
-
-  ### Example
-  ```swift
-  let model = try NLModel(contentsOf: myModelURL)
-  let service = ClassificationService(
-     name: "SentimentClassifier",
-     model: model,
-     scheme: "sentiment",
-     maxResults: 2
-  )
-  let task = ClassificationMLTask(
-     service: service,
-     strings: ["I love Swift!", "This is so-so."]
-  )
-  guard case let .task(wrapped) = task.toComponent() else { return }
-  let outputs = try await wrapped.execute()
-  let tags = outputs["tags"] as? [Tag]
-  print(tags)
- ```
-  */
+/// `ClassificationMLTask` wraps any `MLServiceProtocol` (e.g. `ClassificationService`)
+/// into a `WorkflowComponent`.
+///
+/// - **Inputs**
+///    - `strings`: `[String]` — an array of texts to classify.
+/// - **Outputs**
+///    - `tags`: `[Tag]` — a flat array of `Tag` objects, one per predicted label. Each `Tag` includes:
+///        - `token`: the substring that was tagged
+///        - `label`: the tag or category
+///        - `scheme`: the tagging scheme identifier
+///        - `confidence`: optional confidence score
+///        - `start`: starting index of the tagged token in the source string
+///        - `length`: length of the tagged token in the source string
+///
+/// ### Example
+/// ```swift
+/// let model = try NLModel(contentsOf: myModelURL)
+/// let service = ClassificationService(
+///    name: "SentimentClassifier",
+///    model: model,
+///    scheme: "sentiment",
+///    maxResults: 2
+/// )
+/// let task = ClassificationMLTask(
+///    service: service,
+///    strings: ["I love Swift!", "This is so-so."]
+/// )
+/// guard case let .task(wrapped) = task.toComponent() else { return }
+/// let outputs = try await wrapped.execute()
+/// let tags = outputs["tags"] as? [Tag]
+/// print(tags)
+/// ```
 public class ClassificationMLTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.
     private let logger: CustomLogger?
 
-    /**
-     - Parameters:
-        - name: Optional override for workflow task name.
-        - description: Optional override for the workflow description.
-        - service: An `MLServiceProtocol` that emits `["tags": [Tag]]`.
-        - strings: Fallback array of strings to classify.
-        - inputs: Additional inputs to the task.
-        - logger: An optional logger to capture task execution details.
-     */
+    /// - Parameters:
+    ///    - name: Optional override for workflow task name.
+    ///    - description: Optional override for the workflow description.
+    ///    - service: An `MLServiceProtocol` that emits `["tags": [Tag]]`.
+    ///    - strings: Fallback array of strings to classify.
+    ///    - inputs: Additional inputs to the task.
+    ///    - logger: An optional logger to capture task execution details.
     public init(
         name: String? = nil,
         description: String? = nil,

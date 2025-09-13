@@ -9,9 +9,7 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
- An example demonstrating how to use domain-specific routing to LLM services.
- */
+/// An example demonstrating how to use domain-specific routing to LLM services.
 struct DomainRoutingExample {
     func execute() async {
         // Initialize the LLMManager
@@ -187,15 +185,13 @@ private struct MockLLMResponse: LLMResponseProtocol {
     /// Token usage data for the mock response.
     public var tokenUsage: LLMTokenUsage?
 
-    /**
-     Initializes a `MockLLMResponse` instance.
-
-     - Parameters:
-        - text: The mock text content.
-        - vendor: The vendor of the mock LLM.
-        - model: The model name (optional).
-        - tokenUsage: The mock token usage statistics (optional).
-     */
+    /// Initializes a `MockLLMResponse` instance.
+    ///
+    /// - Parameters:
+    ///    - text: The mock text content.
+    ///    - vendor: The vendor of the mock LLM.
+    ///    - model: The model name (optional).
+    ///    - tokenUsage: The mock token usage statistics (optional).
     public init(text: String, vendor: String = "Test Vendor", model: String? = "MockLLM", tokenUsage: LLMTokenUsage? = nil) {
         self.text = text
         self.vendor = vendor

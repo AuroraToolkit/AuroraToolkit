@@ -9,20 +9,18 @@ import AuroraCore
 import Foundation
 import NaturalLanguage
 
-/**
- `TaggingService` implements `MLServiceProtocol`  for tagging text.
-
- Uses Apple’s Natural Language `NLTagger` under the hood to produce token-level `Tag` objects for one or more schemes.
-
- - **Inputs**
-    - `strings`: `[String]` of texts to tag.
- - **Outputs**
-    - `tags`: `[[Tag]]` — an array (per input string) of `Tag` arrays.
-
- ### Notes
- - This service supports multiple `NLTagScheme`s. It will enumerate each configured scheme and append all resulting `Tag` objects.
- - For the `.sentimentScore` scheme, `Tag.confidence` will be populated with the numeric score (-1.0…1.0). For other schemes, `confidence` remains `nil`.
- */
+/// `TaggingService` implements `MLServiceProtocol`  for tagging text.
+///
+/// Uses Apple's Natural Language `NLTagger` under the hood to produce token-level `Tag` objects for one or more schemes.
+///
+/// - **Inputs**
+///    - `strings`: `[String]` of texts to tag.
+/// - **Outputs**
+///    - `tags`: `[[Tag]]` — an array (per input string) of `Tag` arrays.
+///
+/// ### Notes
+/// - This service supports multiple `NLTagScheme`s. It will enumerate each configured scheme and append all resulting `Tag` objects.
+/// - For the `.sentimentScore` scheme, `Tag.confidence` will be populated with the numeric score (-1.0…1.0). For other schemes, `confidence` remains `nil`.
 public final class TaggingService: MLServiceProtocol {
     public var name: String
     private let schemes: [NLTagScheme]
@@ -30,16 +28,14 @@ public final class TaggingService: MLServiceProtocol {
     private let options: NLTagger.Options
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `TaggingService`.
-
-     - Parameters:
-       - name: Identifier for this service (default: `"TaggingService"`).
-       - schemes: One or more `NLTagScheme` values (e.g. `[.nameType]`, `[.sentimentScore]`).
-       - unit: Tokenization granularity (`.word`, `.sentence`, `.paragraph`).
-       - options: `NLTagger.Options` (e.g. `.omitWhitespace`, `.omitPunctuation`).
-       - logger: Optional logger for debug/info.
-     */
+    /// Initializes a new `TaggingService`.
+    ///
+    /// - Parameters:
+    ///   - name: Identifier for this service (default: `"TaggingService"`).
+    ///   - schemes: One or more `NLTagScheme` values (e.g. `[.nameType]`, `[.sentimentScore]`).
+    ///   - unit: Tokenization granularity (`.word`, `.sentence`, `.paragraph`).
+    ///   - options: `NLTagger.Options` (e.g. `.omitWhitespace`, `.omitPunctuation`).
+    ///   - logger: Optional logger for debug/info.
     public init(
         name: String = "TaggingService",
         schemes: [NLTagScheme],

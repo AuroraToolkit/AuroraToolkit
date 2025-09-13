@@ -7,12 +7,10 @@
 
 import Foundation
 
-/**
- Represents the response from OpenAI's LLM models, conforming to `LLMResponseProtocol`.
-
- The OpenAI API returns a list of choices, and this struct captures the first choice as the primary response.
- It also tracks usage statistics such as prompt and completion tokens.
- */
+/// Represents the response from OpenAI's LLM models, conforming to `LLMResponseProtocol`.
+///
+/// The OpenAI API returns a list of choices, and this struct captures the first choice as the primary response.
+/// It also tracks usage statistics such as prompt and completion tokens.
 public struct OpenAILLMResponse: LLMResponseProtocol, Codable {
     public struct Choice: Codable {
         public struct Message: Codable {

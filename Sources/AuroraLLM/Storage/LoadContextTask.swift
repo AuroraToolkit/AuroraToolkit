@@ -8,30 +8,26 @@
 import AuroraCore
 import Foundation
 
-/**
- `LoadContextTask` is responsible for loading a `Context` object from disk.
-
- - **Inputs**
-    - `filename`: The name of the file to load the context from (optional).
- - **Outputs**
-    - `context`: The loaded context object.
-
- This task can be integrated into a workflow where context data needs to be retrieved from disk.
- */
+/// `LoadContextTask` is responsible for loading a `Context` object from disk.
+///
+/// - **Inputs**
+///    - `filename`: The name of the file to load the context from (optional).
+/// - **Outputs**
+///    - `context`: The loaded context object.
+///
+/// This task can be integrated into a workflow where context data needs to be retrieved from disk.
 public class LoadContextTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
-    /**
-     Initializes a `LoadContextTask` with the ability to load a context from disk.
-
-     - Parameters:
-        - name: Optionally pass the name of the task.
-        - filename: Optionally pass the name of the file to load the context from.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-
-     - Note: The `inputs` array can contain direct values for keys like `filename`, or dynamic references that will be resolved at runtime.
-     */
+    /// Initializes a `LoadContextTask` with the ability to load a context from disk.
+    ///
+    /// - Parameters:
+    ///    - name: Optionally pass the name of the task.
+    ///    - filename: Optionally pass the name of the file to load the context from.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///
+    /// - Note: The `inputs` array can contain direct values for keys like `filename`, or dynamic references that will be resolved at runtime.
     public init(
         name: String? = nil,
         filename: String? = nil,

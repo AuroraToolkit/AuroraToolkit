@@ -2,18 +2,16 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
-    This example demonstrates how to use a `DualDomainRouter` to classify input prompts into domains using two CoreML models.
-    It loads a primary and secondary model, runs each prompt through both, and resolves conflicts based on confidence thresholds.
-
-    The router evaluates predictions from both models:
-    - Uses the primary model for standard classification.
-    - Leverages the secondary model as a contrastive signal to improve accuracy.
-    - Applies confidence-based conflict resolution with optional fallback handling.
-
-    The example processes a predefined test set, compares results against expected domains, and outputs a detailed evaluation report,
-    including per-domain accuracy and misclassified prompts.
- */
+/// This example demonstrates how to use a `DualDomainRouter` to classify input prompts into domains using two CoreML models.
+/// It loads a primary and secondary model, runs each prompt through both, and resolves conflicts based on confidence thresholds.
+///
+/// The router evaluates predictions from both models:
+/// - Uses the primary model for standard classification.
+/// - Leverages the secondary model as a contrastive signal to improve accuracy.
+/// - Applies confidence-based conflict resolution with optional fallback handling.
+///
+/// The example processes a predefined test set, compares results against expected domains, and outputs a detailed evaluation report,
+/// including per-domain accuracy and misclassified prompts.
 struct DualDomainRoutingExample {
     private func modelPath(for filename: String) -> URL {
         URL(fileURLWithPath: #file)

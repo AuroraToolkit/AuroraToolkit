@@ -9,11 +9,9 @@ import AuroraCore
 import Foundation
 import os.log
 
-/**
- `AnthropicService` implements the `LLMServiceProtocol` to interact with the Anthropic API.
- It allows for flexible configuration for different models and temperature settings, and now provides
- detailed error handling using `LLMServiceError`.
- */
+/// `AnthropicService` implements the `LLMServiceProtocol` to interact with the Anthropic API.
+/// It allows for flexible configuration for different models and temperature settings, and now provides
+/// detailed error handling using `LLMServiceError`.
 public class AnthropicService: LLMServiceProtocol {
     /// A logger for recording information and errors within the `AnthropicService`.
     private let logger: CustomLogger?
@@ -45,21 +43,19 @@ public class AnthropicService: LLMServiceProtocol {
     /// The URL session used to send basic requests.
     var urlSession: URLSession
 
-    /**
-     Initializes a new `AnthropicService` instance with the given API key and token limit.
-
-     - Parameters:
-        -  name: The name of the service instance (default is `"Anthropic"`).
-        - baseURL: The base URL for the Anthropic API. Defaults to "https://api.anthropic.com".
-        - apiKey: The API key used for authenticating requests to the Anthropic API.
-        - contextWindowSize: The size of the context window used by the service. Defaults to 200k.
-        - maxOutputTokens: The maximum number of tokens allowed for output in a single request. Defaults to 4096.
-        - inputTokenPolicy: The policy to handle input tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
-        - outputTokenPolicy: The policy to handle output tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
-        - systemPrompt: The default system prompt for this service, used to set the behavior or persona of the model.
-        - urlSession: The `URLSession` instance used for network requests. Defaults to a `.default` configuration.
-        - logger: An optional logger for recording information and errors within the service.
-     */
+    /// Initializes a new `AnthropicService` instance with the given API key and token limit.
+    ///
+    /// - Parameters:
+    ///    -  name: The name of the service instance (default is `"Anthropic"`).
+    ///    - baseURL: The base URL for the Anthropic API. Defaults to "https://api.anthropic.com".
+    ///    - apiKey: The API key used for authenticating requests to the Anthropic API.
+    ///    - contextWindowSize: The size of the context window used by the service. Defaults to 200k.
+    ///    - maxOutputTokens: The maximum number of tokens allowed for output in a single request. Defaults to 4096.
+    ///    - inputTokenPolicy: The policy to handle input tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
+    ///    - outputTokenPolicy: The policy to handle output tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
+    ///    - systemPrompt: The default system prompt for this service, used to set the behavior or persona of the model.
+    ///    - urlSession: The `URLSession` instance used for network requests. Defaults to a `.default` configuration.
+    ///    - logger: An optional logger for recording information and errors within the service.
     public init(name: String = "Anthropic", baseURL: String = "https://api.anthropic.com", apiKey: String?, contextWindowSize: Int = 200_000, maxOutputTokens: Int = 4096, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, urlSession: URLSession = URLSession(configuration: .default), logger: CustomLogger? = nil) {
         self.name = name
         self.baseURL = baseURL
@@ -97,14 +93,12 @@ public class AnthropicService: LLMServiceProtocol {
 
     // MARK: - Non-streaming Request
 
-    /**
-     Sends a non-streaming request to the Anthropic API and retrieves the response asynchronously.
-
-     - Parameter request: The `LLMRequest` containing the messages and model configuration.
-
-     - Returns: The `LLMResponseProtocol` containing the generated text or an error if the request fails.
-     - Throws: `LLMServiceError` if the request encounters an issue (e.g., invalid response, decoding error, etc.).
-     */
+    /// Sends a non-streaming request to the Anthropic API and retrieves the response asynchronously.
+    ///
+    /// - Parameter request: The `LLMRequest` containing the messages and model configuration.
+    ///
+    /// - Returns: The `LLMResponseProtocol` containing the generated text or an error if the request fails.
+    /// - Throws: `LLMServiceError` if the request encounters an issue (e.g., invalid response, decoding error, etc.).
     public func sendRequest(_ request: LLMRequest) async throws -> LLMResponseProtocol {
         try validateStreamingConfig(request, expectStreaming: false)
 
@@ -160,13 +154,11 @@ public class AnthropicService: LLMServiceProtocol {
 
     // MARK: - Streaming Request
 
-    /**
-     Sends a request to the Anthropic API and retrieves the response asynchronously.
-
-     - Parameter request: The `LLMRequest` containing the messages and model configuration.
-     - Returns: The `LLMResponseProtocol` containing the generated text or an error if the request fails.
-     - Throws: `LLMServiceError` if the request encounters an issue (e.g., missing API key, invalid response, etc.).
-     */
+    /// Sends a request to the Anthropic API and retrieves the response asynchronously.
+    ///
+    /// - Parameter request: The `LLMRequest` containing the messages and model configuration.
+    /// - Returns: The `LLMResponseProtocol` containing the generated text or an error if the request fails.
+    /// - Throws: `LLMServiceError` if the request encounters an issue (e.g., missing API key, invalid response, etc.).
     public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol {
         try validateStreamingConfig(request, expectStreaming: true)
 

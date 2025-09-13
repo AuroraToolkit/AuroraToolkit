@@ -7,11 +7,9 @@
 
 import Foundation
 
-/**
-    A representation of a JSON element for structured JSON parsing.
-
-    This enum can represent any JSON structure, including objects, arrays, strings, numbers, booleans, and null values.
- */
+/// A representation of a JSON element for structured JSON parsing.
+///
+/// This enum can represent any JSON structure, including objects, arrays, strings, numbers, booleans, and null values.
 public enum JSONElement: Equatable {
     case object([String: JSONElement])
     case array([JSONElement])
@@ -19,13 +17,11 @@ public enum JSONElement: Equatable {
     case number(NSNumber) // All numeric values, including booleans as 0(false)/1(true)
     case null
 
-    /**
-        Initializes a new JSON element from a given JSON object.
-
-        - Parameters:
-            - jsonObject: The JSON object to convert to a JSONElement.
-        - Returns a JSONElement representing the JSON object.
-     */
+    /// Initializes a new JSON element from a given JSON object.
+    ///
+    /// - Parameters:
+    ///    - jsonObject: The JSON object to convert to a JSONElement.
+    /// - Returns a JSONElement representing the JSON object.
     public init(from jsonObject: Any) {
         if let dictionary = jsonObject as? [String: Any] {
             self = .object(dictionary.mapValues { JSONElement(from: $0) })
@@ -40,13 +36,11 @@ public enum JSONElement: Equatable {
         }
     }
 
-    /**
-        Initializes a new JSON element from a given data object.
-
-        - Parameters:
-            - data: The data object to convert to a JSONElement.
-        - Returns a JSONElement representing the data object, or `nil` if the data is not valid JSON
-     */
+    /// Initializes a new JSON element from a given data object.
+    ///
+    /// - Parameters:
+    ///    - data: The data object to convert to a JSONElement.
+    /// - Returns a JSONElement representing the data object, or `nil` if the data is not valid JSON
     public init?(data: Data) {
         guard let jsonObject = try? JSONSerialization.jsonObject(with: data) else {
             return nil
@@ -78,13 +72,11 @@ public enum JSONElement: Equatable {
         return false
     }
 
-    /**
-        Subscript access to the JSON object by key.
-
-        - Parameters:
-            - key: The key to access in the JSON object.
-        - Returns: The JSONElement for the given key, or `nil` if the key is not found or the JSONElement is not an object.
-     */
+    /// Subscript access to the JSON object by key.
+    ///
+    /// - Parameters:
+    ///    - key: The key to access in the JSON object.
+    /// - Returns: The JSONElement for the given key, or `nil` if the key is not found or the JSONElement is not an object.
     public subscript(key: String) -> JSONElement? {
         if case let .object(object) = self {
             return object[key]
@@ -93,13 +85,11 @@ public enum JSONElement: Equatable {
         return nil
     }
 
-    /**
-        Subscript access to the JSON array by index.
-
-        - Parameters:
-            - index: The index to access in the JSON array.
-        - Returns: The JSONElement for the given index, or `nil` if the index is out of bounds or the JSONElement is not an array.
-     */
+    /// Subscript access to the JSON array by index.
+    ///
+    /// - Parameters:
+    ///    - index: The index to access in the JSON array.
+    /// - Returns: The JSONElement for the given index, or `nil` if the index is out of bounds or the JSONElement is not an array.
     public subscript(index: Int) -> JSONElement? {
         if case let .array(array) = self, array.indices.contains(index) {
             return array[index]
@@ -250,13 +240,11 @@ public enum JSONElement: Equatable {
         }
     }
 
-    /**
-        Returns the JSONElement as a JSON string.
-
-        - Parameters:
-            - prettyPrinted: Whether to format the JSON string with whitespace for readability. Defaults to `false`.
-        - Returns: The JSON string representation of the JSONElement, or `nil` if it cannot be converted to a JSON string.
-     */
+    /// Returns the JSONElement as a JSON string.
+    ///
+    /// - Parameters:
+    ///    - prettyPrinted: Whether to format the JSON string with whitespace for readability. Defaults to `false`.
+    /// - Returns: The JSON string representation of the JSONElement, or `nil` if it cannot be converted to a JSON string.
     public func toJSONString(prettyPrinted: Bool = false) -> String? {
         let options: JSONSerialization.WritingOptions = prettyPrinted ? .prettyPrinted : []
         guard let jsonObject = toAny() else { return nil }
@@ -280,16 +268,14 @@ public enum JSONElement: Equatable {
         }
     }
 
-    /**
-     Compares two JSONElements for equality.
-
-        - Parameters:
-            - lhs: The left-hand side JSONElement to compare.
-            - rhs: The right-hand side JSONElement to compare.
-        - Returns: `true` if the JSONElements are equal, `false` otherwise.
-
-        - Note: This comparison is recursive for objects and arrays.
-     */
+    /// Compares two JSONElements for equality.
+    ///
+    /// - Parameters:
+    ///    - lhs: The left-hand side JSONElement to compare.
+    ///    - rhs: The right-hand side JSONElement to compare.
+    /// - Returns: `true` if the JSONElements are equal, `false` otherwise.
+    ///
+    /// - Note: This comparison is recursive for objects and arrays.
     public static func == (lhs: JSONElement, rhs: JSONElement) -> Bool {
         switch (lhs, rhs) {
         case let (.string(lhsValue), .string(rhsValue)):

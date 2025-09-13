@@ -6,9 +6,7 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
-    A basic example demonstrating how to send a request to the LLM service.
- */
+/// A basic example demonstrating how to send a request to the LLM service.
 struct BasicRequestExample {
     func execute() async {
         // Set your Anthropic API key as an environment variable to run this example, e.g., `export ANTHROPIC_API_KEY="your-api-key"`

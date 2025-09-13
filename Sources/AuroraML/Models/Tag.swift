@@ -7,29 +7,26 @@
 
 import Foundation
 
-/**
- A single tagged span in an input string, produced by `TaggingService` or other tagging ML services.
-
- - Use Cases:
- - Sentiment tagging: each word or phrase tagged with a sentiment label and optional score.
- - Entity extraction: tokens tagged as `PERSON`, `ORG`, `LOCATION`, etc., with confidences.
- - Keyword or lemma tagging: parts of speech, lemmas, or custom categories.
- - Any other token-level or span-level ML tagging.
-
- - Example:
- ```swift
- let example = "I love Swift!"
- let tag = Tag(
-    token: "love",
-    label: "Positive",
-    scheme: "sentimentScore",
-    confidence: 0.95,
-    start: 2,
-    length: 4
- )
- ```
-
- */
+/// A single tagged span in an input string, produced by `TaggingService` or other tagging ML services.
+///
+/// - Use Cases:
+/// - Sentiment tagging: each word or phrase tagged with a sentiment label and optional score.
+/// - Entity extraction: tokens tagged as `PERSON`, `ORG`, `LOCATION`, etc., with confidences.
+/// - Keyword or lemma tagging: parts of speech, lemmas, or custom categories.
+/// - Any other token-level or span-level ML tagging.
+///
+/// - Example:
+/// ```swift
+/// let example = "I love Swift!"
+/// let tag = Tag(
+///    token: "love",
+///    label: "Positive",
+///    scheme: "sentimentScore",
+///    confidence: 0.95,
+///    start: 2,
+///    length: 4
+/// )
+/// ```
 public struct Tag: Equatable {
     /// The exact substring from the source text that was tagged.
     public let token: String
@@ -50,17 +47,15 @@ public struct Tag: Equatable {
     /// The length  of the tagged token in the source string.
     public let length: Int
 
-    /**
-     Creates a new `Tag`.
-
-     - Parameters:
-        - token: The substring that was tagged.
-        - label: The tag label or category.
-        - scheme: The tagging scheme identifier.
-        - confidence: An optional confidence score (default: `nil`).
-        - start: The starting index of the tagged token in the source string.
-        - length: The length of the tagged token in the source string.
-     */
+    /// Creates a new `Tag`.
+    ///
+    /// - Parameters:
+    ///    - token: The substring that was tagged.
+    ///    - label: The tag label or category.
+    ///    - scheme: The tagging scheme identifier.
+    ///    - confidence: An optional confidence score (default: `nil`).
+    ///    - start: The starting index of the tagged token in the source string.
+    ///    - length: The length of the tagged token in the source string.
     public init(
         token: String,
         label: String,

@@ -9,16 +9,14 @@ import AuroraCore
 import Foundation
 import os.log
 
-/**
- `RSSParsingTask` parses an RSS feed and extracts the article links.
-
- - **Inputs**
-    - `feedData`: The data of the RSS feed to parse.
- - **Outputs**
-    - `articles`: An array of `RSSArticle` objects containing the article details.
-
- This task can be integrated into a workflow where article links need to be extracted from an RSS feed.
- */
+/// `RSSParsingTask` parses an RSS feed and extracts the article links.
+///
+/// - **Inputs**
+///    - `feedData`: The data of the RSS feed to parse.
+/// - **Outputs**
+///    - `articles`: An array of `RSSArticle` objects containing the article details.
+///
+/// This task can be integrated into a workflow where article links need to be extracted from an RSS feed.
 public class RSSParsingTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
@@ -29,17 +27,15 @@ public class RSSParsingTask: WorkflowComponent {
     private var currentElement: String = ""
     private var currentLink: String?
 
-    /**
-     Initializes the `RSSParsingTask` with the RSS feed data.
-
-     - Parameters:
-        - name: The name of the task (default is `RSSParsingTask`).
-        - feedData: The data of the RSS feed to parse.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: An optional logger for logging task execution details.
-
-     - Note: The `inputs` array can contain direct values for keys like `feedData`, or dynamic references that will be resolved at runtime.
-     */
+    /// Initializes the `RSSParsingTask` with the RSS feed data.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task (default is `RSSParsingTask`).
+    ///    - feedData: The data of the RSS feed to parse.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: An optional logger for logging task execution details.
+    ///
+    /// - Note: The `inputs` array can contain direct values for keys like `feedData`, or dynamic references that will be resolved at runtime.
     public init(
         name: String? = nil,
         feedData: Data? = nil,
@@ -84,9 +80,7 @@ public class RSSParsingTask: WorkflowComponent {
     }
 }
 
-/**
- `RSSArticle` represents an article extracted from an RSS feed.
- */
+/// `RSSArticle` represents an article extracted from an RSS feed.
 public struct RSSArticle {
     /// The title of the article.
     public let title: String
@@ -101,9 +95,7 @@ public struct RSSArticle {
     public let guid: String
 }
 
-/**
-    The `RSSParserDelegate` class is responsible for parsing the RSS feed XML data.
- */
+/// The `RSSParserDelegate` class is responsible for parsing the RSS feed XML data.
 private class RSSParserDelegate: NSObject, XMLParserDelegate {
     var articles: [RSSArticle] = []
     private var currentElement: String = ""

@@ -9,11 +9,9 @@ import AuroraCore
 import Foundation
 import os.log
 
-/**
- `GoogleService` implements the `LLMServiceProtocol` to interact with the Google Generative AI API (Gemini).
- It allows for flexible configuration for different models and temperature settings, handles API key securely,
- and provides error handling using `LLMServiceError`.
- */
+/// `GoogleService` implements the `LLMServiceProtocol` to interact with the Google Generative AI API (Gemini).
+/// It allows for flexible configuration for different models and temperature settings, handles API key securely,
+/// and provides error handling using `LLMServiceError`.
 public class GoogleService: LLMServiceProtocol {
     /// A logger for recording information and errors within the `GoogleService`.
     private let logger: CustomLogger?
@@ -47,21 +45,19 @@ public class GoogleService: LLMServiceProtocol {
 
     // API key is retrieved from SecureStorage when needed
 
-    /**
-     Initializes a new `GoogleService` instance with the given configuration.
-
-     - Parameters:
-        - name: The name for this specific service instance (default is `"Google"`). Used for retrieving credentials.
-        - baseURL: The base URL for the Google Generative AI API. Defaults to `"https://generativelanguage.googleapis.com"`.
-        - apiKey: The API key used for authenticating requests. This key will be stored securely using `SecureStorage`.
-        - contextWindowSize: The context window size supported by the model being used. Defaults to `1,048,576` (e.g., Gemini 1.5 Pro).
-        - maxOutputTokens: The maximum number of tokens the model can generate in a single response. Defaults to `8192` (e.g., Gemini 1.5 Pro).
-        - inputTokenPolicy: The policy for handling requests exceeding the input token limit. Defaults to `.adjustToServiceLimits`.
-        - outputTokenPolicy: The policy for handling requests exceeding the maximum output token limit. Defaults to `.adjustToServiceLimits`.
-        - systemPrompt: An optional default system prompt to guide the model's behavior for this service instance.
-        - urlSession: The `URLSession` instance for network requests. Defaults to a standard configuration.
-        - logger: An optional logger for recording information and errors. Defaults to `nil`.
-     */
+    /// Initializes a new `GoogleService` instance with the given configuration.
+    ///
+    /// - Parameters:
+    ///    - name: The name for this specific service instance (default is `"Google"`). Used for retrieving credentials.
+    ///    - baseURL: The base URL for the Google Generative AI API. Defaults to `"https://generativelanguage.googleapis.com"`.
+    ///    - apiKey: The API key used for authenticating requests. This key will be stored securely using `SecureStorage`.
+    ///    - contextWindowSize: The context window size supported by the model being used. Defaults to `1,048,576` (e.g., Gemini 1.5 Pro).
+    ///    - maxOutputTokens: The maximum number of tokens the model can generate in a single response. Defaults to `8192` (e.g., Gemini 1.5 Pro).
+    ///    - inputTokenPolicy: The policy for handling requests exceeding the input token limit. Defaults to `.adjustToServiceLimits`.
+    ///    - outputTokenPolicy: The policy for handling requests exceeding the maximum output token limit. Defaults to `.adjustToServiceLimits`.
+    ///    - systemPrompt: An optional default system prompt to guide the model's behavior for this service instance.
+    ///    - urlSession: The `URLSession` instance for network requests. Defaults to a standard configuration.
+    ///    - logger: An optional logger for recording information and errors. Defaults to `nil`.
     public init(
         name: String = "Google",
         baseURL: String = "https://generativelanguage.googleapis.com",
@@ -95,13 +91,11 @@ public class GoogleService: LLMServiceProtocol {
 
     // MARK: - LLMServiceProtocol Methods
 
-    /**
-     Sends a non-streaming request to the Google Generative AI API and retrieves the response asynchronously.
-
-     - Parameter request: The `LLMRequest` containing the messages and model configuration. Ensure `request.stream` is `false`.
-     - Returns: An `LLMResponseProtocol` containing the generated text and other metadata.
-     - Throws: `LLMServiceError` if the API key is missing, the URL is invalid, the request fails, the response is invalid (non-2xx status), or decoding fails. Also throws errors during request mapping or network issues.
-     */
+    /// Sends a non-streaming request to the Google Generative AI API and retrieves the response asynchronously.
+    ///
+    /// - Parameter request: The `LLMRequest` containing the messages and model configuration. Ensure `request.stream` is `false`.
+    /// - Returns: An `LLMResponseProtocol` containing the generated text and other metadata.
+    /// - Throws: `LLMServiceError` if the API key is missing, the URL is invalid, the request fails, the response is invalid (non-2xx status), or decoding fails. Also throws errors during request mapping or network issues.
     public func sendRequest(_ request: LLMRequest) async throws -> LLMResponseProtocol {
         try validateStreamingConfig(request, expectStreaming: false)
 
@@ -176,15 +170,13 @@ public class GoogleService: LLMServiceProtocol {
         }
     }
 
-    /**
-     Sends a streaming request to the Google Generative AI API and receives the response asynchronously.
-
-     - Parameters:
-        - request: The `LLMRequest` containing the messages and model configuration. Ensure `request.stream` is `true`.
-        - onPartialResponse: An optional closure that receives chunks of the generated text as they arrive.
-     - Returns: An `LLMResponseProtocol` containing the final aggregated text and other metadata once the stream is complete.
-     - Throws: `LLMServiceError` if the API key is missing, the URL is invalid, the request fails, the response is invalid, decoding fails, or the stream terminates unexpectedly. Also throws errors during request mapping or network issues.
-     */
+    /// Sends a streaming request to the Google Generative AI API and receives the response asynchronously.
+    ///
+    /// - Parameters:
+    ///    - request: The `LLMRequest` containing the messages and model configuration. Ensure `request.stream` is `true`.
+    ///    - onPartialResponse: An optional closure that receives chunks of the generated text as they arrive.
+    /// - Returns: An `LLMResponseProtocol` containing the final aggregated text and other metadata once the stream is complete.
+    /// - Throws: `LLMServiceError` if the API key is missing, the URL is invalid, the request fails, the response is invalid, decoding fails, or the stream terminates unexpectedly. Also throws errors during request mapping or network issues.
     public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol {
         guard request.stream else {
             throw LLMServiceError.custom(message: "Streaming flag must be true in sendStreamingRequest().")

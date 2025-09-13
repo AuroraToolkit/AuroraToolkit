@@ -8,9 +8,7 @@
 import AuroraCore
 import Foundation
 
-/**
-    A struct representing a domain prediction with a label and confidence score.
- */
+/// A struct representing a domain prediction with a label and confidence score.
 public struct DualDomainPrediction: Equatable {
     /// The predicted domain label.
     public let label: String
@@ -18,14 +16,12 @@ public struct DualDomainPrediction: Equatable {
     public let confidence: Double
 }
 
-/**
- A domain router that combines two classifiers:
-
-  - A **primary** router (default authority)
-  - A **secondary** contrastive router (used to validate, challenge, or help resolve uncertain predictions)
-
-  The router uses confidence thresholds and an optional fallback domain to resolve disagreements.
-  */
+/// A domain router that combines two classifiers:
+///
+///  - A **primary** router (default authority)
+///  - A **secondary** contrastive router (used to validate, challenge, or help resolve uncertain predictions)
+///
+///  The router uses confidence thresholds and an optional fallback domain to resolve disagreements.
 public struct DualDomainRouter: LLMDomainRouterProtocol {
     /// The name of the router, used for logging and identification.
     public let name: String
@@ -52,33 +48,31 @@ public struct DualDomainRouter: LLMDomainRouterProtocol {
     /// The secondary router, providing contrastive input to challenge or validate the primary router's prediction.
     private let secondary: LLMDomainRouterProtocol
 
-    /**
-     A closure provided by the developer to resolve domain prediction conflicts
-     that cannot be automatically settled by confidence thresholds.
-
-     This is the final fallback resolution step when:
-      - The primary and secondary predictions differ
-      - The confidence delta is below the resolution threshold
-      - Neither prediction meets the fallback confidence threshold
-
-     The closure receives the predicted domains (or `nil`) from both routers
-     and should return a supported domain or `nil` if resolution is not possible.
-
-     Examples:
-
-         // Basic: Prefer primary if available, fallback to secondary
-         resolve: { primary, secondary in
-             return primary ?? secondary
-         }
-
-         // Custom logic: Favor 'technology' over 'health' in ties
-         resolve: { primary, secondary in
-             if primary == "health" && secondary == "technology" {
-                 return "technology"
-             }
-             return primary ?? secondary
-         }
-     */
+    /// A closure provided by the developer to resolve domain prediction conflicts
+    /// that cannot be automatically settled by confidence thresholds.
+    ///
+    /// This is the final fallback resolution step when:
+    ///  - The primary and secondary predictions differ
+    ///  - The confidence delta is below the resolution threshold
+    ///  - Neither prediction meets the fallback confidence threshold
+    ///
+    /// The closure receives the predicted domains (or `nil`) from both routers
+    /// and should return a supported domain or `nil` if resolution is not possible.
+    ///
+    /// Examples:
+    ///
+    ///     // Basic: Prefer primary if available, fallback to secondary
+    ///     resolve: { primary, secondary in
+    ///         return primary ?? secondary
+    ///     }
+    ///
+    ///     // Custom logic: Favor 'technology' over 'health' in ties
+    ///     resolve: { primary, secondary in
+    ///         if primary == "health" && secondary == "technology" {
+    ///             return "technology"
+    ///         }
+    ///         return primary ?? secondary
+    ///     }
     private let resolve: (_ primary: DualDomainPrediction?, _ secondary: DualDomainPrediction?) -> String?
 
     /// Shared logger instance.
@@ -86,22 +80,20 @@ public struct DualDomainRouter: LLMDomainRouterProtocol {
 
     /// A logger for capturing conflicts between primary and secondary predictions in DualDomainRouter.
     private let conflictLogger: ConflictLoggingStrategy?
-    /**
-     Initializes a new `DualDomainRouter`.
-
-     - Parameters:
-        - name: The name of the router.
-        - primary: The primary (default) router whose prediction is preferred unless overridden by confidence or conflict resolution logic.
-        - secondary: The contrastive router used to provide a second opinion or trigger conflict resolution logic.
-        - supportedDomains: A list of valid domains this router recognizes.
-        - confidenceThreshold: An optional confidence threshold for favoring the more confident prediction between the two routers.
-        - fallbackDomain: An optional fallback domain if both routers are uncertain.
-        - fallbackConfidenceThreshold: An optional confidence threshold under which both predictions are considered uncertain.
-        - allowSyntheticFallbacks: If true, fallback predictions will be synthesized instead of returning nil.
-        - logger: A custom logger for logging domain predictions and conflicts.
-        - conflictLogger: A logging strategy for capturing conflicts between primary and secondary predictions.
-        - resolveConflict: A closure that resolves conflicts between the two predictions when confidence thresholds don’t resolve it.
-     */
+    /// Initializes a new `DualDomainRouter`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the router.
+    ///    - primary: The primary (default) router whose prediction is preferred unless overridden by confidence or conflict resolution logic.
+    ///    - secondary: The contrastive router used to provide a second opinion or trigger conflict resolution logic.
+    ///    - supportedDomains: A list of valid domains this router recognizes.
+    ///    - confidenceThreshold: An optional confidence threshold for favoring the more confident prediction between the two routers.
+    ///    - fallbackDomain: An optional fallback domain if both routers are uncertain.
+    ///    - fallbackConfidenceThreshold: An optional confidence threshold under which both predictions are considered uncertain.
+    ///    - allowSyntheticFallbacks: If true, fallback predictions will be synthesized instead of returning nil.
+    ///    - logger: A custom logger for logging domain predictions and conflicts.
+    ///    - conflictLogger: A logging strategy for capturing conflicts between primary and secondary predictions.
+    ///    - resolveConflict: A closure that resolves conflicts between the two predictions when confidence thresholds don't resolve it.
     public init(
         name: String,
         primary: LLMDomainRouterProtocol,
@@ -128,14 +120,12 @@ public struct DualDomainRouter: LLMDomainRouterProtocol {
         resolve = resolveConflict
     }
 
-    /**
-     Determines the domain for the given `LLMRequest` using the primary and secondary routers.
-
-     - Parameters:
-        - request: The request containing messages to be analyzed for routing.
-     - Returns: A string representing the predicted domain if supported, or `nil` if not supported or below our confidence threshold.
-     - Throws: Never throws currently, but declared for protocol conformance and future flexibility.
-     */
+    /// Determines the domain for the given `LLMRequest` using the primary and secondary routers.
+    ///
+    /// - Parameters:
+    ///    - request: The request containing messages to be analyzed for routing.
+    /// - Returns: A string representing the predicted domain if supported, or `nil` if not supported or below our confidence threshold.
+    /// - Throws: Never throws currently, but declared for protocol conformance and future flexibility.
     public func determineDomain(for request: LLMRequest) async throws -> String? {
         let primaryPrediction = try await prediction(from: primary, for: request)
         let secondaryPrediction = try await prediction(from: secondary, for: request)
@@ -198,17 +188,15 @@ public struct DualDomainRouter: LLMDomainRouterProtocol {
 
     // MARK: - Helper functions
 
-    /**
-        Retrieves the prediction and confidence from the specified router.
-
-        - Parameters:
-            - router: The router to retrieve the prediction from.
-            - request: The request containing messages to be analyzed for routing.
-        - Returns: A `DomainPrediction` containing the predicted domain and its confidence level.
-        - Throws: An error if the prediction fails.
-
-        This function is private and used internally to retrieve the prediction and confidence from the specified router. It handles both confident and non-confident routers. If the domain cannot be determined, the `fallbackDomain` is returned with a confidence of 0. If `fallbackDomain` is not set and `allowSyntheticFallbacks` is `true`, "unknown" is returned.
-     */
+    /// Retrieves the prediction and confidence from the specified router.
+    ///
+    /// - Parameters:
+    ///     - router: The router to retrieve the prediction from.
+    ///     - request: The request containing messages to be analyzed for routing.
+    /// - Returns: A `DomainPrediction` containing the predicted domain and its confidence level.
+    /// - Throws: An error if the prediction fails.
+    ///
+    /// This function is private and used internally to retrieve the prediction and confidence from the specified router. It handles both confident and non-confident routers. If the domain cannot be determined, the `fallbackDomain` is returned with a confidence of 0. If `fallbackDomain` is not set and `allowSyntheticFallbacks` is `true`, "unknown" is returned.
     private func prediction(from router: LLMDomainRouterProtocol,
                             for request: LLMRequest) async throws -> DualDomainPrediction?
     {
@@ -249,31 +237,25 @@ public struct DualDomainRouter: LLMDomainRouterProtocol {
 
 // MARK: - Conflict Logging
 
-/**
-    This protocol defines a method for logging conflicts between primary and secondary predictions.
- */
+/// This protocol defines a method for logging conflicts between primary and secondary predictions.
 public protocol ConflictLoggingStrategy {
     /// Logs a conflict with the provided details.
     func logConflict(prompt: String, primary: String, primaryConfidence: Double, secondary: String, secondaryConfidence: Double)
 }
 
-/**
-    A file-based conflict logger that appends conflict details to a CSV file.
- */
+/// A file-based conflict logger that appends conflict details to a CSV file.
 public final class FileConflictLogger: ConflictLoggingStrategy {
     private var fileHandle: FileHandle?
     private let dateFormatter: DateFormatter
     private let logger: CustomLogger?
 
-    /**
-        Public initializer that sets up CSV logging using a specified file name.
-
-        - Parameters:
-            - fileName: The base name for the log file.
-            - directory: The directory where the log file will be created. Defaults to the app's document directory.
-
-        - Note: The file will be created if it doesn't exist, and a CSV header will be added.
-     */
+    /// Public initializer that sets up CSV logging using a specified file name.
+    ///
+    /// - Parameters:
+    ///     - fileName: The base name for the log file.
+    ///     - directory: The directory where the log file will be created. Defaults to the app's document directory.
+    ///
+    /// - Note: The file will be created if it doesn't exist, and a CSV header will be added.
     public init(fileName: String, directory: URL? = nil, logger: CustomLogger? = nil) {
         dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
@@ -303,16 +285,14 @@ public final class FileConflictLogger: ConflictLoggingStrategy {
         }
     }
 
-    /**
-     Logs a conflict with the provided details.
-
-     - Parameters:
-        - prompt: The user prompt that led to the conflict.
-        - primary: The primary router's prediction.
-        - primaryConfidence: The confidence level of the primary prediction.
-        - secondary: The secondary router's prediction.
-        - secondaryConfidence: The confidence level of the secondary prediction.
-     */
+    /// Logs a conflict with the provided details.
+    ///
+    /// - Parameters:
+    ///    - prompt: The user prompt that led to the conflict.
+    ///    - primary: The primary router's prediction.
+    ///    - primaryConfidence: The confidence level of the primary prediction.
+    ///    - secondary: The secondary router's prediction.
+    ///    - secondaryConfidence: The confidence level of the secondary prediction.
     public func logConflict(
         prompt: String,
         primary: String,
@@ -333,32 +313,26 @@ public final class FileConflictLogger: ConflictLoggingStrategy {
     }
 }
 
-/**
-    A console-based conflict logger that prints conflict details to the console.
- */
+/// A console-based conflict logger that prints conflict details to the console.
 public final class ConsoleConflictLogger: ConflictLoggingStrategy {
     private let logger: CustomLogger?
 
-    /**
-        Public initializer that sets up console logging.
-
-        - Parameters:
-            - logger: An optional custom logger for logging conflict details.
-     */
+    /// Public initializer that sets up console logging.
+    ///
+    /// - Parameters:
+    ///     - logger: An optional custom logger for logging conflict details.
     public init(logger: CustomLogger? = nil) {
         self.logger = logger
     }
 
-    /**
-     Logs a conflict with the provided details.
-
-     - Parameters:
-        - prompt: The user prompt that led to the conflict.
-        - primary: The primary router's prediction.
-        - primaryConfidence: The confidence level of the primary prediction.
-        - secondary: The secondary router's prediction.
-        - secondaryConfidence: The confidence level of the secondary prediction.
-     */
+    /// Logs a conflict with the provided details.
+    ///
+    /// - Parameters:
+    ///    - prompt: The user prompt that led to the conflict.
+    ///    - primary: The primary router's prediction.
+    ///    - primaryConfidence: The confidence level of the primary prediction.
+    ///    - secondary: The secondary router's prediction.
+    ///    - secondaryConfidence: The confidence level of the secondary prediction.
     public func logConflict(
         prompt: String,
         primary: String,

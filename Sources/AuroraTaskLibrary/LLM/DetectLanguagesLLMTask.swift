@@ -9,54 +9,50 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
-  `DetectLanguagesTask` identifies the language(s) of the provided strings using an LLM service.
-
-  - **Inputs**
-     - `strings`: An array of strings for which the language needs to be detected.
-     - `maxTokens`: The maximum number of tokens allowed for the LLM response. Defaults to 500.
-  - **Outputs**
-     - `languages`: A dictionary where the keys are the input strings, and the values are the detected language codes (e.g., "en" for English, "fr" for French).
-     - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-     - `rawResponse`: The original unmodified raw response text from the LLM.
-
-  ### Use Cases
-  - Analyze user-generated content to understand the languages used.
-  - Preprocess multilingual datasets for translation or other tasks.
-  - Detect and handle language-specific workflows in applications.
-
-  ### Example:
-  **Input Strings:**
-  - "Bonjour tout le monde."
-  - "Hello world!"
-
- **Output JSON:**
- ```
- {
-     "languages": {
-         "Bonjour tout le monde.": "fr",
-         "Hello world!": "en"
-     }
- }
- ```
- */
+/// `DetectLanguagesTask` identifies the language(s) of the provided strings using an LLM service.
+///
+/// - **Inputs**
+///    - `strings`: An array of strings for which the language needs to be detected.
+///    - `maxTokens`: The maximum number of tokens allowed for the LLM response. Defaults to 500.
+/// - **Outputs**
+///    - `languages`: A dictionary where the keys are the input strings, and the values are the detected language codes (e.g., "en" for English, "fr" for French).
+///    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+///    - `rawResponse`: The original unmodified raw response text from the LLM.
+///
+/// ### Use Cases
+/// - Analyze user-generated content to understand the languages used.
+/// - Preprocess multilingual datasets for translation or other tasks.
+/// - Detect and handle language-specific workflows in applications.
+///
+/// ### Example:
+/// **Input Strings:**
+/// - "Bonjour tout le monde."
+/// - "Hello world!"
+///
+/// **Output JSON:**
+/// ```
+/// {
+///     "languages": {
+///         "Bonjour tout le monde.": "fr",
+///         "Hello world!": "en"
+///     }
+/// }
+/// ```
 public class DetectLanguagesLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.
     private let logger: CustomLogger?
 
-    /**
-     Initializes a `DetectLanguagesLLMTask` with the required parameters.
-
-     - Parameters:
-        - name: Optionally pass the name of the task.
-        - llmService: The LLM service used for language detection.
-        - strings: The list of strings to analyze. Defaults to `nil` (can be resolved dynamically).
-        - maxTokens: The maximum number of tokens allowed for the response. Defaults to 500.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-     */
+    /// Initializes a `DetectLanguagesLLMTask` with the required parameters.
+    ///
+    /// - Parameters:
+    ///    - name: Optionally pass the name of the task.
+    ///    - llmService: The LLM service used for language detection.
+    ///    - strings: The list of strings to analyze. Defaults to `nil` (can be resolved dynamically).
+    ///    - maxTokens: The maximum number of tokens allowed for the response. Defaults to 500.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

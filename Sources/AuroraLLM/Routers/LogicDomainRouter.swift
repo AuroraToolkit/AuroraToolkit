@@ -10,10 +10,8 @@ import Foundation
 
 // MARK: - Routing Logic Rule
 
-/**
- A single deterministic rule that can claim an `LLMRequest`
- and map it to a domain.
- */
+/// A single deterministic rule that can claim an `LLMRequest`
+/// and map it to a domain.
 public struct LogicRule {
     /// Human-readable identifier for logs/metrics.
     public let name: String
@@ -42,16 +40,14 @@ public struct LogicRule {
 
 // MARK: - Evaluation Strategy
 
-/**
- Determines how the router chooses a domain when evaluating rules.
-
- * `.firstMatch` – stop at the first rule that matches (fast).
- * `.highestPriority` – evaluate all rules, pick the highest `priority`.
- * `.topKThenResolve` – gather the first *k* matches, pass them to a resolver.
- * `.probabilisticWeights` – resolver returns `(domain, weight)` pairs,
-   a weighted random draw selects the domain.
- * `.custom` – caller receives every match array and decides.
- */
+/// Determines how the router chooses a domain when evaluating rules.
+///
+/// * `.firstMatch` – stop at the first rule that matches (fast).
+/// * `.highestPriority` – evaluate all rules, pick the highest `priority`.
+/// * `.topKThenResolve` – gather the first *k* matches, pass them to a resolver.
+/// * `.probabilisticWeights` – resolver returns `(domain, weight)` pairs,
+///   a weighted random draw selects the domain.
+/// * `.custom` – caller receives every match array and decides.
 public enum EvaluationStrategy {
     case firstMatch
     case highestPriority
@@ -66,33 +62,31 @@ public enum EvaluationStrategy {
 
 // MARK: - Logic-Based Router
 
-/**
- A purely deterministic router that applies an ordered set
- of `LogicRule`s to an `LLMRequest`.
-
- Example usage:
- ```swift
- let router = LogicDomainRouter(
-     name: "Deterministic",
-     supportedDomains: ["sports","finance","private","general"],
-     rules: [
-         .regex(name: "Sports",
-                pattern: #"\b(score|match|nba|nfl)\b"#,
-                domain: "sports"),
-         .regex(name: "Finance",
-                pattern: #"\b(loan|apr|mortgage)\b"#,
-                domain: "finance"),
-         .regex(name: "PII (email)",
-                pattern: #"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}"#,
-                domain: "private",
-                priority: 100)
-     ],
-     defaultDomain: "general",
-     evaluationStrategy: .highestPriority
- )
- llmManager.registerDomainRouter(router)
- ```
- */
+/// A purely deterministic router that applies an ordered set
+/// of `LogicRule`s to an `LLMRequest`.
+///
+/// Example usage:
+/// ```swift
+/// let router = LogicDomainRouter(
+///     name: "Deterministic",
+///     supportedDomains: ["sports","finance","private","general"],
+///     rules: [
+///         .regex(name: "Sports",
+///                pattern: #"\b(score|match|nba|nfl)\b"#,
+///                domain: "sports"),
+///         .regex(name: "Finance",
+///                pattern: #"\b(loan|apr|mortgage)\b"#,
+///                domain: "finance"),
+///         .regex(name: "PII (email)",
+///                pattern: #"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}"#,
+///                domain: "private",
+///                priority: 100)
+///     ],
+///     defaultDomain: "general",
+///     evaluationStrategy: .highestPriority
+/// )
+/// llmManager.registerDomainRouter(router)
+/// ```
 public final class LogicDomainRouter: LLMDomainRouterProtocol {
     public let name: String
     public let supportedDomains: [String]
@@ -102,15 +96,13 @@ public final class LogicDomainRouter: LLMDomainRouterProtocol {
     private let strategy: EvaluationStrategy
     private let logger: CustomLogger?
 
-    /**
-     - Parameters:
-        - name: Identifier used in logs.
-        - supportedDomains: Valid domain list.
-        - rules: Ordered array of `LogicRule`s.
-        - defaultDomain: Optional catch-all when nothing matches.
-        - evaluationStrategy: See `EvaluationStrategy`.
-        - logger: Optional custom logger.
-     */
+    /// - Parameters:
+    ///    - name: Identifier used in logs.
+    ///    - supportedDomains: Valid domain list.
+    ///    - rules: Ordered array of `LogicRule`s.
+    ///    - defaultDomain: Optional catch-all when nothing matches.
+    ///    - evaluationStrategy: See `EvaluationStrategy`.
+    ///    - logger: Optional custom logger.
     public init(name: String,
                 supportedDomains: [String],
                 rules: [LogicRule],
@@ -126,10 +118,8 @@ public final class LogicDomainRouter: LLMDomainRouterProtocol {
         self.logger = logger
     }
 
-    /**
-     Applies the chosen `EvaluationStrategy` and returns a domain
-     or `nil` if unresolved.
-     */
+    /// Applies the chosen `EvaluationStrategy` and returns a domain
+    /// or `nil` if unresolved.
     public func determineDomain(for request: LLMRequest) async throws -> String? {
         switch strategy {
         case .firstMatch:
@@ -204,7 +194,7 @@ public final class LogicDomainRouter: LLMDomainRouterProtocol {
 // MARK: - Convenience Rule Builders
 
 public extension LogicRule {
-    /** Regex/keyword match (case-insensitive, Unicode-aware). */
+    /// Regex/keyword match (case-insensitive, Unicode-aware).
     static func regex(name: String,
                       pattern: String,
                       domain: String,
@@ -220,7 +210,7 @@ public extension LogicRule {
         }
     }
 
-    /** Match on estimated token count with a custom comparison closure. */
+    /// Match on estimated token count with a custom comparison closure.
     static func tokens(name: String,
                        domain: String,
                        priority: Int = 0,
@@ -231,7 +221,7 @@ public extension LogicRule {
         }
     }
 
-    /** Match when local hour falls inside `hours`. */
+    /// Match when local hour falls inside `hours`.
     static func hours(name: String,
                       hours: ClosedRange<Int>,
                       domain: String,

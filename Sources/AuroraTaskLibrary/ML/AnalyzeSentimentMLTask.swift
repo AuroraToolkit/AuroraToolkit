@@ -9,61 +9,57 @@ import AuroraCore
 import AuroraML
 import Foundation
 
-/**
- `AnalyzeSentimentMLTask` performs sentiment analysis on an array of strings using any `MLServiceProtocol` implementation.
-
- - **Inputs**
-    - `strings`: The list of texts to analyze.
-    - `detailed`: Whether to include confidence percentages (defaults to `false`).
-    - `positiveThreshold`: Scores above this are “positive” (defaults to `0.1`).
-    - `negativeThreshold`: Scores below this are “negative” (defaults to `-0.1`).
- - **Outputs**
-    - `sentiments`: A mapping each input string to either:
-    - A `String` label (`"positive"|"neutral"|"negative"`) when `detailed == false`
-    - A `[String: Any]` with keys:
-    - `"sentiment"`: the label
-    - `"confidence"`: `Int` percent (0–100)
-
- ### Example
- ```swift
-     let service = TaggingService(
-        name: "SentimentTagger",
-        schemes: [.sentimentScore],
-        unit: .paragraph
-     )
-     let task = AnalyzeSentimentMLTask(
-        mlService: service,
-        strings: ["I love this!", "I hate that."],
-        detailed: true,
-        positiveThreshold: 0.2,
-        negativeThreshold: -0.2
-     )
-
- guard case let .task(wrapped) = task.toComponent() else { fatalError() }
- let outputs = try await wrapped.execute()
- // e.g. outputs["sentiments"] == [
- //   "I love this!": ["sentiment":"positive", "confidence":90],
- //   "I hate that.":  ["sentiment":"negative", "confidence":75]
- // ]
-
- */
+/// `AnalyzeSentimentMLTask` performs sentiment analysis on an array of strings using any `MLServiceProtocol` implementation.
+///
+/// - **Inputs**
+///    - `strings`: The list of texts to analyze.
+///    - `detailed`: Whether to include confidence percentages (defaults to `false`).
+///    - `positiveThreshold`: Scores above this are "positive" (defaults to `0.1`).
+///    - `negativeThreshold`: Scores below this are "negative" (defaults to `-0.1`).
+/// - **Outputs**
+///    - `sentiments`: A mapping each input string to either:
+///    - A `String` label (`"positive"|"neutral"|"negative"`) when `detailed == false`
+///    - A `[String: Any]` with keys:
+///    - `"sentiment"`: the label
+///    - `"confidence"`: `Int` percent (0–100)
+///
+/// ### Example
+/// ```swift
+///     let service = TaggingService(
+///        name: "SentimentTagger",
+///        schemes: [.sentimentScore],
+///        unit: .paragraph
+///     )
+///     let task = AnalyzeSentimentMLTask(
+///        mlService: service,
+///        strings: ["I love this!", "I hate that."],
+///        detailed: true,
+///        positiveThreshold: 0.2,
+///        negativeThreshold: -0.2
+///     )
+///
+/// guard case let .task(wrapped) = task.toComponent() else { fatalError() }
+/// let outputs = try await wrapped.execute()
+/// // e.g. outputs["sentiments"] == [
+/// //   "I love this!": ["sentiment":"positive", "confidence":90],
+/// //   "I hate that.":  ["sentiment":"negative", "confidence":75]
+/// // ]
+///
 public class AnalyzeSentimentMLTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.
     private let logger: CustomLogger?
 
-    /**
-     - Parameters:
-        - name: The name of the task.
-        - mlService: The ML service to use for the task.
-        - strings: The list of texts to analyze.
-        - detailed: Whether to include confidence percentages (defaults to `false`).
-        - positiveThreshold: Scores above this are “positive” (defaults to `0.1`).
-        - negativeThreshold: Scores below this are “negative” (defaults to `-0.1`).
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: An optional logger for logging task execution details.
-     */
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - mlService: The ML service to use for the task.
+    ///    - strings: The list of texts to analyze.
+    ///    - detailed: Whether to include confidence percentages (defaults to `false`).
+    ///    - positiveThreshold: Scores above this are "positive" (defaults to `0.1`).
+    ///    - negativeThreshold: Scores below this are "negative" (defaults to `-0.1`).
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: An optional logger for logging task execution details.
     public init(
         name: String? = nil,
         mlService: MLServiceProtocol,

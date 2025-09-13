@@ -12,20 +12,18 @@ import AuroraTaskLibrary
 import Foundation
 import NaturalLanguage
 
-/**
- Example workflow demonstrating on-device blog post categorization with a
- pre-trained Core ML NLModel, followed by an LLM-powered summary and suggestion
- of up to two new categories.
-
- Steps:
- * Load your compiled `BlogCategoriesClassifier.mlmodelc` into an `NLModel`.
- * Wrap it in `NLModelClassificationService`.
- * Classify a new blog post to get its current category.
- * Send the post text + predicted category to an LLM to:
-    * Generate a one-sentence summary.
-    * Suggest up to two additional categories (or an empty list if none apply).
- * Print a final report: summary, classified categories, and any new suggestions.
- */
+/// Example workflow demonstrating on-device blog post categorization with a
+/// pre-trained Core ML NLModel, followed by an LLM-powered summary and suggestion
+/// of up to two new categories.
+///
+/// Steps:
+/// * Load your compiled `BlogCategoriesClassifier.mlmodelc` into an `NLModel`.
+/// * Wrap it in `NLModelClassificationService`.
+/// * Classify a new blog post to get its current category.
+/// * Send the post text + predicted category to an LLM to:
+///    * Generate a one-sentence summary.
+///    * Suggest up to two additional categories (or an empty list if none apply).
+/// * Print a final report: summary, classified categories, and any new suggestions.
 struct BlogCategoryWorkflowExample {
     func execute() async {
         /// Load a pre-trained Core ML model for blog post categorization.

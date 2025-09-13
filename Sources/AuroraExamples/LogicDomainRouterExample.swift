@@ -20,9 +20,7 @@ final class SeededGenerator: RandomNumberGenerator {
     }
 }
 
-/**
- An example of using the `LogicDomainRouter` to route requests based on various criteria.
- */
+/// An example of using the `LogicDomainRouter` to route requests based on various criteria.
 struct LogicDomainRouterExample {
     let privacyRouter = LogicDomainRouter(
         name: "Privacy Gate",

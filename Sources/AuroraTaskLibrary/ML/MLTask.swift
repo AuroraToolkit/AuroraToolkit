@@ -15,19 +15,17 @@ public class MLTask: WorkflowComponent {
     /// An optional logger for logging task execution details.
     private let logger: CustomLogger?
 
-    /**
-        Initializes a new `MLTask`.
-
-        - Parameters:
-            - name: The name of the task.
-            - description: An optional description for the task.
-            - mlService: The ML service to use for the task.
-            - request: The `MLRequest` object containing the input data.
-            - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-            - logger: An optional logger for logging task execution details.
-
-     - Note: The `inputs` array can contain direct values for keys like `request`, or dynamic references that will be resolved at runtime.
-     */
+    /// Initializes a new `MLTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - description: An optional description for the task.
+    ///    - mlService: The ML service to use for the task.
+    ///    - request: The `MLRequest` object containing the input data.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: An optional logger for logging task execution details.
+    ///
+    /// - Note: The `inputs` array can contain direct values for keys like `request`, or dynamic references that will be resolved at runtime.
     public init(
         name: String? = nil,
         description: String? = nil,

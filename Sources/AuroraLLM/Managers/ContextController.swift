@@ -8,9 +8,7 @@
 import AuroraCore
 import Foundation
 
-/**
- `ContextController` manages the state and operations related to a specific `Context`, including adding, removing, and updating items, as well as summarizing older items. The controller handles context-specific summarization using a connected LLM service.
- */
+/// `ContextController` manages the state and operations related to a specific `Context`, including adding, removing, and updating items, as well as summarizing older items. The controller handles context-specific summarization using a connected LLM service.
 public class ContextController {
     /// Unique identifier for the context controller.
     public let id: UUID
@@ -30,14 +28,12 @@ public class ContextController {
     /// Optional logger for logging events and errors.
     private var logger: CustomLogger?
 
-    /**
-     Initializes a new `ContextController` instance.
-
-     - Parameters:
-        - context: Optional `Context` object. If none is provided, a new context will be created automatically.
-        - llmService: The LLM service to be used for summarization.
-        - summarizer: Optional `Summarizer` instance. If none is provided, a default summarizer will be created.
-     */
+    /// Initializes a new `ContextController` instance.
+    ///
+    /// - Parameters:
+    ///    - context: Optional `Context` object. If none is provided, a new context will be created automatically.
+    ///    - llmService: The LLM service to be used for summarization.
+    ///    - summarizer: Optional `Summarizer` instance. If none is provided, a default summarizer will be created.
     public init(
         context: Context? = nil,
         llmService: LLMServiceProtocol,
@@ -51,65 +47,53 @@ public class ContextController {
         self.summarizer = summarizer ?? Summarizer(llmService: llmService, logger: logger)
     }
 
-    /**
-     Updates the LLM service used by the `ContextController`.
-
-     - Parameter newService: The new `LLMServiceProtocol` to use for summarization.
-
-     This method is useful for switching between different LLM services during runtime.
-     Note: The `Summarizer` instance will be updated to use the new LLM service.
-     */
+    /// Updates the LLM service used by the `ContextController`.
+    ///
+    /// - Parameter newService: The new `LLMServiceProtocol` to use for summarization.
+    ///
+    /// This method is useful for switching between different LLM services during runtime.
+    /// Note: The `Summarizer` instance will be updated to use the new LLM service.
     public func updateLLMService(_ newService: LLMServiceProtocol) {
         llmService = newService
         summarizer = Summarizer(llmService: newService) // Update summarizer to use new LLM
     }
 
-    /**
-     Adds a new item to the context.
-
-     - Parameters:
-        - content: The content of the item to be added.
-        - creationDate: The date when the item was created. Defaults to the current date.
-        - isSummary: A boolean flag indicating whether the item being added is a summary. Defaults to `false`.
-     */
+    /// Adds a new item to the context.
+    ///
+    /// - Parameters:
+    ///    - content: The content of the item to be added.
+    ///    - creationDate: The date when the item was created. Defaults to the current date.
+    ///    - isSummary: A boolean flag indicating whether the item being added is a summary. Defaults to `false`.
     public func addItem(content: String, creationDate: Date = Date(), isSummary: Bool = false) {
         context.addItem(content: content, creationDate: creationDate, isSummary: isSummary)
     }
 
-    /**
-     Adds a bookmark to the context for a specific item.
-
-     - Parameters:
-        - item: The `ContextItem` to be bookmarked.
-        - label: A label for the bookmark.
-     */
+    /// Adds a bookmark to the context for a specific item.
+    ///
+    /// - Parameters:
+    ///    - item: The `ContextItem` to be bookmarked.
+    ///    - label: A label for the bookmark.
     public func addBookmark(for item: ContextItem, label: String) {
         context.addBookmark(for: item, label: label)
     }
 
-    /**
-     Removes items from the context based on their offsets.
-
-     - Parameter offsets: The index set of the items to be removed.
-     */
+    /// Removes items from the context based on their offsets.
+    ///
+    /// - Parameter offsets: The index set of the items to be removed.
     public func removeItems(atOffsets offsets: IndexSet) {
         context.removeItems(atOffsets: offsets)
     }
 
-    /**
-     Updates an existing item in the context.
-
-     - Parameter updatedItem: The updated `ContextItem` to replace the old item.
-     */
+    /// Updates an existing item in the context.
+    ///
+    /// - Parameter updatedItem: The updated `ContextItem` to replace the old item.
     public func updateItem(_ updatedItem: ContextItem) {
         context.updateItem(updatedItem)
     }
 
-    /**
-     Summarizes older context items based on a given age threshold.
-
-     - Parameter daysThreshold: The number of days after which items are considered "old". Defaults to 7 days.
-     */
+    /// Summarizes older context items based on a given age threshold.
+    ///
+    /// - Parameter daysThreshold: The number of days after which items are considered "old". Defaults to 7 days.
     public func summarizeOlderContext(daysThreshold: Int = 7) async throws {
         guard !context.items.isEmpty else { return }
 
@@ -122,11 +106,9 @@ public class ContextController {
         try await summarizeGroup(group)
     }
 
-    /**
-     Summarizes a group of context items using the connected LLM service and stores the result in `summarizedItems`.
-
-     - Parameter group: The array of `ContextItem` to be summarized.
-     */
+    /// Summarizes a group of context items using the connected LLM service and stores the result in `summarizedItems`.
+    ///
+    /// - Parameter group: The array of `ContextItem` to be summarized.
     private func summarizeGroup(_ group: [ContextItem], options: SummarizerOptions? = nil) async throws {
         guard !group.isEmpty else { return }
 
@@ -156,67 +138,53 @@ public class ContextController {
         }
     }
 
-    /**
-     Retrieves the full history of context items.
-
-     - Returns: An array of `ContextItem` representing the full history.
-     */
+    /// Retrieves the full history of context items.
+    ///
+    /// - Returns: An array of `ContextItem` representing the full history.
     public func fullHistory() -> [ContextItem] {
         return context.items
     }
 
-    /**
-     Retrieves the summarized context items.
-
-     - Returns: An array of `ContextItem` representing the summarized items.
-     */
+    /// Retrieves the summarized context items.
+    ///
+    /// - Returns: An array of `ContextItem` representing the summarized items.
     public func summarizedContext() -> [ContextItem] {
         return summarizedItems
     }
 
-    /**
-     Exposes the context items for testing purposes.
-
-     - Returns: An array of `ContextItem`.
-     */
+    /// Exposes the context items for testing purposes.
+    ///
+    /// - Returns: An array of `ContextItem`.
     public func getItems() -> [ContextItem] {
         return context.items
     }
 
-    /**
-     Exposes the bookmarks for testing purposes.
-
-     - Returns: An array of `Bookmark`.
-     */
+    /// Exposes the bookmarks for testing purposes.
+    ///
+    /// - Returns: An array of `Bookmark`.
     public func getBookmarks() -> [Bookmark] {
         return context.bookmarks
     }
 
-    /**
-     Exposes the underlying context for testing or external use.
-
-     - Returns: The `Context` instance.
-     */
+    /// Exposes the underlying context for testing or external use.
+    ///
+    /// - Returns: The `Context` instance.
     public func getContext() -> Context {
         var contextToReturn = context
         contextToReturn.llmServiceVendor = llmService.vendor
         return contextToReturn
     }
 
-    /**
-     Exposes the llmService used by the `ContextController`.
-
-     - Returns: The `LLMServiceProtocol` instance.
-     */
+    /// Exposes the llmService used by the `ContextController`.
+    ///
+    /// - Returns: The `LLMServiceProtocol` instance.
     public func getLLMService() -> LLMServiceProtocol {
         return llmService
     }
 
-    /**
-     Exposes the summarizer used by the `ContextController`.
-
-     - Returns: The `Summarizer` instance.
-     */
+    /// Exposes the summarizer used by the `ContextController`.
+    ///
+    /// - Returns: The `Summarizer` instance.
     public func getSummarizer() -> SummarizerProtocol {
         return summarizer
     }

@@ -7,14 +7,12 @@
 
 import Foundation
 
-/**
- A declarative representation of a workflow, consisting of tasks and task groups.
-
- The `Workflow` struct allows developers to define complex workflows using a clear and concise declarative syntax.
- Workflows are composed of individual tasks and task groups, enabling sequential and parallel execution patterns.
-
- - Note: Tasks and task groups are represented by the `Workflow.Task` and `Workflow.TaskGroup` types, respectively.
- */
+/// A declarative representation of a workflow, consisting of tasks and task groups.
+///
+/// The `Workflow` struct allows developers to define complex workflows using a clear and concise declarative syntax.
+/// Workflows are composed of individual tasks and task groups, enabling sequential and parallel execution patterns.
+///
+/// - Note: Tasks and task groups are represented by the `Workflow.Task` and `Workflow.TaskGroup` types, respectively.
 public struct Workflow {
     /// Use `SwiftTask` as an alias for `_Concurrency.Task` internally
     private typealias SwiftTask = _Concurrency.Task
@@ -57,9 +55,7 @@ public struct Workflow {
         case failed
     }
 
-    /**
-     A state management actor for tracking the workflow state.
-     */
+    /// A state management actor for tracking the workflow state.
     private actor StateManager {
         private(set) var state: State = .notStarted
 
@@ -78,15 +74,13 @@ public struct Workflow {
     /// A logger instance for logging workflow events.
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `Workflow`.
-
-     - Parameters:
-        - name: The name of the workflow.
-        - description: A brief description of the workflow.
-        - content: A closure that declares the tasks and task groups for the workflow.
-        - logger: An optional logger for logging workflow events.
-     */
+    /// Initializes a new `Workflow`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the workflow.
+    ///    - description: A brief description of the workflow.
+    ///    - content: A closure that declares the tasks and task groups for the workflow.
+    ///    - logger: An optional logger for logging workflow events.
     public init(name: String, description: String, logger: CustomLogger? = nil, @WorkflowBuilder _ content: () -> [Component]) {
         id = UUID()
         self.name = name
@@ -97,11 +91,9 @@ public struct Workflow {
 
     // MARK: - Workflow Lifecycle
 
-    /**
-        Starts the workflow asynchronously.
-
-        The method iterates over each component in the workflow and executes it asynchronously.
-     */
+    /// Starts the workflow asynchronously.
+    ///
+    /// The method iterates over each component in the workflow and executes it asynchronously.
     public mutating func start() async {
         let currentState = await stateManager.getState()
 
@@ -142,9 +134,7 @@ public struct Workflow {
         }
     }
 
-    /**
-     Cancels the workflow asynchronously.
-     */
+    /// Cancels the workflow asynchronously.
     public func cancel() async {
         await stateManager.updateState(to: .canceled)
         detailsHolder.details = ExecutionDetails(
@@ -157,9 +147,7 @@ public struct Workflow {
         logger?.debug("Workflow \(name) canceled.", category: "Workflow")
     }
 
-    /**
-        Pauses the workflow asynchronously.
-     */
+    /// Pauses the workflow asynchronously.
     public func pause() async {
         guard await stateManager.getState() == .inProgress else {
             logger?.debug("Cannot pause workflow \(name) because it is not in progress.", category: "Workflow")
@@ -170,9 +158,7 @@ public struct Workflow {
         logger?.debug("Workflow \(name) paused.", category: "Workflow")
     }
 
-    /**
-        Resumes the workflow asynchronously.
-     */
+    /// Resumes the workflow asynchronously.
     public mutating func resume() async {
         guard await stateManager.getState() == .paused else {
             logger?.debug("Cannot resume workflow \(name) because it is not paused.", category: "Workflow")
@@ -186,9 +172,7 @@ public struct Workflow {
         await continueExecution()
     }
 
-    /**
-        Continues the workflow execution after resuming from a paused state.
-     */
+    /// Continues the workflow execution after resuming from a paused state.
     private mutating func continueExecution() async {
         do {
             // Resume execution of remaining components
@@ -220,12 +204,10 @@ public struct Workflow {
         }
     }
 
-    /**
-        Executes the components of the workflow.
-
-        The method iterates over each component in the workflow and executes it asynchronously.
-        Task outputs are collected and stored in the `outputs` dictionary for use in subsequent tasks.
-     */
+    /// Executes the components of the workflow.
+    ///
+    /// The method iterates over each component in the workflow and executes it asynchronously.
+    /// Task outputs are collected and stored in the `outputs` dictionary for use in subsequent tasks.
     private mutating func executeComponents() async throws {
         var step = 0
 
@@ -297,19 +279,17 @@ public struct Workflow {
         }
     }
 
-    /**
-        Resolves the inputs for a task using the outputs of previously executed tasks.
-
-        - Parameters:
-            - task: The task for which to resolve inputs.
-            - workflowOutputs: A dictionary of outputs from previously executed tasks.
-        - Returns: A dictionary of resolved inputs for the task.
-
-        The method resolves dynamic references in the task inputs by looking up the corresponding output keys in the `workflowOutputs` dictionary.
-        Dynamic references are denoted with `{` and `}` brackets in the input values. For example, `{TaskName.OutputKey}`.
-        Dynamic references are replaced with the actual output values from the workflow. If an output key is not found, the reference is left unresolved.
-        If an input key is not a dynamic reference, the value is used as is.
-     */
+    /// Resolves the inputs for a task using the outputs of previously executed tasks.
+    ///
+    /// - Parameters:
+    ///     - task: The task for which to resolve inputs.
+    ///     - workflowOutputs: A dictionary of outputs from previously executed tasks.
+    /// - Returns: A dictionary of resolved inputs for the task.
+    ///
+    /// The method resolves dynamic references in the task inputs by looking up the corresponding output keys in the `workflowOutputs` dictionary.
+    /// Dynamic references are denoted with `{` and `}` brackets in the input values. For example, `{TaskName.OutputKey}`.
+    /// Dynamic references are replaced with the actual output values from the workflow. If an output key is not found, the reference is left unresolved.
+    /// If an input key is not a dynamic reference, the value is used as is.
     private func resolveInputs(for task: Task, using workflowOutputs: [String: Any]) -> [String: Any] {
         task.inputs.reduce(into: [String: Any]()) { resolvedInputs, entry in
             let (key, value) = entry
@@ -322,14 +302,12 @@ public struct Workflow {
         }
     }
 
-    /**
-        Executes a task asynchronously and returns the outputs produced by the task.
-
-        - Parameters:
-            - task: The task to be executed
-            - workflowOutputs: A dictionary of outputs from previously executed tasks.
-        - Returns: A dictionary of outputs produced by the task.
-     */
+    /// Executes a task asynchronously and returns the outputs produced by the task.
+    ///
+    /// - Parameters:
+    ///     - task: The task to be executed
+    ///     - workflowOutputs: A dictionary of outputs from previously executed tasks.
+    /// - Returns: A dictionary of outputs produced by the task.
     private func executeTask(_ task: Task, workflowOutputs: [String: Any]) async throws -> [String: Any] {
         logger?.debug("Executing task: \(task.name)", category: "Workflow")
 
@@ -365,16 +343,14 @@ public struct Workflow {
         return outputs
     }
 
-    /**
-        Executes a task group asynchronously and returns the outputs produced by the group.
-
-        - Parameters:
-            - group: The task group to be executed.
-            - workflowOutputs: A dictionary of outputs from previously executed tasks.
-        - Returns: A dictionary of outputs produced by the task group.
-
-        Task groups can execute tasks sequentially or in parallel based on the `mode` property.
-     */
+    /// Executes a task group asynchronously and returns the outputs produced by the group.
+    ///
+    /// - Parameters:
+    ///     - group: The task group to be executed.
+    ///     - workflowOutputs: A dictionary of outputs from previously executed tasks.
+    /// - Returns: A dictionary of outputs produced by the task group.
+    ///
+    /// Task groups can execute tasks sequentially or in parallel based on the `mode` property.
     private func executeTaskGroup(_ group: TaskGroup, workflowOutputs: [String: Any]) async throws -> [String: Any] {
         logger?.debug("Executing task group: \(group.name)", category: "Workflow")
 
@@ -441,9 +417,7 @@ public struct Workflow {
 
     // MARK: - Nested Types
 
-    /**
-     Represents a building block of a workflow, which can be either a task or a task group.
-     */
+    /// Represents a building block of a workflow, which can be either a task or a task group.
     public enum Component {
         /// A single task within the workflow.
         case task(Task)
@@ -463,61 +437,49 @@ public struct Workflow {
 
     // MARK: - Components Manager
 
-    /**
-     A helper that manages initial and completed components of a workflow.
-
-        The manager is responsible for storing the components of a workflow, including tasks, task groups, logic, and triggers. As components are executed, they can be removed from the components list and added to the list of completed components.
-
-     - Note: It is the responsibility of the workflow to move components as needed during execution.
-     */
+    /// A helper that manages initial and completed components of a workflow.
+    ///
+    /// The manager is responsible for storing the components of a workflow, including tasks, task groups, logic, and triggers. As components are executed, they can be removed from the components list and added to the list of completed components.
+    ///
+    /// - Note: It is the responsibility of the workflow to move components as needed during execution.
     public final class ComponentsManager {
         /// The components that have not yet been executed.
         public private(set) var components: [Component]
         /// The components that have been completed.
         public private(set) var completedComponents: [Component] = []
 
-        /**
-            Initializes a new components manager with an optional list of initial components.
-
-            - Parameter initialComponents: An optional list of initial components.
-         */
+        /// Initializes a new components manager with an optional list of initial components.
+        ///
+        /// - Parameter initialComponents: An optional list of initial components.
         public init(initialComponents: [Component] = []) {
             components = initialComponents
         }
 
-        /**
-            Removes the first component from the list of components.
-
-            - Returns: The first component in the list, or nil if the list is empty
-         */
+        /// Removes the first component from the list of components.
+        ///
+        /// - Returns: The first component in the list, or nil if the list is empty
         func removeFirst() -> Workflow.Component? {
             guard !components.isEmpty else { return nil }
             return components.removeFirst()
         }
 
-        /**
-             Inserts one or more components at the beginning of the list.
-
-             - Parameter components: The components to insert.
-         */
+        /// Inserts one or more components at the beginning of the list.
+        ///
+        /// - Parameter components: The components to insert.
         func insert(_ components: [Workflow.Component]) {
             self.components.insert(contentsOf: components, at: 0)
         }
 
-        /**
-            Marks a component as completed and moves it to the list of completed components.
-
-            - Parameter component: The component to mark as completed.
-         */
+        /// Marks a component as completed and moves it to the list of completed components.
+        ///
+        /// - Parameter component: The component to mark as completed.
         func complete(_ component: Component) {
             completedComponents.append(component)
         }
 
-        /**
-            Checks if the components list is empty.
-
-            - Returns: `true` if the components list is empty, otherwise `false`.
-         */
+        /// Checks if the components list is empty.
+        ///
+        /// - Returns: `true` if the components list is empty, otherwise `false`.
         var isEmpty: Bool {
             components.isEmpty
         }
@@ -525,9 +487,7 @@ public struct Workflow {
 
     // MARK: - Execution Details
 
-    /**
-        Represents the details of a workflow or task execution, used for logging and reporting.
-     */
+    /// Represents the details of a workflow or task execution, used for logging and reporting.
     public struct ExecutionDetails {
         /// The state of the workflow or task after execution.
         public let state: Workflow.State
@@ -557,9 +517,7 @@ public struct Workflow {
         }
     }
 
-    /**
-        A holder for the execution details of a workflow, task, or task group, used to mutate details after execution.
-     */
+    /// A holder for the execution details of a workflow, task, or task group, used to mutate details after execution.
     public final class ExecutionDetailsHolder {
         public var details: ExecutionDetails?
 
@@ -570,12 +528,10 @@ public struct Workflow {
 
     // MARK: - Task
 
-    /**
-     Represents an individual unit of work in the workflow.
-
-     Tasks define specific actions or operations within a workflow. Each task may include inputs
-     and provide outputs after execution. Tasks can execute asynchronously using the `execute` method.
-     */
+    /// Represents an individual unit of work in the workflow.
+    ///
+    /// Tasks define specific actions or operations within a workflow. Each task may include inputs
+    /// and provide outputs after execution. Tasks can execute asynchronously using the `execute` method.
     public struct Task: WorkflowComponent {
         /// A unique identifier for the task.
         public let id: UUID
@@ -595,15 +551,13 @@ public struct Workflow {
         /// Holds the execution details of the task.
         public let detailsHolder = ExecutionDetailsHolder()
 
-        /**
-         Initializes a new task.
-
-         - Parameters:
-            - name: The name of the task.
-            - description: A brief description of the task (default is an empty string).
-            - inputs: The required inputs for the task (default is an empty dictionary).
-            - executeBlock: An optional closure defining the work to be performed by the task.
-         */
+        /// Initializes a new task.
+        ///
+        /// - Parameters:
+        ///    - name: The name of the task.
+        ///    - description: A brief description of the task (default is an empty string).
+        ///    - inputs: The required inputs for the task (default is an empty dictionary).
+        ///    - executeBlock: An optional closure defining the work to be performed by the task.
         public init(
             name: String?,
             description: String = "",
@@ -617,13 +571,11 @@ public struct Workflow {
             self.executeBlock = executeBlock
         }
 
-        /**
-         Executes the task using the provided inputs.
-
-         - Parameter inputs: A dictionary of inputs required by the task.
-         - Returns: A dictionary of outputs produced by the task.
-         - Throws: An error if the task execution logic is not provided or fails during execution.
-         */
+        /// Executes the task using the provided inputs.
+        ///
+        /// - Parameter inputs: A dictionary of inputs required by the task.
+        /// - Returns: A dictionary of outputs produced by the task.
+        /// - Throws: An error if the task execution logic is not provided or fails during execution.
         public func execute(inputs: [String: Any?] = [:]) async throws -> [String: Any] {
             let mergedInputs = self.inputs
                 .merging(inputs as [String: Any]) { _, new in new } // Runtime inputs take precedence
@@ -639,13 +591,11 @@ public struct Workflow {
             }
         }
 
-        /**
-            Updates the execution details of the task.
-
-            - Parameter details: The updated execution details.
-
-            This method allows the workflow to update the task details after execution.
-         */
+        /// Updates the execution details of the task.
+        ///
+        /// - Parameter details: The updated execution details.
+        ///
+        /// This method allows the workflow to update the task details after execution.
         public func updateExecutionDetails(_ details: ExecutionDetails) {
             detailsHolder.details = details
         }
@@ -658,12 +608,10 @@ public struct Workflow {
 
     // MARK: - TaskGroup
 
-    /**
-     Represents a collection of related tasks within the workflow.
-
-     Task groups can specify whether their tasks execute sequentially or in parallel.
-     Groups provide logical grouping and execution flexibility for tasks within a workflow.
-     */
+    /// Represents a collection of related tasks within the workflow.
+    ///
+    /// Task groups can specify whether their tasks execute sequentially or in parallel.
+    /// Groups provide logical grouping and execution flexibility for tasks within a workflow.
     public struct TaskGroup: WorkflowComponent {
         /// A unique identifier for the task group.
         public let id: UUID
@@ -689,14 +637,12 @@ public struct Workflow {
         /// Holds the execution details of the task group.
         public let detailsHolder = ExecutionDetailsHolder()
 
-        /**
-         Initializes a new task group.
-
-         - Parameters:
-            - name: The name of the task group.
-            - description: A brief description of the task group (default is an empty string).
-            - content: A closure that declares the tasks within the group.
-         */
+        /// Initializes a new task group.
+        ///
+        /// - Parameters:
+        ///    - name: The name of the task group.
+        ///    - description: A brief description of the task group (default is an empty string).
+        ///    - content: A closure that declares the tasks within the group.
         public init(name: String, description: String = "", mode: ExecutionMode = .sequential, @WorkflowBuilder _ content: () -> [Workflow.Component]) {
             id = UUID()
             self.name = name
@@ -710,13 +656,11 @@ public struct Workflow {
             }
         }
 
-        /**
-            Updates the execution details of the task group.
-
-            - Parameter details: The updated execution details.
-
-            This method allows the workflow to update the task group details after execution.
-         */
+        /// Updates the execution details of the task group.
+        ///
+        /// - Parameter details: The updated execution details.
+        ///
+        /// This method allows the workflow to update the task group details after execution.
         public func updateExecutionDetails(_ details: ExecutionDetails) {
             detailsHolder.details = details
         }
@@ -729,11 +673,9 @@ public struct Workflow {
 
     // MARK: - Subflow
 
-    /**
-        Represents a nested workflow within the main workflow.
-
-        Subflows allow workflows to be composed of other workflows, enabling modular design and reusability.
-     */
+    /// Represents a nested workflow within the main workflow.
+    ///
+    /// Subflows allow workflows to be composed of other workflows, enabling modular design and reusability.
     public struct Subflow: WorkflowComponent {
         /// A wrapped workflow.
         var workflow: Workflow
@@ -755,11 +697,9 @@ public struct Workflow {
 
     // MARK: - Logic
 
-    /**
-        Represents a conditional logic component that can evaluate conditions and produce new components.
-
-        Logic components allow workflows to make decisions based on dynamic conditions and insert new components as needed.
-     */
+    /// Represents a conditional logic component that can evaluate conditions and produce new components.
+    ///
+    /// Logic components allow workflows to make decisions based on dynamic conditions and insert new components as needed.
     public struct Logic: WorkflowComponent, LogicComponent {
         /// A unique identifier for the logic component.
         public let id: UUID
@@ -776,14 +716,12 @@ public struct Workflow {
         /// Holds the execution details of the logic component.
         public let detailsHolder = ExecutionDetailsHolder()
 
-        /**
-         Initializes a new Logic component.
-
-         - Parameters:
-            - name: The name of the component.
-            - description: A brief description of the component.
-            - evaluateBlock: A closure that returns new components when evaluated.
-         */
+        /// Initializes a new Logic component.
+        ///
+        /// - Parameters:
+        ///    - name: The name of the component.
+        ///    - description: A brief description of the component.
+        ///    - evaluateBlock: A closure that returns new components when evaluated.
         public init(
             name: String?,
             description: String = "",
@@ -795,9 +733,7 @@ public struct Workflow {
             self.evaluateBlock = evaluateBlock
         }
 
-        /**
-         Evaluates the logic component and returns new components.
-         */
+        /// Evaluates the logic component and returns new components.
         public func evaluate() async throws -> [Workflow.Component] {
             let timer = ExecutionTimer().start()
             let newComponents = try await evaluateBlock()
@@ -814,9 +750,7 @@ public struct Workflow {
             return newComponents
         }
 
-        /**
-         Updates the execution details of the logic component.
-         */
+        /// Updates the execution details of the logic component.
         public func updateExecutionDetails(_ details: ExecutionDetails) {
             detailsHolder.details = details
         }
@@ -829,11 +763,9 @@ public struct Workflow {
 
     // MARK: - Trigger
 
-    /**
-        Represents a trigger component that can wait for a condition and produce new components.
-
-        Trigger components allow workflows to wait for specific conditions (e.g., time-based or event-based) and insert new components as needed.
-     */
+    /// Represents a trigger component that can wait for a condition and produce new components.
+    ///
+    /// Trigger components allow workflows to wait for specific conditions (e.g., time-based or event-based) and insert new components as needed.
     public struct Trigger: WorkflowComponent, TriggerComponent {
         /// A unique identifier for the trigger component.
         public let id: UUID
@@ -850,14 +782,12 @@ public struct Workflow {
         /// Holds the execution details of the trigger component.
         public let detailsHolder = ExecutionDetailsHolder()
 
-        /**
-         Initializes a new Trigger component.
-
-         - Parameters:
-            - name: The name of the component.
-            - description: A brief description of the component.
-            - triggerBlock: A closure that waits for a condition and returns new components.
-         */
+        /// Initializes a new Trigger component.
+        ///
+        /// - Parameters:
+        ///    - name: The name of the component.
+        ///    - description: A brief description of the component.
+        ///    - triggerBlock: A closure that waits for a condition and returns new components.
         public init(
             name: String?,
             description: String = "",
@@ -869,9 +799,7 @@ public struct Workflow {
             self.triggerBlock = triggerBlock
         }
 
-        /**
-         Waits for the trigger condition and returns new components.
-         */
+        /// Waits for the trigger condition and returns new components.
         public func waitForTrigger() async throws -> [Workflow.Component] {
             let timer = ExecutionTimer().start()
             let newComponents = try await triggerBlock()
@@ -888,9 +816,7 @@ public struct Workflow {
             return newComponents
         }
 
-        /**
-         Updates the execution details of the trigger component.
-         */
+        /// Updates the execution details of the trigger component.
         public func updateExecutionDetails(_ details: ExecutionDetails) {
             detailsHolder.details = details
         }

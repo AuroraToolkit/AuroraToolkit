@@ -9,47 +9,45 @@ import AuroraCore
 import Foundation
 import NaturalLanguage
 
-/**
- `ClassificationService` implements `MLServiceProtocol` using Apple's `NLModel` text classifiers.
-
- It classifies each input string using the provided `NLModel` to predict a label and optional confidence, and returns an array of `Tag` objects, where each  tag corresponds to an input string.
-
- - **Inputs**
-    - `strings`: An array of `String` texts to tag.
- - **Outputs**
-    - `tags`: A `Tag` array, where each tag corresponds to an input string. Each `Tag` includes:
-        - `token`: the substring that was tagged
-        - `label`: the tag or category
-        - `scheme`: the tagging scheme identifier
-        - `confidence`: optional confidence score
-        - `start`: starting index of the tagged token in the source string
-        - `length`: length of the tagged token in the source string
-
- **Note**: Your Core ML model must be a compiled text classifier loaded into an `NLModel` (e.g. `NLModel(contentsOf: myModelURL)`).
-
- ### Example
- ```swift
- // Load a compiled Core ML text classifier:
- let model = try! NLModel(contentsOf: URL(fileURLWithPath: "TextClassifier.mlmodelc"))
- let service = ClassificationService(
-    name: "TextClassifier",
-    model: model,
-    scheme: "TextClassifier",
-    maxResults: 3,
-    logger: CustomLogger.shared
- )
-
- let strings = ["I love Swift!", "This is okay."]
- let request = MLRequest(inputs: ["strings": strings])
-
- // Execute:
- let outputs = try await service.run(request: request)
- let tags = outputs["tags"] as? [Tag]
- for tag in tags {
-     print("\(tag.token) → \(tag.label) @\(tag.confidence ?? 0)")
- }
- ```
- */
+/// `ClassificationService` implements `MLServiceProtocol` using Apple's `NLModel` text classifiers.
+///
+/// It classifies each input string using the provided `NLModel` to predict a label and optional confidence, and returns an array of `Tag` objects, where each  tag corresponds to an input string.
+///
+/// - **Inputs**
+///    - `strings`: An array of `String` texts to tag.
+/// - **Outputs**
+///    - `tags`: A `Tag` array, where each tag corresponds to an input string. Each `Tag` includes:
+///        - `token`: the substring that was tagged
+///        - `label`: the tag or category
+///        - `scheme`: the tagging scheme identifier
+///        - `confidence`: optional confidence score
+///        - `start`: starting index of the tagged token in the source string
+///        - `length`: length of the tagged token in the source string
+///
+/// **Note**: Your Core ML model must be a compiled text classifier loaded into an `NLModel` (e.g. `NLModel(contentsOf: myModelURL)`).
+///
+/// ### Example
+/// ```swift
+/// // Load a compiled Core ML text classifier:
+/// let model = try! NLModel(contentsOf: URL(fileURLWithPath: "TextClassifier.mlmodelc"))
+/// let service = ClassificationService(
+///    name: "TextClassifier",
+///    model: model,
+///    scheme: "TextClassifier",
+///    maxResults: 3,
+///    logger: CustomLogger.shared
+/// )
+///
+/// let strings = ["I love Swift!", "This is okay."]
+/// let request = MLRequest(inputs: ["strings": strings])
+///
+/// // Execute:
+/// let outputs = try await service.run(request: request)
+/// let tags = outputs["tags"] as? [Tag]
+/// for tag in tags {
+///     print("\(tag.token) → \(tag.label) @\(tag.confidence ?? 0)")
+/// }
+/// ```
 public final class ClassificationService: MLServiceProtocol {
     public var name: String
     private let model: NLModel
@@ -57,14 +55,12 @@ public final class ClassificationService: MLServiceProtocol {
     private let maxResults: Int
     private let logger: CustomLogger?
 
-    /**
-     - Parameters:
-        - name: Identifier for this service.
-        - model: A compiled `NLModel` text‐classifier.
-        - scheme: The tag scheme identifier to set on each `Tag`.
-        - maxResults: How many top labels to return per input string.
-        - logger: Optional logger for debugging.
-     */
+    /// - Parameters:
+    ///    - name: Identifier for this service.
+    ///    - model: A compiled `NLModel` text‐classifier.
+    ///    - scheme: The tag scheme identifier to set on each `Tag`.
+    ///    - maxResults: How many top labels to return per input string.
+    ///    - logger: Optional logger for debugging.
     public init(
         name: String,
         model: NLModel,

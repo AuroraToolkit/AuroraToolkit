@@ -9,60 +9,55 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
-  `TranslateStringsLLMTask` translates a list of strings into a specified target language using an LLM service.
-
-  - **Inputs**
-     - `strings`: The list of strings to translate.
-     - `targetLanguage`: The target language for the translation (e.g., "fr" for French, "es" for Spanish).
-     - `sourceLanguage`: The source language of the strings (optional). Defaults to `nil` (infers the language if not provided).
-     - `maxTokens`: The maximum number of tokens to generate in the response. Defaults to `500`.
-  - **Outputs**
-     - `translations`: A dictionary where keys are the original strings and values are the translated strings.
-     - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-     - `rawResponse`: The original unmodified raw response text from the LLM.
-
-  ### Use Cases
-  - Translate user-generated content into a standard language for consistency in applications.
-  - Provide multi-language support for articles, reviews, or other content.
-  - Enable real-time translation of chat messages in global communication tools.
-
-  ### Example:
-  **Input Strings:**
-  - "Hello, how are you?"
-  - "This is an example sentence."
-
-  **Target Language:**
-  - French
-
- **Output JSON:**
- ```
- {
-    "Hello, how are you?": "Bonjour, comment ça va?",
-    "This is an example sentence.": "Ceci est une phrase d'exemple."
- }
- ```
-
- */
+/// `TranslateStringsLLMTask` translates a list of strings into a specified target language using an LLM service.
+///
+/// - **Inputs**
+///    - `strings`: The list of strings to translate.
+///    - `targetLanguage`: The target language for the translation (e.g., "fr" for French, "es" for Spanish).
+///    - `sourceLanguage`: The source language of the strings (optional). Defaults to `nil` (infers the language if not provided).
+///    - `maxTokens`: The maximum number of tokens to generate in the response. Defaults to `500`.
+/// - **Outputs**
+///    - `translations`: A dictionary where keys are the original strings and values are the translated strings.
+///    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+///    - `rawResponse`: The original unmodified raw response text from the LLM.
+///
+/// ### Use Cases
+/// - Translate user-generated content into a standard language for consistency in applications.
+/// - Provide multi-language support for articles, reviews, or other content.
+/// - Enable real-time translation of chat messages in global communication tools.
+///
+/// ### Example:
+/// **Input Strings:**
+/// - "Hello, how are you?"
+/// - "This is an example sentence."
+///
+/// **Target Language:**
+/// - French
+///
+/// **Output JSON:**
+/// ```
+/// {
+///    "Hello, how are you?": "Bonjour, comment ça va?",
+///    "This is an example sentence.": "Ceci est une phrase d'exemple."
+/// }
+/// ```
 public class TranslateStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `TranslateStringsLLMTask`.
-
-     - Parameters:
-        - name: The name of the task.
-        - llmService: The LLM service used for translation.
-        - strings: The list of strings to translate.
-        - targetLanguage: The target language for the translation (e.g., "fr" for French).
-        - sourceLanguage: The source language of the strings (optional). Defaults to `nil` (infers the language if not provided).
-        - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-     */
+    /// Initializes a new `TranslateStringsLLMTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - llmService: The LLM service used for translation.
+    ///    - strings: The list of strings to translate.
+    ///    - targetLanguage: The target language for the translation (e.g., "fr" for French).
+    ///    - sourceLanguage: The source language of the strings (optional). Defaults to `nil` (infers the language if not provided).
+    ///    - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

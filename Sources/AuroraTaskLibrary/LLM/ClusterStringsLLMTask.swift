@@ -9,55 +9,51 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
-  `ClusterStringsTask` groups strings into clusters based on semantic similarity, without requiring predefined categories.
-
-  - **Inputs**
-     - `strings`: The list of strings to cluster.
-     - `maxClusters`: Optional maximum number of clusters to create. If not provided, the LLM determines the optimal number dynamically.
-  - **Outputs**
-     - `clusters`: A dictionary where keys are cluster IDs or inferred names, and values are lists of strings belonging to each cluster.
-     - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-     - `rawResponse`: The original unmodified raw response text from the LLM.
-
- ### Use Cases:
- - **Customer Feedback Analysis**: Grouping customer reviews or feedback to identify trends.
- - **Content Clustering**: Organizing blog posts, news articles, or research papers into topic-based clusters.
- - **Unsupervised Data Exploration**: Automatically grouping strings for exploratory analysis when categories are unknown.
- - **Semantic Deduplication**: Identifying and grouping similar strings to detect duplicates or near-duplicates.
-
-  ### Example:
-  **Input Strings:**
-  - "The stock market dropped today."
-  - "AI is transforming software development."
-  - "The S&P 500 index fell by 2%."
-
-  **Output JSON:**
-  ```
-  {
-    "Cluster 1": ["The stock market dropped today.", "The S&P 500 index fell by 2%."],
-    "Cluster 2": ["AI is transforming software development."]
-  }
-  ```
- */
+/// `ClusterStringsTask` groups strings into clusters based on semantic similarity, without requiring predefined categories.
+///
+/// - **Inputs**
+///    - `strings`: The list of strings to cluster.
+///    - `maxClusters`: Optional maximum number of clusters to create. If not provided, the LLM determines the optimal number dynamically.
+/// - **Outputs**
+///    - `clusters`: A dictionary where keys are cluster IDs or inferred names, and values are lists of strings belonging to each cluster.
+///    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+///    - `rawResponse`: The original unmodified raw response text from the LLM.
+///
+/// ### Use Cases:
+/// - **Customer Feedback Analysis**: Grouping customer reviews or feedback to identify trends.
+/// - **Content Clustering**: Organizing blog posts, news articles, or research papers into topic-based clusters.
+/// - **Unsupervised Data Exploration**: Automatically grouping strings for exploratory analysis when categories are unknown.
+/// - **Semantic Deduplication**: Identifying and grouping similar strings to detect duplicates or near-duplicates.
+///
+/// ### Example:
+/// **Input Strings:**
+/// - "The stock market dropped today."
+/// - "AI is transforming software development."
+/// - "The S&P 500 index fell by 2%."
+///
+/// **Output JSON:**
+/// ```
+/// {
+///   "Cluster 1": ["The stock market dropped today.", "The S&P 500 index fell by 2%."],
+///   "Cluster 2": ["AI is transforming software development."]
+/// }
+/// ```
 public class ClusterStringsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `ClusterStringsLLMTask`.
-
-     - Parameters:
-        - name: The name of the task.
-        - llmService: The LLM service used for clustering.
-        - strings: The list of strings to cluster.
-        - maxClusters: Optional maximum number of clusters to create.
-        - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-     */
+    /// Initializes a new `ClusterStringsLLMTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - llmService: The LLM service used for clustering.
+    ///    - strings: The list of strings to cluster.
+    ///    - maxClusters: Optional maximum number of clusters to create.
+    ///    - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

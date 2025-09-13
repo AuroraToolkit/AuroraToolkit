@@ -8,34 +8,30 @@
 import AuroraCore
 import Foundation
 
-/**
- `SaveContextTask` is responsible for saving a `Context` object to disk.
-
- - **Inputs**
-    - `context`: The `Context` object to save.
-    - `filename`: The name of the file (without extension) used for saving the context.
- - **Outputs**
-    - `filename`: The name of the file where the context was saved.
-
- This task can be integrated in a workflow where context data needs to be saved to disk.
-
- - Note: The task ensures that a dedicated `contexts/` directory exists in the documents folder.
- */
+/// `SaveContextTask` is responsible for saving a `Context` object to disk.
+///
+/// - **Inputs**
+///    - `context`: The `Context` object to save.
+///    - `filename`: The name of the file (without extension) used for saving the context.
+/// - **Outputs**
+///    - `filename`: The name of the file where the context was saved.
+///
+/// This task can be integrated in a workflow where context data needs to be saved to disk.
+///
+/// - Note: The task ensures that a dedicated `contexts/` directory exists in the documents folder.
 public class SaveContextTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
-    /**
-     Initializes a `SaveContextTask` with the context and filename.
-
-     - Parameters:
-        - name: Optionally pass the name of the task.
-        - context: The `Context` object to save.
-        - filename: The name of the file (without extension) used for saving the context.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-
-     - Note: The `inputs` array can contain direct values for keys like `filename`, or dynamic references that will be resolved at runtime.
-     */
+    /// Initializes a `SaveContextTask` with the context and filename.
+    ///
+    /// - Parameters:
+    ///    - name: Optionally pass the name of the task.
+    ///    - context: The `Context` object to save.
+    ///    - filename: The name of the file (without extension) used for saving the context.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///
+    /// - Note: The `inputs` array can contain direct values for keys like `filename`, or dynamic references that will be resolved at runtime.
     public init(
         name: String? = nil,
         context: Context? = nil,

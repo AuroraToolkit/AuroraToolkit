@@ -11,20 +11,18 @@ import AuroraTaskLibrary
 import Foundation
 import NaturalLanguage
 
-/**
- Example workflow demonstrating multi‐step support‐ticket analysis:
-
- 1. Classify ticket type with a Core ML text classifier
- 2. Extract the user’s intent via IntentExtractionMLTask
- 3. Run a semantic search against a static FAQ corpus
- 4. Tag named entities in the ticket
-
- The final report prints:
- • Predicted ticket types
- • Extracted intent(s)
- • Top-K FAQ hits
- • Recognized entities
- */
+/// Example workflow demonstrating multi‐step support‐ticket analysis:
+///
+/// 1. Classify ticket type with a Core ML text classifier
+/// 2. Extract the user's intent via IntentExtractionMLTask
+/// 3. Run a semantic search against a static FAQ corpus
+/// 4. Tag named entities in the ticket
+///
+/// The final report prints:
+/// • Predicted ticket types
+/// • Extracted intent(s)
+/// • Top-K FAQ hits
+/// • Recognized entities
 struct SupportTicketWorkflowExample {
     func execute(on ticketText: String) async {
         print("🔍 Analyzing support ticket...")

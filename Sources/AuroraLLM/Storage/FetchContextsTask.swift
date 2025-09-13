@@ -6,31 +6,27 @@
 import AuroraCore
 import Foundation
 
-/**
- `FetchContextsTask` is responsible for retrieving a list of stored contexts from the disk.
-
- - **Inputs:**
-    - `filenames`: An optional array of filenames (without extensions) specifying which contexts to retrieve.
- - **Outputs:**
-    - `contexts`: An array of URLs pointing to the context files on disk.
-
- This task can be used in workflows requiring access to multiple stored contexts. If a list of specific filenames is provided, only those contexts will be fetched.
- Otherwise, all contexts will be retrieved.
- */
+/// `FetchContextsTask` is responsible for retrieving a list of stored contexts from the disk.
+///
+/// - **Inputs:**
+///    - `filenames`: An optional array of filenames (without extensions) specifying which contexts to retrieve.
+/// - **Outputs:**
+///    - `contexts`: An array of URLs pointing to the context files on disk.
+///
+/// This task can be used in workflows requiring access to multiple stored contexts. If a list of specific filenames is provided, only those contexts will be fetched.
+/// Otherwise, all contexts will be retrieved.
 public struct FetchContextsTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
 
-    /**
-     Initializes a `FetchContextsTask` with an optional name and list of filenames.
-
-     - Parameters:
-        - name: An optional name for the task. Defaults to the type name if `nil`.
-        - filenames: An optional array of filenames (without extensions) specifying which contexts to retrieve.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-
-     - Note: The `inputs` array can contain direct values for keys like `filenames`, or dynamic references that will be resolved at runtime.
-     */
+    /// Initializes a `FetchContextsTask` with an optional name and list of filenames.
+    ///
+    /// - Parameters:
+    ///    - name: An optional name for the task. Defaults to the type name if `nil`.
+    ///    - filenames: An optional array of filenames (without extensions) specifying which contexts to retrieve.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///
+    /// - Note: The `inputs` array can contain direct values for keys like `filenames`, or dynamic references that will be resolved at runtime.
     public init(
         name: String? = nil,
         filenames: [String]? = nil,

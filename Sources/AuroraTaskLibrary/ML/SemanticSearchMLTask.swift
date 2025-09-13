@@ -9,58 +9,54 @@ import AuroraCore
 import AuroraML
 import Foundation
 
-/**
-  `SemanticSearchMLTask` wraps any `MLServiceProtocol` that performs
-  semantic search (emitting `[[String: Any]]` under the `"results"` key)
-  into a `WorkflowComponent`.
-
-  - **Inputs**
-     - `query`: `String` to search for.
-     - `vector`: `[Double]` raw embedding to search with.
-  - **Outputs**
-     - `results`: `[[String: Any]]` — an array of
-         - `"document"`: `String`
-         - `"score"`: `Double`
-
-  ### Example
-  ```swift
-  let docs = ["The cat sat", "A quick brown fox"]
-  let embeddingService = EmbeddingService(
-     name: "SentenceEmbedding",
-     embedding: NLEmbedding.sentenceEmbedding(for: .english)!
-  )
-  let searchService = try SemanticSearchService(
-     name: "DemoSearch",
-     embeddingService: embeddingService,
-     documents: docs,
-     topK: 1
-  )
-  let task = SemanticSearchMLTask(
-     service: searchService,
-     query: "fast fox"
-  )
-  guard case let .task(wrapped) = task.toComponent() else { return }
-  let outputs = try await wrapped.execute()
-  let hits = outputs["results"] as? [[String: Any]]
-  print(hits)
- ```
-  */
+/// `SemanticSearchMLTask` wraps any `MLServiceProtocol` that performs
+/// semantic search (emitting `[[String: Any]]` under the `"results"` key)
+/// into a `WorkflowComponent`.
+///
+/// - **Inputs**
+///    - `query`: `String` to search for.
+///    - `vector`: `[Double]` raw embedding to search with.
+/// - **Outputs**
+///    - `results`: `[[String: Any]]` — an array of
+///        - `"document"`: `String`
+///        - `"score"`: `Double`
+///
+/// ### Example
+/// ```swift
+/// let docs = ["The cat sat", "A quick brown fox"]
+/// let embeddingService = EmbeddingService(
+///    name: "SentenceEmbedding",
+///    embedding: NLEmbedding.sentenceEmbedding(for: .english)!
+/// )
+/// let searchService = try SemanticSearchService(
+///    name: "DemoSearch",
+///    embeddingService: embeddingService,
+///    documents: docs,
+///    topK: 1
+/// )
+/// let task = SemanticSearchMLTask(
+///    service: searchService,
+///    query: "fast fox"
+/// )
+/// guard case let .task(wrapped) = task.toComponent() else { return }
+/// let outputs = try await wrapped.execute()
+/// let hits = outputs["results"] as? [[String: Any]]
+/// print(hits)
+/// ```
 public class SemanticSearchMLTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.
     private let logger: CustomLogger?
 
-    /**
-     - Parameters:
-        - name: Optional override for the workflow task name.
-        - description: Optional override for the workflow description.
-        - service: A `SemanticSearchService` or any `MLServiceProtocol` emitting `"results"`.
-        - query: Fallback `String` query to use if not provided at execution time.
-        - vector: Fallback raw embedding if not providing a query.
-        - inputs: Additional inputs to the task.
-        - logger: Optional logger for logging task execution details.
-     */
+    /// - Parameters:
+    ///    - name: Optional override for the workflow task name.
+    ///    - description: Optional override for the workflow description.
+    ///    - service: A `SemanticSearchService` or any `MLServiceProtocol` emitting `"results"`.
+    ///    - query: Fallback `String` query to use if not provided at execution time.
+    ///    - vector: Fallback raw embedding if not providing a query.
+    ///    - inputs: Additional inputs to the task.
+    ///    - logger: Optional logger for logging task execution details.
     public init(
         name: String? = nil,
         description: String? = nil,

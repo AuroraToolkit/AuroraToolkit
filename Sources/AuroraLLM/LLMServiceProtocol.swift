@@ -9,137 +9,109 @@ import Foundation
 
 // MARK: - TokenAdjustmentPolicy
 
-/**
- The `TokenAdjustmentPolicy` enum specifies how input and output token limits are handled for an LLM service.
-
- This policy provides flexibility in managing requests when they exceed the token constraints of a specific service, ensuring developers can configure behavior that aligns with their use case.
-
- - Note: Each service can have separate policies for input and output tokens, allowing fine-grained control over request handling.
- */
+/// The `TokenAdjustmentPolicy` enum specifies how input and output token limits are handled for an LLM service.
+///
+/// This policy provides flexibility in managing requests when they exceed the token constraints of a specific service, ensuring developers can configure behavior that aligns with their use case.
+///
+/// - Note: Each service can have separate policies for input and output tokens, allowing fine-grained control over request handling.
 public enum TokenAdjustmentPolicy {
-    /**
-     Automatically adjusts the token limits to match the service's constraints.
-
-     - For input tokens: The request's content is trimmed to fit within the service's input token limit using the specified trimming strategy.
-     - For output tokens: The request's `maxTokens` is reduced to the service's `maxOutputTokens`.
-
-     - Use Case: This policy is ideal when ensuring compatibility with the service is more important than strict adherence to the original request's configuration.
-     */
+    /// Automatically adjusts the token limits to match the service's constraints.
+    ///
+    /// - For input tokens: The request's content is trimmed to fit within the service's input token limit using the specified trimming strategy.
+    /// - For output tokens: The request's `maxTokens` is reduced to the service's `maxOutputTokens`.
+    ///
+    /// - Use Case: This policy is ideal when ensuring compatibility with the service is more important than strict adherence to the original request's configuration.
     case adjustToServiceLimits
 
-    /**
-     Strictly enforces the token limits defined in the request.
-
-     - For input tokens: If the request exceeds the service's input token limit, the request will fail.
-     - For output tokens: If the request's `maxTokens` exceeds the service's `maxOutputTokens`, the request will fail.
-
-     - Use Case: This policy is ideal for debugging or when the integrity of the original request must be preserved without any modifications.
-     */
+    /// Strictly enforces the token limits defined in the request.
+    ///
+    /// - For input tokens: If the request exceeds the service's input token limit, the request will fail.
+    /// - For output tokens: If the request's `maxTokens` exceeds the service's `maxOutputTokens`, the request will fail.
+    ///
+    /// - Use Case: This policy is ideal for debugging or when the integrity of the original request must be preserved without any modifications.
     case strictRequestLimits
 }
 
 // MARK: - LLMServiceProtocol
 
-/**
- The `LLMServiceProtocol` defines the interface for interacting with different LLM (Language Learning Model) services.
-
- Conforming types (e.g., `OpenAIService`, `AnthropicService`, `OllamaService`) must implement this protocol to enable communication with their respective LLM backends.
-
- This protocol ensures that all LLM services handle requests and responses consistently, allowing the client to interact with multiple LLMs in a unified way.
-
- - Note: Each service can define its own token limits and handle authentication in its unique way.
- */
+/// The `LLMServiceProtocol` defines the interface for interacting with different LLM (Language Learning Model) services.
+///
+/// Conforming types (e.g., `OpenAIService`, `AnthropicService`, `OllamaService`) must implement this protocol to enable communication with their respective LLM backends.
+///
+/// This protocol ensures that all LLM services handle requests and responses consistently, allowing the client to interact with multiple LLMs in a unified way.
+///
+/// - Note: Each service can define its own token limits and handle authentication in its unique way.
 public protocol LLMServiceProtocol {
-    /**
-     The name of the LLM service vendor (e.g., "OpenAI", "Anthropic", "Ollama").
-     */
+    /// The name of the LLM service vendor (e.g., "OpenAI", "Anthropic", "Ollama").
     var vendor: String { get }
 
-    /**
-     The name of the service instance, which can be customized during initialization
-     */
+    /// The name of the service instance, which can be customized during initialization
     var name: String { get set }
 
-    /**
-     The maximum context window size (total tokens, input + output) supported by the service.
-
-     - Note: Requests should not exceed this limit to ensure they are processed correctly.
-     */
+    /// The maximum context window size (total tokens, input + output) supported by the service.
+    ///
+    /// - Note: Requests should not exceed this limit to ensure they are processed correctly.
     var contextWindowSize: Int { get }
 
-    /**
-     The maximum number of tokens allowed for output (completion) in a single request.
-
-     - Important: This value may differ between services. For example, OpenAI may have a higher token limit compared to other LLMs.
-     This value must be less than or equal to `contextWindowSize` to ensure the request fits within the service's capacity.
-     - Note: Many services have a max output token limit lower than the context window size.
-     */
+    /// The maximum number of tokens allowed for output (completion) in a single request.
+    ///
+    /// - Important: This value may differ between services. For example, OpenAI may have a higher token limit compared to other LLMs.
+    /// This value must be less than or equal to `contextWindowSize` to ensure the request fits within the service's capacity.
+    /// - Note: Many services have a max output token limit lower than the context window size.
     var maxOutputTokens: Int { get }
 
-    /**
-     Specifies the policy to handle input tokens when they exceed the service's input token limit.
-
-     - SeeAlso: `TokenAdjustmentPolicy`
-     */
+    /// Specifies the policy to handle input tokens when they exceed the service's input token limit.
+    ///
+    /// - SeeAlso: `TokenAdjustmentPolicy`
     var inputTokenPolicy: TokenAdjustmentPolicy { get set }
 
-    /**
-     Specifies the policy to handle output tokens when they exceed the service's max output token limit.
-
-     - SeeAlso: `TokenAdjustmentPolicy`
-     */
+    /// Specifies the policy to handle output tokens when they exceed the service's max output token limit.
+    ///
+    /// - SeeAlso: `TokenAdjustmentPolicy`
     var outputTokenPolicy: TokenAdjustmentPolicy { get set }
 
     /// The default system prompt for this service, used to set the behavior or persona of the model.
     var systemPrompt: String? { get set }
 
-    /**
-     Sends a request to the LLM service asynchronously and returns the response.
-
-     - Parameter request: The `LLMRequest` object containing the prompt and configuration for the LLM.
-
-     - Returns: An `LLMResponseProtocol` containing the text generated by the LLM.
-     - Throws: An error if the request fails due to network issues, invalid parameters, or API errors.
-     */
+    /// Sends a request to the LLM service asynchronously and returns the response.
+    ///
+    /// - Parameter request: The `LLMRequest` object containing the prompt and configuration for the LLM.
+    ///
+    /// - Returns: An `LLMResponseProtocol` containing the text generated by the LLM.
+    /// - Throws: An error if the request fails due to network issues, invalid parameters, or API errors.
     func sendRequest(_ request: LLMRequest) async throws -> LLMResponseProtocol
 
-    /**
-     Sends a request to the LLM service asynchronously with support for streaming.
-
-     - Parameters:
-        -  request: The `LLMRequest` object containing the prompt and configuration for the LLM.
-        -  onPartialResponse: A closure that handles partial responses during streaming.
-
-     - Returns: An `LLMResponseProtocol` containing the final text generated by the LLM.
-     - Throws: An error if the request fails due to network issues, invalid parameters, or API errors.
-     */
+    /// Sends a request to the LLM service asynchronously with support for streaming.
+    ///
+    /// - Parameters:
+    ///    -  request: The `LLMRequest` object containing the prompt and configuration for the LLM.
+    ///    -  onPartialResponse: A closure that handles partial responses during streaming.
+    ///
+    /// - Returns: An `LLMResponseProtocol` containing the final text generated by the LLM.
+    /// - Throws: An error if the request fails due to network issues, invalid parameters, or API errors.
     func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol
 }
 
 // MARK: - LLMServiceProtocol Extensions
 
 public extension LLMServiceProtocol {
-    /**
-     Resolves the effective system prompt using priority: request.systemPrompt > message system > service default.
-
-     - Parameters:
-       - request: The LLM request
-       - serviceSystemPrompt: The service's default system prompt
-     - Returns: The effective system prompt to use, or nil if none available
-     */
+    /// Resolves the effective system prompt using priority: request.systemPrompt > message system > service default.
+    ///
+    /// - Parameters:
+    ///   - request: The LLM request
+    ///   - serviceSystemPrompt: The service's default system prompt
+    /// - Returns: The effective system prompt to use, or nil if none available
     func resolveSystemPrompt(from request: LLMRequest, serviceSystemPrompt: String?) -> String? {
         let messageSystemPrompt = request.messages.first(where: { $0.role == .system })?.content
         return request.systemPrompt ?? messageSystemPrompt ?? serviceSystemPrompt
     }
 
-    /**
-     Prepares messages for API request by handling system prompt priority and removing duplicates.
-
-     - Parameters:
-       - request: The LLM request
-       - serviceSystemPrompt: The service's default system prompt
-     - Returns: Array of messages with proper system prompt handling
-     */
+    /// Prepares messages for API request by handling system prompt priority and removing duplicates.
+    ///
+    /// - Parameters:
+    ///   - request: The LLM request
+    ///   - serviceSystemPrompt: The service's default system prompt
+    /// - Returns: Array of messages with proper system prompt handling
     func prepareMessages(from request: LLMRequest, serviceSystemPrompt: String?) -> [LLMMessage] {
         var messages = request.messages
 
@@ -157,27 +129,23 @@ public extension LLMServiceProtocol {
         return messages
     }
 
-    /**
-     Prepares messages payload for OpenAI-compatible APIs (OpenAI, Azure OpenAI).
-
-     - Parameters:
-       - request: The LLM request
-       - serviceSystemPrompt: The service's default system prompt
-     - Returns: Array of dictionaries ready for JSON serialization
-     */
+    /// Prepares messages payload for OpenAI-compatible APIs (OpenAI, Azure OpenAI).
+    ///
+    /// - Parameters:
+    ///   - request: The LLM request
+    ///   - serviceSystemPrompt: The service's default system prompt
+    /// - Returns: Array of dictionaries ready for JSON serialization
     func prepareOpenAIMessagesPayload(from request: LLMRequest, serviceSystemPrompt: String?) -> [[String: String]] {
         let messages = prepareMessages(from: request, serviceSystemPrompt: serviceSystemPrompt)
         return messages.map { ["role": $0.role.rawValue, "content": $0.content] }
     }
 
-    /**
-     Prepares messages for Anthropic API format (separate system parameter).
-
-     - Parameters:
-       - request: The LLM request
-       - serviceSystemPrompt: The service's default system prompt
-     - Returns: Tuple containing system prompt and non-system messages
-     */
+    /// Prepares messages for Anthropic API format (separate system parameter).
+    ///
+    /// - Parameters:
+    ///   - request: The LLM request
+    ///   - serviceSystemPrompt: The service's default system prompt
+    /// - Returns: Tuple containing system prompt and non-system messages
     func prepareAnthropicMessages(from request: LLMRequest, serviceSystemPrompt: String?) -> (systemPrompt: String?, messages: [[String: String]]) {
         let effectiveSystemPrompt = resolveSystemPrompt(from: request, serviceSystemPrompt: serviceSystemPrompt)
 
@@ -188,9 +156,7 @@ public extension LLMServiceProtocol {
         return (effectiveSystemPrompt, messagesPayload)
     }
 
-    /**
-     Validates that streaming configuration matches the method being called.
-     */
+    /// Validates that streaming configuration matches the method being called.
     func validateStreamingConfig(_ request: LLMRequest, expectStreaming: Bool) throws {
         if expectStreaming, !request.stream {
             throw LLMServiceError.custom(message: "Streaming is required. Set request.stream = true.")

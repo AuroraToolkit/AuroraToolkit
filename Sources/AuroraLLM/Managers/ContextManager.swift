@@ -7,10 +7,8 @@
 
 import Foundation
 
-/**
- `ContextManager` is responsible for managing multiple `ContextController` instances.
- It allows adding, removing, switching between contexts, and saving/restoring contexts from disk using tasks.
- */
+/// `ContextManager` is responsible for managing multiple `ContextController` instances.
+/// It allows adding, removing, switching between contexts, and saving/restoring contexts from disk using tasks.
 public class ContextManager {
     /// A dictionary mapping UUIDs to their respective `ContextController` instances.
     var contextControllers: [UUID: ContextController] = [:]
@@ -24,16 +22,14 @@ public class ContextManager {
         self.llmServiceFactory = llmServiceFactory
     }
 
-    /**
-     Adds a new context to the manager and returns the unique identifier of the new context.
-
-     - Parameters:
-        - context: An optional `Context` object. If none is provided, a new one will be created automatically.
-        - llmService: The LLM service used for summarization in this context.
-        - summarizer: An optional `Summarizer` instance to handle text summarization. If none is provided, a default summarizer will be created.
-
-     - Returns: The unique identifier (`UUID`) for the newly created `ContextController`.
-     */
+    /// Adds a new context to the manager and returns the unique identifier of the new context.
+    ///
+    /// - Parameters:
+    ///    - context: An optional `Context` object. If none is provided, a new one will be created automatically.
+    ///    - llmService: The LLM service used for summarization in this context.
+    ///    - summarizer: An optional `Summarizer` instance to handle text summarization. If none is provided, a default summarizer will be created.
+    ///
+    /// - Returns: The unique identifier (`UUID`) for the newly created `ContextController`.
     @discardableResult
     public func addNewContext(_ context: Context? = nil, llmService: LLMServiceProtocol, summarizer: SummarizerProtocol? = nil) -> UUID {
         let contextController = ContextController(context: context, llmService: llmService, summarizer: summarizer)
@@ -44,11 +40,9 @@ public class ContextManager {
         return contextController.id
     }
 
-    /**
-     Removes a `ContextController` by its ID.
-
-     - Parameter contextID: The UUID of the context to be removed.
-     */
+    /// Removes a `ContextController` by its ID.
+    ///
+    /// - Parameter contextID: The UUID of the context to be removed.
     public func removeContext(withID contextID: UUID) {
         contextControllers.removeValue(forKey: contextID)
 
@@ -58,11 +52,9 @@ public class ContextManager {
         }
     }
 
-    /**
-     Sets the active context by its ID.
-
-     - Parameter contextID: The UUID of the context to be set as active.
-     */
+    /// Sets the active context by its ID.
+    ///
+    /// - Parameter contextID: The UUID of the context to be set as active.
     public func setActiveContext(withID contextID: UUID) {
         guard contextControllers[contextID] != nil else {
             return
@@ -70,11 +62,9 @@ public class ContextManager {
         activeContextID = contextID
     }
 
-    /**
-     Retrieves the currently active `ContextController`.
-
-     - Returns: The active `ContextController`, or `nil` if there is no active context.
-     */
+    /// Retrieves the currently active `ContextController`.
+    ///
+    /// - Returns: The active `ContextController`, or `nil` if there is no active context.
     public func getActiveContextController() -> ContextController? {
         guard let activeContextID = activeContextID else {
             return nil
@@ -82,54 +72,44 @@ public class ContextManager {
         return contextControllers[activeContextID]
     }
 
-    /**
-     Retrieves a `ContextController` for a given context ID.
-
-     - Parameter contextID: The UUID of the context to be retrieved.
-
-     - Returns: The `ContextController` associated with the given context ID, or `nil` if no such context exists.
-     */
+    /// Retrieves a `ContextController` for a given context ID.
+    ///
+    /// - Parameter contextID: The UUID of the context to be retrieved.
+    ///
+    /// - Returns: The `ContextController` associated with the given context ID, or `nil` if no such context exists.
     public func getContextController(for contextID: UUID) -> ContextController? {
         return contextControllers[contextID]
     }
 
-    /**
-     Retrieves all managed `ContextController` instances.
-
-     - Returns: An array of all `ContextController` instances managed by this `ContextManager`.
-     */
+    /// Retrieves all managed `ContextController` instances.
+    ///
+    /// - Returns: An array of all `ContextController` instances managed by this `ContextManager`.
     public func getAllContextControllers() -> [ContextController] {
         return Array(contextControllers.values)
     }
 
-    /**
-     Summarizes older context items across all managed `ContextController` instances.
-
-     This method will invoke the `summarizeOlderContext()` function for each `ContextController` stored in the manager.
-     */
+    /// Summarizes older context items across all managed `ContextController` instances.
+    ///
+    /// This method will invoke the `summarizeOlderContext()` function for each `ContextController` stored in the manager.
     public func summarizeOlderContexts() async throws {
         for (_, controller) in contextControllers {
             try await controller.summarizeOlderContext()
         }
     }
 
-    /**
-     Removes all managed contexts
-
-     This method will also set activeContextID to `nil`.
-     */
+    /// Removes all managed contexts
+    ///
+    /// This method will also set activeContextID to `nil`.
     public func removeAllContexts() {
         contextControllers.removeAll()
         activeContextID = nil
     }
 
-    /**
-     Saves all managed contexts to disk.
-
-     Each context is saved as a separate file using its UUID in the filename.
-
-     - Throws: Any errors encountered during saving.
-     */
+    /// Saves all managed contexts to disk.
+    ///
+    /// Each context is saved as a separate file using its UUID in the filename.
+    ///
+    /// - Throws: Any errors encountered during saving.
     public func saveAllContexts() async throws {
         for (contextID, contextController) in contextControllers {
             let saveTask = SaveContextTask(context: contextController.getContext(), filename: contextID.uuidString)
@@ -140,13 +120,11 @@ public class ContextManager {
         }
     }
 
-    /**
-     Loads all contexts from disk and restores them as `ContextController` instances.
-
-     This function scans the document directory for saved contexts and restores them into the manager.
-
-     - Throws: Any errors encountered during loading.
-     */
+    /// Loads all contexts from disk and restores them as `ContextController` instances.
+    ///
+    /// This function scans the document directory for saved contexts and restores them into the manager.
+    ///
+    /// - Throws: Any errors encountered during loading.
     public func loadAllContexts() async throws {
         let fetchTask = FetchContextsTask()
         guard case let .task(unwrappedTask) = fetchTask.toComponent() else {

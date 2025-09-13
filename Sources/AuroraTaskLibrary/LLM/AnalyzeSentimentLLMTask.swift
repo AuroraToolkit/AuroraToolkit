@@ -9,62 +9,58 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
- `AnalyzeSentimentLLMTask` is a workflow component that analyzes the sentiment of text strings using a Large Language Model (LLM).
-
- This task leverages LLM capabilities to perform nuanced sentiment analysis, going beyond simple positive/negative classifications
- to provide detailed sentiment insights including confidence levels and reasoning.
-
- - **Inputs**
-   - `strings`: An array of text strings to analyze for sentiment.
-   - `options`: Optional sentiment analysis options (detailed vs. simple analysis, confidence thresholds, etc.).
-
- - **Outputs**
-   - `sentiments`: An array of sentiment analysis results, each containing sentiment label, confidence score, and optional reasoning.
-   - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-   - `rawResponse`: The original unmodified raw response text from the LLM.
-
- ### Use Cases:
- - **Customer Feedback Analysis**: Analyzing customer reviews, support tickets, or survey responses.
- - **Social Media Monitoring**: Understanding public sentiment around brands, products, or events.
- - **Content Moderation**: Identifying potentially harmful or negative content.
- - **Market Research**: Analyzing sentiment trends in user-generated content or feedback.
-
- ### Example:
- **Input Strings:**
- - "I absolutely love this new product! It's amazing."
- - "The service was okay, nothing special."
- - "This is the worst experience I've ever had."
-
- **Output:**
- ```
- {
-   "sentiments": [
-     {"text": "I absolutely love this new product! It's amazing.", "sentiment": "positive", "confidence": 0.95},
-     {"text": "The service was okay, nothing special.", "sentiment": "neutral", "confidence": 0.78},
-     {"text": "This is the worst experience I've ever had.", "sentiment": "negative", "confidence": 0.92}
-   ]
- }
- ```
- */
+/// `AnalyzeSentimentLLMTask` is a workflow component that analyzes the sentiment of text strings using a Large Language Model (LLM).
+///
+/// This task leverages LLM capabilities to perform nuanced sentiment analysis, going beyond simple positive/negative classifications
+/// to provide detailed sentiment insights including confidence levels and reasoning.
+///
+/// - **Inputs**
+///   - `strings`: An array of text strings to analyze for sentiment.
+///   - `options`: Optional sentiment analysis options (detailed vs. simple analysis, confidence thresholds, etc.).
+///
+/// - **Outputs**
+///   - `sentiments`: An array of sentiment analysis results, each containing sentiment label, confidence score, and optional reasoning.
+///   - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+///   - `rawResponse`: The original unmodified raw response text from the LLM.
+///
+/// ### Use Cases:
+/// - **Customer Feedback Analysis**: Analyzing customer reviews, support tickets, or survey responses.
+/// - **Social Media Monitoring**: Understanding public sentiment around brands, products, or events.
+/// - **Content Moderation**: Identifying potentially harmful or negative content.
+/// - **Market Research**: Analyzing sentiment trends in user-generated content or feedback.
+///
+/// ### Example:
+/// **Input Strings:**
+/// - "I absolutely love this new product! It's amazing."
+/// - "The service was okay, nothing special."
+/// - "This is the worst experience I've ever had."
+///
+/// **Output:**
+/// ```
+/// {
+///   "sentiments": [
+///     {"text": "I absolutely love this new product! It's amazing.", "sentiment": "positive", "confidence": 0.95},
+///     {"text": "The service was okay, nothing special.", "sentiment": "neutral", "confidence": 0.78},
+///     {"text": "This is the worst experience I've ever had.", "sentiment": "negative", "confidence": 0.92}
+///   ]
+/// }
+/// ```
 public class AnalyzeSentimentLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `AnalyzeSentimentLLMTask`.
-
-     - Parameters:
-        - name: The name of the task.
-        - llmService: The LLM service used for sentiment analysis.
-        - strings: The list of strings to analyze.
-        - detailed: Whether to return detailed sentiment analysis (e.g., confidence scores). Defaults to `false`.
-        - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-     */
+    /// Initializes a new `AnalyzeSentimentLLMTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - llmService: The LLM service used for sentiment analysis.
+    ///    - strings: The list of strings to analyze.
+    ///    - detailed: Whether to return detailed sentiment analysis (e.g., confidence scores). Defaults to `false`.
+    ///    - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

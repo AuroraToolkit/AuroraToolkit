@@ -9,11 +9,9 @@ import AuroraCore
 import Foundation
 import os.log
 
-/**
- `OpenAIService` implements the `LLMServiceProtocol` to interact with the OpenAI API.
- This service allows flexible configuration for different models and settings, and now provides
- enhanced error handling using `LLMServiceError`.
- */
+/// `OpenAIService` implements the `LLMServiceProtocol` to interact with the OpenAI API.
+/// This service allows flexible configuration for different models and settings, and now provides
+/// enhanced error handling using `LLMServiceError`.
 public class OpenAIService: LLMServiceProtocol {
     /// A logger for recording information and errors within the `AnthropicService`.
     private let logger: CustomLogger?
@@ -45,21 +43,19 @@ public class OpenAIService: LLMServiceProtocol {
     /// The URL session used to send basic requests.
     var urlSession: URLSession
 
-    /**
-     Initializes a new `OpenAIService` instance with the given API key.
-
-     - Parameters:
-        - name: The name of the service instance (default is `"OpenAI"`).
-        - apiKey: The API key used for authenticating requests to the OpenAI API.
-        - baseURL: The base URL for the OpenAI API. Defaults to "https://api.openai.com".
-        - contextWindowSize: The size of the context window used by the service. Defaults to 128k.
-        - maxOutputTokens: The maximum number of tokens allowed in a request. Defaults to 16k.
-        - inputTokenPolicy: The policy to handle input tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
-        - outputTokenPolicy: The policy to handle output tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
-        - systemPrompt: The default system prompt for this service, used to set the behavior or persona of the model.
-        - urlSession: The `URLSession` instance used for network requests. Defaults to a `.default` configuration.
-        - logger: An optional `CustomLogger` instance for logging. Defaults to `nil`.
-     */
+    /// Initializes a new `OpenAIService` instance with the given API key.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the service instance (default is `"OpenAI"`).
+    ///    - apiKey: The API key used for authenticating requests to the OpenAI API.
+    ///    - baseURL: The base URL for the OpenAI API. Defaults to "https://api.openai.com".
+    ///    - contextWindowSize: The size of the context window used by the service. Defaults to 128k.
+    ///    - maxOutputTokens: The maximum number of tokens allowed in a request. Defaults to 16k.
+    ///    - inputTokenPolicy: The policy to handle input tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
+    ///    - outputTokenPolicy: The policy to handle output tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
+    ///    - systemPrompt: The default system prompt for this service, used to set the behavior or persona of the model.
+    ///    - urlSession: The `URLSession` instance used for network requests. Defaults to a `.default` configuration.
+    ///    - logger: An optional `CustomLogger` instance for logging. Defaults to `nil`.
     public init(name: String = "OpenAI", baseURL: String = "https://api.openai.com", apiKey: String?, contextWindowSize: Int = 128_000, maxOutputTokens: Int = 16384, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, urlSession: URLSession = URLSession(configuration: .default), logger: CustomLogger? = nil) {
         self.name = name
         self.baseURL = baseURL
@@ -78,14 +74,12 @@ public class OpenAIService: LLMServiceProtocol {
 
     // MARK: - Non-streaming Request
 
-    /**
-     Sends a request to the OpenAI API asynchronously without streaming.
-
-     - Parameter request: The `LLMRequest` containing the messages and model configuration.
-
-     - Returns: The `LLMResponseProtocol` containing the generated text or an error if the request fails.
-     - Throws: `LLMServiceError` if the request encounters an issue (e.g., missing API key, invalid response, etc.).
-     */
+    /// Sends a request to the OpenAI API asynchronously without streaming.
+    ///
+    /// - Parameter request: The `LLMRequest` containing the messages and model configuration.
+    ///
+    /// - Returns: The `LLMResponseProtocol` containing the generated text or an error if the request fails.
+    /// - Throws: `LLMServiceError` if the request encounters an issue (e.g., missing API key, invalid response, etc.).
     public func sendRequest(_ request: LLMRequest) async throws -> LLMResponseProtocol {
         try validateStreamingConfig(request, expectStreaming: false)
 
@@ -145,16 +139,14 @@ public class OpenAIService: LLMServiceProtocol {
 
     // MARK: - Streaming Request
 
-    /**
-     Sends a request to the OpenAI API asynchronously with streaming support.
-
-     - Parameters:
-        - request: The `LLMRequest` containing the messages and model configuration.
-        - onPartialResponse: A closure that handles partial responses during streaming.
-
-     - Returns: The `LLMResponseProtocol` containing the final text generated by the LLM.
-     - Throws: `LLMServiceError` if the request encounters an issue (e.g., missing API key, invalid response, etc.).
-     */
+    /// Sends a request to the OpenAI API asynchronously with streaming support.
+    ///
+    /// - Parameters:
+    ///    - request: The `LLMRequest` containing the messages and model configuration.
+    ///    - onPartialResponse: A closure that handles partial responses during streaming.
+    ///
+    /// - Returns: The `LLMResponseProtocol` containing the final text generated by the LLM.
+    /// - Throws: `LLMServiceError` if the request encounters an issue (e.g., missing API key, invalid response, etc.).
     public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol {
         try validateStreamingConfig(request, expectStreaming: true)
 

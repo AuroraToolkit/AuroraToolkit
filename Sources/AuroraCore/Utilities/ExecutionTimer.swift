@@ -7,34 +7,26 @@
 
 import Foundation
 
-/**
-    A simple timer for measuring the execution time of code blocks.
- */
+/// A simple timer for measuring the execution time of code blocks.
 public class ExecutionTimer {
     private(set) var startTime: Date?
     private(set) var endTime: Date?
 
-    /**
-     Starts the timer and returns self for chaining.
-        - Returns: The timer instance.
-     */
+    /// Starts the timer and returns self for chaining.
+    /// - Returns: The timer instance.
     @discardableResult
     public func start() -> Self {
         startTime = Date()
         return self
     }
 
-    /**
-        Stops the timer.
-     */
+    /// Stops the timer.
     public func stop() {
         endTime = Date()
     }
 
-    /**
-        The duration as calculated as the difference between the start and end times.
-     - Returns: The duration in seconds, or `nil` if the timer hasn't been started or stopped
-     */
+    /// The duration as calculated as the difference between the start and end times.
+    /// - Returns: The duration in seconds, or `nil` if the timer hasn't been started or stopped
     public var duration: TimeInterval? {
         guard let startTime = startTime, let endTime = endTime else {
             return nil
@@ -42,9 +34,7 @@ public class ExecutionTimer {
         return endTime.timeIntervalSince(startTime)
     }
 
-    /**
-        Resets the timer by setting the start and end times to `nil`.
-     */
+    /// Resets the timer by setting the start and end times to `nil`.
     public func reset() {
         startTime = nil
         endTime = nil

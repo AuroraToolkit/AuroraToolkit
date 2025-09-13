@@ -7,10 +7,8 @@
 
 import Foundation
 
-/**
- `LLMServiceError` defines a set of error types that can occur while interacting with LLM services.
- These errors provide more granular control and understanding of the failure points within the service.
- */
+/// `LLMServiceError` defines a set of error types that can occur while interacting with LLM services.
+/// These errors provide more granular control and understanding of the failure points within the service.
 public enum LLMServiceError: Error, Equatable {
     /// Error thrown when the API key is missing for a service that requires authentication.
     case missingAPIKey

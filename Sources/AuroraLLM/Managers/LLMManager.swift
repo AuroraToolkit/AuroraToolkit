@@ -9,10 +9,8 @@ import AuroraCore
 import Foundation
 import os.log
 
-/**
- `LLMManager` is responsible for managing multiple LLM services and routing requests to the appropriate service based on the specified criteria.
- It allows registering, unregistering, and selecting services based on routing options such as token limit or domain, as well as providing fallback service support.
- */
+/// `LLMManager` is responsible for managing multiple LLM services and routing requests to the appropriate service based on the specified criteria.
+/// It allows registering, unregistering, and selecting services based on routing options such as token limit or domain, as well as providing fallback service support.
 public class LLMManager {
     /// Routing options for selecting an appropriate LLM service.
     public enum Routing: CustomStringConvertible, Equatable {
@@ -45,11 +43,9 @@ public class LLMManager {
     /// The domain routing service used to determine the appropriate domain for a request.
     private(set) var domainRouter: LLMDomainRouterProtocol?
 
-    /**
-        Initializes the `LLMManager` with an optional logger.
-
-        - Parameter logger: An optional `CustomLogger` instance for logging purposes.
-     */
+    /// Initializes the `LLMManager` with an optional logger.
+    ///
+    /// - Parameter logger: An optional `CustomLogger` instance for logging purposes.
     public init(
         logger: CustomLogger? = nil
     ) {
@@ -58,11 +54,9 @@ public class LLMManager {
 
     // MARK: - Registering Services
 
-    /**
-     Registers a new domain routing service or replaces an existing one.
-
-     - Parameter router: The domain router conforming to `LLMDomainRouterProtocol` to be registered for domain routing.
-     */
+    /// Registers a new domain routing service or replaces an existing one.
+    ///
+    /// - Parameter router: The domain router conforming to `LLMDomainRouterProtocol` to be registered for domain routing.
     public func registerDomainRouter(_ router: LLMDomainRouterProtocol) {
         if domainRouter != nil {
             logger?.debug("Replacing existing domain router with '\(router.name)'", category: "LLMManager")
@@ -72,11 +66,9 @@ public class LLMManager {
         domainRouter = router
     }
 
-    /**
-     Registers a new fallback LLM service or replaces an existing one.
-
-     - Parameter service: The service conforming to `LLMServiceProtocol` to be registered as a fallback.
-     */
+    /// Registers a new fallback LLM service or replaces an existing one.
+    ///
+    /// - Parameter service: The service conforming to `LLMServiceProtocol` to be registered as a fallback.
     public func registerFallbackService(_ service: LLMServiceProtocol) {
         if fallbackService != nil {
             logger?.debug("Replacing existing fallback service with name '\(service.name)'", category: "LLMManager")
@@ -87,15 +79,13 @@ public class LLMManager {
         fallbackService = service
     }
 
-    /**
-     Registers a new LLM service or replaces an existing one with the same name.
-
-     - Parameters:
-        -  service: The service conforming to `LLMServiceProtocol` to be registered.
-        -  withRoutings routing: The `Routing` options, if any, for the service. Defaults to `[.inputTokenLimit(256)]`.
-
-     If a service with the same name already exists, it is replaced. Sets the first registered service as the active service if no active service is set.
-     */
+    /// Registers a new LLM service or replaces an existing one with the same name.
+    ///
+    /// - Parameters:
+    ///    -  service: The service conforming to `LLMServiceProtocol` to be registered.
+    ///    -  withRoutings routing: The `Routing` options, if any, for the service. Defaults to `[.inputTokenLimit(256)]`.
+    ///
+    /// If a service with the same name already exists, it is replaced. Sets the first registered service as the active service if no active service is set.
     public func registerService(_ service: LLMServiceProtocol, withRoutings routing: [Routing] = [.inputTokenLimit(256)]) {
         let serviceName = service.name.lowercased()
 
@@ -113,13 +103,11 @@ public class LLMManager {
         }
     }
 
-    /**
-     Unregisters an LLM service with a specified name.
-
-     - Parameter name: The name under which the service is registered.
-
-     If the service being unregistered is the active service, the active service is reset to the first available service or nil if no services are left.
-     */
+    /// Unregisters an LLM service with a specified name.
+    ///
+    /// - Parameter name: The name under which the service is registered.
+    ///
+    /// If the service being unregistered is the active service, the active service is reset to the first available service or nil if no services are left.
     public func unregisterService(withName name: String) {
         let serviceName = name.lowercased()
         logger?.debug("Unregistering service: \(serviceName)", category: "LLMManager")
@@ -134,13 +122,11 @@ public class LLMManager {
 
     // MARK: - Set Active Service
 
-    /**
-     Sets the active LLM service by its registered name.
-
-     - Parameter name: The name of the service to be set as active.
-
-     Logs an error if the specified name does not correspond to a registered service.
-     */
+    /// Sets the active LLM service by its registered name.
+    ///
+    /// - Parameter name: The name of the service to be set as active.
+    ///
+    /// Logs an error if the specified name does not correspond to a registered service.
     public func setActiveService(byName name: String) {
         guard services[name.lowercased()] != nil else {
             logger?.error("Attempted to set active service to unknown service: \(name)", category: "LLMManager")
@@ -152,35 +138,33 @@ public class LLMManager {
 
     // MARK: - Route Request
 
-    /**
-     Routes a request to an appropriate LLM service based on the presence of a domain routing service and registered routings.
-
-     - Parameters:
-        - request: The `LLMRequest` object containing the prompt and configuration for the LLM.
-        -  buffer: The buffer percentage to apply to the token limit. Defaults to 0.05 (5%).
-        -  trimming: The trimming strategy to apply when tokens exceed the limit. Defaults to `.end`.
-
-     - Returns: An optional `LLMResponseProtocol` containing the response from the routed service.
-
-     - Discussion:
-     This function first checks if a domain routing service is available:
-     - If a domain routing service exists, it uses the service to determine the appropriate domain for the request.
-     - If no domain routing service is present, the function defaults to no routings (`[]`).
-
-     Once the `routings` are determined, the function delegates to `sendRequest()`, which handles actual service selection and fallback logic.
-
-     - Behavior:
-        - **With a Domain Routing Service:** The request is sent to the routing service to identify the domain, and the result is used to create routing options.
-        - **Without a Domain Routing Service:** The request is directly passed to `sendRequest()` with no routings (`[]`), defaulting to fallback logic if no matching services are found.
-
-     - Example Usage:
-        ```
-        let response = await manager.routeRequest(myRequest)
-        print(response?.text ?? "No response received")
-        ```
-
-     - Note: The `sendRequest()` method handles registered services and fallback logic, ensuring robust and flexible routing.
-     */
+    /// Routes a request to an appropriate LLM service based on the presence of a domain routing service and registered routings.
+    ///
+    /// - Parameters:
+    ///    - request: The `LLMRequest` object containing the prompt and configuration for the LLM.
+    ///    -  buffer: The buffer percentage to apply to the token limit. Defaults to 0.05 (5%).
+    ///    -  trimming: The trimming strategy to apply when tokens exceed the limit. Defaults to `.end`.
+    ///
+    /// - Returns: An optional `LLMResponseProtocol` containing the response from the routed service.
+    ///
+    /// - Discussion:
+    /// This function first checks if a domain routing service is available:
+    /// - If a domain routing service exists, it uses the service to determine the appropriate domain for the request.
+    /// - If no domain routing service is present, the function defaults to no routings (`[]`).
+    ///
+    /// Once the `routings` are determined, the function delegates to `sendRequest()`, which handles actual service selection and fallback logic.
+    ///
+    /// - Behavior:
+    ///    - **With a Domain Routing Service:** The request is sent to the routing service to identify the domain, and the result is used to create routing options.
+    ///    - **Without a Domain Routing Service:** The request is directly passed to `sendRequest()` with no routings (`[]`), defaulting to fallback logic if no matching services are found.
+    ///
+    /// - Example Usage:
+    ///    ```
+    ///    let response = await manager.routeRequest(myRequest)
+    ///    print(response?.text ?? "No response received")
+    ///    ```
+    ///
+    /// - Note: The `sendRequest()` method handles registered services and fallback logic, ensuring robust and flexible routing.
     public func routeRequest(
         _ request: LLMRequest,
         buffer: Double = 0.05,
@@ -215,19 +199,17 @@ public class LLMManager {
 
     // MARK: - Send Request
 
-    /**
-     Sends a request to an LLM service, applying the specified routing and token trimming strategies if necessary.
-
-     - Parameters:
-        -  request: The `LLMRequest` containing the messages and parameters.
-        -  routings: The routing options to select the appropriate service. Defaults to `[.inputTokenLimit(256)]`.
-        -  buffer: The buffer percentage to apply to the token limit. Defaults to 0.05 (5%).
-        -  trimming: The trimming strategy to apply when tokens exceed the limit. Defaults to `.end`.
-
-     - Returns: An optional `LLMResponseProtocol` object.
-
-     This function trims the content if it exceeds the token limit of the selected service and sends the request.
-     */
+    /// Sends a request to an LLM service, applying the specified routing and token trimming strategies if necessary.
+    ///
+    /// - Parameters:
+    ///    -  request: The `LLMRequest` containing the messages and parameters.
+    ///    -  routings: The routing options to select the appropriate service. Defaults to `[.inputTokenLimit(256)]`.
+    ///    -  buffer: The buffer percentage to apply to the token limit. Defaults to 0.05 (5%).
+    ///    -  trimming: The trimming strategy to apply when tokens exceed the limit. Defaults to `.end`.
+    ///
+    /// - Returns: An optional `LLMResponseProtocol` object.
+    ///
+    /// This function trims the content if it exceeds the token limit of the selected service and sends the request.
     public func sendRequest(
         _ request: LLMRequest,
         routings: [Routing] = [.inputTokenLimit(256)],
@@ -239,20 +221,18 @@ public class LLMManager {
 
     // MARK: - Streaming Request
 
-    /**
-     Sends a streaming request to an LLM service, applying the specified routing and token trimming strategies if necessary.
-
-     - Parameters:
-        -  request: The `LLMRequest` containing the messages and parameters.
-        -  onPartialResponse: A closure that handles partial responses during streaming.
-        -  routing: The routing options to select the appropriate service. Defaults to `[.inputTokenLimit(256)]`.
-        -  buffer: The buffer percentage to apply to the token limit. Defaults to 0.05 (5%).
-        -  trimming: The trimming strategy to apply when tokens exceed the limit. Defaults to `.end`.
-
-     - Returns: An optional `LLMResponseProtocol` object.
-
-     This function trims the content if it exceeds the token limit of the selected service and sends the streaming request.
-     */
+    /// Sends a streaming request to an LLM service, applying the specified routing and token trimming strategies if necessary.
+    ///
+    /// - Parameters:
+    ///    -  request: The `LLMRequest` containing the messages and parameters.
+    ///    -  onPartialResponse: A closure that handles partial responses during streaming.
+    ///    -  routing: The routing options to select the appropriate service. Defaults to `[.inputTokenLimit(256)]`.
+    ///    -  buffer: The buffer percentage to apply to the token limit. Defaults to 0.05 (5%).
+    ///    -  trimming: The trimming strategy to apply when tokens exceed the limit. Defaults to `.end`.
+    ///
+    /// - Returns: An optional `LLMResponseProtocol` object.
+    ///
+    /// This function trims the content if it exceeds the token limit of the selected service and sends the streaming request.
     public func sendStreamingRequest(
         _ request: LLMRequest,
         onPartialResponse: ((String) -> Void)?,
@@ -274,20 +254,18 @@ public class LLMManager {
 
     // MARK: - Helper Methods
 
-    /**
-     Sends a streaming request to an LLM service, applying the specified routing and token trimming strategies if necessary.
-
-     - Parameters:
-        -  request: The `LLMRequest` containing the messages and parameters.
-        -  onPartialResponse: A closure that handles partial responses during streaming.
-        -  routing: The routing options to select the appropriate service. Defaults to `[.inputTokenLimit(256)]`.
-        -  buffer: The buffer percentage to apply to the token limit. Defaults to 0.05 (5%).
-        -  trimming: The trimming strategy to apply when tokens exceed the limit. Defaults to `.end`.
-
-     - Returns: An optional `LLMResponseProtocol` object.
-
-     This function trims the content if it exceeds the token limit of the selected service and sends the streaming request.
-     */
+    /// Sends a streaming request to an LLM service, applying the specified routing and token trimming strategies if necessary.
+    ///
+    /// - Parameters:
+    ///    -  request: The `LLMRequest` containing the messages and parameters.
+    ///    -  onPartialResponse: A closure that handles partial responses during streaming.
+    ///    -  routing: The routing options to select the appropriate service. Defaults to `[.inputTokenLimit(256)]`.
+    ///    -  buffer: The buffer percentage to apply to the token limit. Defaults to 0.05 (5%).
+    ///    -  trimming: The trimming strategy to apply when tokens exceed the limit. Defaults to `.end`.
+    ///
+    /// - Returns: An optional `LLMResponseProtocol` object.
+    ///
+    /// This function trims the content if it exceeds the token limit of the selected service and sends the streaming request.
     private func optimizeAndSendRequest(
         _ request: LLMRequest,
         onPartialResponse: ((String) -> Void)?,
@@ -311,24 +289,22 @@ public class LLMManager {
         return await sendRequestToService(selectedService, withRequest: optimizedRequest, onPartialResponse: onPartialResponse)
     }
 
-    /**
-     Optimizes the `LLMRequest` to fit within the constraints of the selected service.
-
-     - Parameters:
-        -  request: The `LLMRequest` to optimize.
-        -  service: The `LLMServiceProtocol` instance representing the selected service.
-        -  trimming: The trimming strategy to apply when tokens exceed the limit.
-        -  buffer: The buffer percentage to apply to the token limit, reducing the effective token limit slightly to allow for safer usage. Defaults to `0.05` (5%).
-
-     - Returns: An optimized `LLMRequest` object, adjusted to ensure input and output tokens fit within the service's constraints.
-
-     - Discussion:
-     The optimization process considers the following:
-     - The `contextWindowSize` represents the total allowable tokens (input + output tokens).
-     - The `maxOutputTokens` represents the service's specific token limit for generating a response.
-     - Input tokens are trimmed to fit within the context window after reserving space for output tokens.
-     - If the `.none` trimming strategy is specified, the original request is returned unchanged.
-     */
+    /// Optimizes the `LLMRequest` to fit within the constraints of the selected service.
+    ///
+    /// - Parameters:
+    ///    -  request: The `LLMRequest` to optimize.
+    ///    -  service: The `LLMServiceProtocol` instance representing the selected service.
+    ///    -  trimming: The trimming strategy to apply when tokens exceed the limit.
+    ///    -  buffer: The buffer percentage to apply to the token limit, reducing the effective token limit slightly to allow for safer usage. Defaults to `0.05` (5%).
+    ///
+    /// - Returns: An optimized `LLMRequest` object, adjusted to ensure input and output tokens fit within the service's constraints.
+    ///
+    /// - Discussion:
+    /// The optimization process considers the following:
+    /// - The `contextWindowSize` represents the total allowable tokens (input + output tokens).
+    /// - The `maxOutputTokens` represents the service's specific token limit for generating a response.
+    /// - Input tokens are trimmed to fit within the context window after reserving space for output tokens.
+    /// - If the `.none` trimming strategy is specified, the original request is returned unchanged.
     private func optimizeRequest(
         _ request: LLMRequest,
         for service: LLMServiceProtocol,
@@ -392,17 +368,15 @@ public class LLMManager {
         )
     }
 
-    /**
-     Trims the content of the provided messages to fit within a token limit, applying a buffer and trimming strategy.
-
-     - Parameters:
-        -  messages: The array of `LLMMessage` objects to trim.
-        -  limit: The maximum token limit allowed for the message content.
-        -  buffer: The buffer percentage to apply to the token limit.
-        -  strategy: The trimming strategy to use if content exceeds the token limit.
-
-     - Returns: An array of trimmed `LLMMessage` objects fitting within the token limit.
-     */
+    /// Trims the content of the provided messages to fit within a token limit, applying a buffer and trimming strategy.
+    ///
+    /// - Parameters:
+    ///    -  messages: The array of `LLMMessage` objects to trim.
+    ///    -  limit: The maximum token limit allowed for the message content.
+    ///    -  buffer: The buffer percentage to apply to the token limit.
+    ///    -  strategy: The trimming strategy to use if content exceeds the token limit.
+    ///
+    /// - Returns: An array of trimmed `LLMMessage` objects fitting within the token limit.
     private func trimMessages(
         _ messages: [LLMMessage],
         toFitTokenLimit limit: Int,
@@ -435,17 +409,15 @@ public class LLMManager {
         }
     }
 
-    /**
-     Sends a request to a specific LLM service.
-
-     - Parameters:
-        -  service: The `LLMServiceProtocol` conforming service.
-        -  request: The `LLMRequest` to send.
-        -  onPartialResponse: A closure that handles partial responses during streaming (optional).
-        -  isRetryingWithFallback: A flag indicating whether the request is a retry with a fallback service.
-
-     - Returns: An optional `LLMResponseProtocol` object.
-     */
+    /// Sends a request to a specific LLM service.
+    ///
+    /// - Parameters:
+    ///    -  service: The `LLMServiceProtocol` conforming service.
+    ///    -  request: The `LLMRequest` to send.
+    ///    -  onPartialResponse: A closure that handles partial responses during streaming (optional).
+    ///    -  isRetryingWithFallback: A flag indicating whether the request is a retry with a fallback service.
+    ///
+    /// - Returns: An optional `LLMResponseProtocol` object.
     private func sendRequestToService(
         _ service: LLMServiceProtocol,
         withRequest request: LLMRequest,
@@ -479,16 +451,14 @@ public class LLMManager {
         }
     }
 
-    /**
-     Chooses an LLM service based on the provided routing strategy.
-
-     - Parameters:
-        -  basedOn routings: The routing strategies to be applied for selection.
-        -  request: The request being sent, used for analyzing compatibility.
-        -  trimming: The trimming strategy to apply if tokens exceed the limit.
-
-     - Returns: The `LLMServiceProtocol` that matches the given routing strategy, if available.
-     */
+    /// Chooses an LLM service based on the provided routing strategy.
+    ///
+    /// - Parameters:
+    ///    -  basedOn routings: The routing strategies to be applied for selection.
+    ///    -  request: The request being sent, used for analyzing compatibility.
+    ///    -  trimming: The trimming strategy to apply if tokens exceed the limit.
+    ///
+    /// - Returns: The `LLMServiceProtocol` that matches the given routing strategy, if available.
     private func selectService(
         basedOn routings: [Routing],
         for request: LLMRequest,
@@ -530,24 +500,22 @@ public class LLMManager {
         return nil
     }
 
-    /**
-     Evaluates whether a given `LLMServiceProtocol` service meets the criteria specified by a routing strategy for the given request.
-
-     - Parameters:
-        -  service: The service being evaluated.
-        -  routings: The routing strategies that specifies which criteria to evaluate.
-        -  request: The `LLMRequest` providing details such as token count and maximum output tokens.
-
-     - Returns: `true` if the service meets the criteria specified by the routing strategy; `false` otherwise.
-
-     - Discussion:
-        - Routing Criteria:
-            - `inputTokenLimit`: Ensures that the input tokens in the request fit within the effective input token limit of the service.
-            - `Domain`: Ensures that the service supports the specified domain(s).
-        - `contextWindowSize` defines the total token budget for both input and output tokens.
-        - `maxOutputTokens` defines the maximum allowable tokens for generating a response.
-        - The function validates that the service's `contextWindowSize` can accommodate the sum of input and output tokens in the request and ensures `maxOutputTokens` is not exceeded.
-     */
+    /// Evaluates whether a given `LLMServiceProtocol` service meets the criteria specified by a routing strategy for the given request.
+    ///
+    /// - Parameters:
+    ///    -  service: The service being evaluated.
+    ///    -  routings: The routing strategies that specifies which criteria to evaluate.
+    ///    -  request: The `LLMRequest` providing details such as token count and maximum output tokens.
+    ///
+    /// - Returns: `true` if the service meets the criteria specified by the routing strategy; `false` otherwise.
+    ///
+    /// - Discussion:
+    ///    - Routing Criteria:
+    ///        - `inputTokenLimit`: Ensures that the input tokens in the request fit within the effective input token limit of the service.
+    ///        - `Domain`: Ensures that the service supports the specified domain(s).
+    ///    - `contextWindowSize` defines the total token budget for both input and output tokens.
+    ///    - `maxOutputTokens` defines the maximum allowable tokens for generating a response.
+    ///    - The function validates that the service's `contextWindowSize` can accommodate the sum of input and output tokens in the request and ensures `maxOutputTokens` is not exceeded.
     private func serviceMeetsCriteria(
         _ service: LLMServiceProtocol,
         routings: [Routing],
@@ -573,23 +541,21 @@ public class LLMManager {
         return true
     }
 
-    /**
-     Evaluates whether a service meets the token limit requirements for a given request.
-
-     - Parameters:
-        - service: The `LLMServiceProtocol` instance representing the service being evaluated.
-        - request: The `LLMRequest` containing the input tokens, output tokens, and other parameters.
-        - limit: The input token limit for the routing strategy.
-        - trimming: The trimming strategy to apply if tokens exceed the limit.
-
-     - Returns: `true` if the service meets all token-related constraints (input tokens, output tokens, and context window size); `false` otherwise.
-
-     This function validates the following:
-       - Input tokens: Ensures the request's input tokens fit within the effective input token limit of the service.
-       - Output tokens: Ensures the `maxTokens` in the request does not exceed the service's `maxOutputTokens`.
-       - Context window: Verifies that the total token budget (input + output) fits within the service's `contextWindowSize`.
-       - Adjustment policies: Applies the service's `TokenAdjustmentPolicy` for input and output tokens.
-     */
+    /// Evaluates whether a service meets the token limit requirements for a given request.
+    ///
+    /// - Parameters:
+    ///    - service: The `LLMServiceProtocol` instance representing the service being evaluated.
+    ///    - request: The `LLMRequest` containing the input tokens, output tokens, and other parameters.
+    ///    - limit: The input token limit for the routing strategy.
+    ///    - trimming: The trimming strategy to apply if tokens exceed the limit.
+    ///
+    /// - Returns: `true` if the service meets all token-related constraints (input tokens, output tokens, and context window size); `false` otherwise.
+    ///
+    /// This function validates the following:
+    ///   - Input tokens: Ensures the request's input tokens fit within the effective input token limit of the service.
+    ///   - Output tokens: Ensures the `maxTokens` in the request does not exceed the service's `maxOutputTokens`.
+    ///   - Context window: Verifies that the total token budget (input + output) fits within the service's `contextWindowSize`.
+    ///   - Adjustment policies: Applies the service's `TokenAdjustmentPolicy` for input and output tokens.
     private func evaluateTokenLimits(
         _ service: LLMServiceProtocol,
         request: LLMRequest,
@@ -637,23 +603,21 @@ public class LLMManager {
         return inputTokenRequirementMet && outputTokenRequirementMet && contextWindowRequirementMet
     }
 
-    /**
-     Evaluates whether a service supports the specified domains for routing.
-
-     - Parameters:
-        - service: The `LLMServiceProtocol` instance representing the service being evaluated.
-        - preferredDomains: An array of preferred domains to be matched with the service's capabilities.
-
-     - Returns: `true` if the service supports at least one of the preferred domains; `false` otherwise.
-
-     - Discussion:
-     This function compares the domains specified in the routing strategy with the service's registered domains.
-     It ensures that the service can handle requests within the specified domain(s).
-
-     - Notes:
-       - Domain matching is case-insensitive.
-       - Services can support multiple domains, and this function checks for intersection between the preferred domains and the service's supported domains.
-     */
+    /// Evaluates whether a service supports the specified domains for routing.
+    ///
+    /// - Parameters:
+    ///    - service: The `LLMServiceProtocol` instance representing the service being evaluated.
+    ///    - preferredDomains: An array of preferred domains to be matched with the service's capabilities.
+    ///
+    /// - Returns: `true` if the service supports at least one of the preferred domains; `false` otherwise.
+    ///
+    /// - Discussion:
+    /// This function compares the domains specified in the routing strategy with the service's registered domains.
+    /// It ensures that the service can handle requests within the specified domain(s).
+    ///
+    /// - Notes:
+    ///   - Domain matching is case-insensitive.
+    ///   - Services can support multiple domains, and this function checks for intersection between the preferred domains and the service's supported domains.
     private func evaluateDomainSupport(
         _ service: LLMServiceProtocol,
         preferredDomains: [String]

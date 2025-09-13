@@ -8,21 +8,19 @@
 import Foundation
 import os
 
-/**
-    The `CustomLogger` class provides a centralized logging system for the app. It allows for logging messages at different severity levels and categories, as well as enabling or disabling debug logs.
-
-    Usage:
-    ```swift
-    CustomLogger.shared.debug("Debug message", category: "MyCategory")
-    CustomLogger.shared.info("Info message")
-    CustomLogger.shared.error("Error message", category: "MyCategory")
-    CustomLogger.shared.fault("Fault message")
-
-    CustomLogger.shared.toggleDebugLogs(true)
-
-    CustomLogger.shared.log(level: .info, "Custom log message", category: "MyCategory", metadata: ["key": "value"])
-    ```
- */
+/// The `CustomLogger` class provides a centralized logging system for the app. It allows for logging messages at different severity levels and categories, as well as enabling or disabling debug logs.
+///
+/// Usage:
+/// ```swift
+/// CustomLogger.shared.debug("Debug message", category: "MyCategory")
+/// CustomLogger.shared.info("Info message")
+/// CustomLogger.shared.error("Error message", category: "MyCategory")
+/// CustomLogger.shared.fault("Fault message")
+///
+/// CustomLogger.shared.toggleDebugLogs(true)
+///
+/// CustomLogger.shared.log(level: .info, "Custom log message", category: "MyCategory", metadata: ["key": "value"])
+/// ```
 public final class CustomLogger {
     public static let shared = CustomLogger()
 
@@ -51,24 +49,20 @@ public final class CustomLogger {
         }
     }
 
-    /**
-     Toggles the global debug logs on or off.
-     - Parameter enabled: A boolean value indicating whether debug logs should be enabled.
-     */
+    /// Toggles the global debug logs on or off.
+    /// - Parameter enabled: A boolean value indicating whether debug logs should be enabled.
     public func toggleDebugLogs(_ enabled: Bool) {
         loggerQueue.sync {
             enableDebugLogs = enabled
         }
     }
 
-    /**
-     Logs a message to the console with optional metadata.
-     - Parameters:
-       - level: The severity level of the log message (`.debug`, `.info`, `.error`, `.fault`).
-       - message: The message to log.
-       - category: The category for the log message. Defaults to `"Unspecified"`.
-       - metadata: A dictionary of key-value pairs providing additional context (optional).
-     */
+    /// Logs a message to the console with optional metadata.
+    /// - Parameters:
+    ///   - level: The severity level of the log message (`.debug`, `.info`, `.error`, `.fault`).
+    ///   - message: The message to log.
+    ///   - category: The category for the log message. Defaults to `"Unspecified"`.
+    ///   - metadata: A dictionary of key-value pairs providing additional context (optional).
     public func log(
         level: OSLogType,
         _ message: String,

@@ -1,8 +1,8 @@
-# AuroraCore
+# AuroraToolkit
 
-AuroraCore is the foundational library within the **AuroraToolkit**—a suite of tools designed to simplify the integration of AI capabilities into your projects. This package offers robust support for AI-driven workflows, including task orchestration, workflow management, on-device ML services, and seamless integration with large language models (LLMs) like Anthropic Claude, Google Gemini, OpenAI ChatGPT, and open-source Ollama models. Its modular architecture empowers developers to customize, extend, and integrate with external services effortlessly.
+**AuroraToolkit** is a suite of tools designed to simplify the integration of AI capabilities into your projects. This package offers robust support for AI-driven workflows, including task orchestration, workflow management, on-device ML services, and seamless integration with large language models (LLMs) like Anthropic Claude, Google Gemini, OpenAI ChatGPT, and open-source Ollama models. Its modular architecture empowers developers to customize, extend, and integrate with external services effortlessly.
 
-The AuroraToolkit core package is organized into several modules to enhance flexibility and maintainability:
+The AuroraToolkit main package is organized into several modules to enhance flexibility and maintainability:
 
 - **AuroraCore**: The foundational library for workflow orchestration, utilities, and declarative task management.
 - **AuroraLLM**: A dedicated package for integrating large language models (LLMs) such as Anthropic, Google, OpenAI, and Ollama.
@@ -10,7 +10,7 @@ The AuroraToolkit core package is organized into several modules to enhance flex
 - **AuroraTaskLibrary**: A growing collection of prebuilt, reusable tasks designed to accelerate development.
 - **AuroraExamples**: Practical examples demonstrating how to leverage the toolkit for real-world scenarios.
 
-Whether you're building sophisticated AI-powered applications or integrating modular components into your workflows, AuroraCore provides the tools and flexibility to bring your ideas to life.
+Whether you're building sophisticated AI-powered applications or integrating modular components into your workflows, AuroraToolkit provides the tools and flexibility to bring your ideas to life.
 
 
 ## Features
@@ -83,7 +83,7 @@ A separate package showcasing real-world implementations of workflows, LLM integ
 
 ### Swift Package Manager
 
-To integrate AuroraCore into your project using Swift Package Manager, add the following line to your `Package.swift` file:
+To integrate AuroraToolkit into your project using Swift Package Manager, add the following line to your `Package.swift` file:
 
 ```swift
 .package(url: "https://github.com/AuroraToolkit/AuroraCore.git", from: "0.9.2")
@@ -296,7 +296,7 @@ for question in questions {
 
 ## Running Tests
 
-AuroraCore includes tests for multiple language model services. The Ollama tests will always run, as they do not require any API keys. For testing Anthropic, Google, or OpenAI services, you will need to manually provide your API keys.
+AuroraToolkit includes tests for multiple language model services. The Ollama tests will always run, as they do not require any API keys. For testing Anthropic, Google, or OpenAI services, you will need to manually provide your API keys.
 
 ### .env example
 
@@ -323,6 +323,59 @@ Some test and example files use OpenAI or Anthropic services and need API keys t
 
 With this setup, you can run the tests on multiple LLMs and ensure your sensitive keys are not inadvertently shared.
 
+## Documentation
+
+AuroraToolkit uses Swift-DocC for comprehensive, interactive documentation. The documentation is organized by module and includes API references, tutorials, and practical examples.
+
+### Generating Documentation
+
+#### Quick Generation
+For local development and testing, use the quick generation script:
+
+```bash
+./generate-docs.sh
+```
+
+This generates DocC archives for all modules in `.build/plugins/Swift-DocC/outputs/`.
+
+#### Full Build with Web Export
+For production builds and web hosting, use the comprehensive build script:
+
+```bash
+./build-docs.sh
+```
+
+This script:
+- Generates DocC archives for all modules
+- Exports web-ready HTML documentation to `./docs/`
+- Prepares documentation for static hosting
+
+### Viewing Documentation
+
+#### Archive Format (Xcode)
+Open individual `.doccarchive` files with Xcode:
+- Navigate to `.build/plugins/Swift-DocC/outputs/`
+- Double-click any `.doccarchive` file to open in Xcode
+
+#### Web Format (Browser)
+Serve the exported documentation with a local web server:
+
+```bash
+# Serve a specific module
+python3 -m http.server 8000 --directory docs/AuroraCore
+
+# Or serve all modules
+python3 -m http.server 8000 --directory docs
+```
+
+### Documentation Structure
+
+Each module includes:
+- **API Reference**: Complete documentation of all public interfaces
+- **Getting Started**: Quick start guides with code examples
+- **Architecture**: Design patterns and module organization
+- **Tutorials**: Step-by-step guides for common use cases
+
 ## Future Ideas
 
 - **On-device LLM support**: Integrate with on-device language models to enable fast, private, and offline AI capabilities.
@@ -345,7 +398,7 @@ We expect all participants to adhere to our [Code of Conduct](CODE_OF_CONDUCT.md
 
 ## License
 
-AuroraCore is released under the [Apache 2.0 License](LICENSE).
+AuroraToolkit is released under the [Apache 2.0 License](LICENSE).
 
 ## Contact
 

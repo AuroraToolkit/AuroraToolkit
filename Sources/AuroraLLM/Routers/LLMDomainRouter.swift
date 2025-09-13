@@ -8,13 +8,11 @@
 import AuroraCore
 import os.log
 
-/**
-    The `LLMDomainRouter` class is responsible for determining the domain of a request using an LLM service.
-
-    The router uses the service to process the request and identify the domain. If the domain is not in the list of supported domains, a fallback ("unresolved") is returned.
-
-    - Note: The router is initialized with a list of supported domains and a system prompt that guides the LLM in determining the domain. The LLM is instructed to return "unresolved" if the domain is not supported, which will return "unresolved" if included in the supported domains, or `nil` if not.
- */
+/// The `LLMDomainRouter` class is responsible for determining the domain of a request using an LLM service.
+///
+/// The router uses the service to process the request and identify the domain. If the domain is not in the list of supported domains, a fallback ("unresolved") is returned.
+///
+/// - Note: The router is initialized with a list of supported domains and a system prompt that guides the LLM in determining the domain. The LLM is instructed to return "unresolved" if the domain is not supported, which will return "unresolved" if included in the supported domains, or `nil` if not.
 public class LLMDomainRouter: LLMDomainRouterProtocol {
     public let name: String
     public var service: LLMServiceProtocol
@@ -28,18 +26,16 @@ public class LLMDomainRouter: LLMDomainRouterProtocol {
     information.
     """
 
-    /**
-     Initializes the domain router with an LLM service and a list of supported domains.
-
-     - Parameters:
-        - name: The name of the domain router.
-        - service: The `LLMServiceProtocol` used to determine the domain.
-        - supportedDomains: A list of domains that the router supports.
-        - instructions: Instructions to include in the system prompt. If not provided, a default set of instructions is used.
-        - logger: An optional logger for debugging and error reporting.
-
-     - Note: The instructions *must* include a `%@` placeholder for the list of supported domains.
-     */
+    /// Initializes the domain router with an LLM service and a list of supported domains.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the domain router.
+    ///    - service: The `LLMServiceProtocol` used to determine the domain.
+    ///    - supportedDomains: A list of domains that the router supports.
+    ///    - instructions: Instructions to include in the system prompt. If not provided, a default set of instructions is used.
+    ///    - logger: An optional logger for debugging and error reporting.
+    ///
+    /// - Note: The instructions *must* include a `%@` placeholder for the list of supported domains.
     public init(
         name: String,
         service: LLMServiceProtocol,
@@ -54,33 +50,29 @@ public class LLMDomainRouter: LLMDomainRouterProtocol {
         configureSystemPrompt(instructions ?? defaultInstructions)
     }
 
-    /**
-        Configures the system prompt for the domain router.
-
-        - Parameters:
-            - instructions: Instructions to include in the system prompt.
-
-        The system prompt is used to guide the user in determining the domain for a given input.
-     */
+    /// Configures the system prompt for the domain router.
+    ///
+    /// - Parameters:
+    ///     - instructions: Instructions to include in the system prompt.
+    ///
+    /// The system prompt is used to guide the user in determining the domain for a given input.
     private func configureSystemPrompt(_ instructions: String) {
         let domainList = supportedDomains.joined(separator: ", ")
         service.systemPrompt = String(format: instructions, domainList)
     }
 
-    /**
-     Determines the domain for a given request using the associated LLM service.
-
-     - Parameters:
-        - request: The `LLMRequest` containing the prompt or context for domain determination.
-
-     - Returns: A string representing the determined domain.
-
-     - Throws: An error if the service fails to process the request.
-
-     - Discussion:
-        The method uses the associated `LLMServiceProtocol` to process the request and identify the domain.
-        If the domain is not in the list of supported domains, a fallback ("general") is returned.
-     */
+    /// Determines the domain for a given request using the associated LLM service.
+    ///
+    /// - Parameters:
+    ///    - request: The `LLMRequest` containing the prompt or context for domain determination.
+    ///
+    /// - Returns: A string representing the determined domain.
+    ///
+    /// - Throws: An error if the service fails to process the request.
+    ///
+    /// - Discussion:
+    ///    The method uses the associated `LLMServiceProtocol` to process the request and identify the domain.
+    ///    If the domain is not in the list of supported domains, a fallback ("general") is returned.
     public func determineDomain(for request: LLMRequest) async throws -> String? {
         // Prepend the system prompt if defined for the service
         var routedRequest = request

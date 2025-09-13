@@ -9,30 +9,26 @@ import AuroraCore
 import Foundation
 import NaturalLanguage
 
-/**
- `IntentExtractionService` uses a `ClassificationService` to extract one or more intents from input text, returning a structured list of intent dictionaries.
-
- - **Inputs**
-    - `strings`: `[String]` — one or more texts to classify into intents.
- - **Outputs**
-    - `intents`: `[[String: Any]]` — an array of intent dictionaries for each string, each containing:
-        - `name`: `String` — the predicted intent label.
-        - `confidence`: `Double` — the confidence score for that intent.
-
- You can configure the maximum number of intents returned via the `maxResults` parameter.
- */
+/// `IntentExtractionService` uses a `ClassificationService` to extract one or more intents from input text, returning a structured list of intent dictionaries.
+///
+/// - **Inputs**
+///    - `strings`: `[String]` — one or more texts to classify into intents.
+/// - **Outputs**
+///    - `intents`: `[[String: Any]]` — an array of intent dictionaries for each string, each containing:
+///        - `name`: `String` — the predicted intent label.
+///        - `confidence`: `Double` — the confidence score for that intent.
+///
+/// You can configure the maximum number of intents returned via the `maxResults` parameter.
 public final class IntentExtractionService: MLServiceProtocol {
     public var name: String
 
     private let classifier: ClassificationService
 
-    /**
-     - Parameters:
-        - name: Optionally pass the name of the service, defaults to "IntentExtractionService".
-        - model: A compiled `NLModel` trained to predict intents (e.g. “playMusic”, “setTimer”).
-        - maxResults: How many top intents to return.
-        - logger: Optional logger for debug.
-     */
+    /// - Parameters:
+    ///    - name: Optionally pass the name of the service, defaults to "IntentExtractionService".
+    ///    - model: A compiled `NLModel` trained to predict intents (e.g. "playMusic", "setTimer").
+    ///    - maxResults: How many top intents to return.
+    ///    - logger: Optional logger for debug.
     public init(
         name: String = "IntentExtractionService",
         model: NLModel,

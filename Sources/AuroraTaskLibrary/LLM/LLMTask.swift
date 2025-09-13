@@ -9,37 +9,33 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
- `LLMTask` sends a prompt to a Large Language Model (LLM) service and returns a response.
-
- - **Inputs**
-    - `llmRequest`: The request object containing the prompt and configuration for the LLM service.
- - **Outputs**
-    - `response`: The response from the LLM service.
-
- This task is designed to be part of a workflow where the result from an LLM is used in further tasks.
-
- - Note: This class works with any service that conforms to `LLMServiceProtocol`.
- */
+/// `LLMTask` sends a prompt to a Large Language Model (LLM) service and returns a response.
+///
+/// - **Inputs**
+///    - `llmRequest`: The request object containing the prompt and configuration for the LLM service.
+/// - **Outputs**
+///    - `response`: The response from the LLM service.
+///
+/// This task is designed to be part of a workflow where the result from an LLM is used in further tasks.
+///
+/// - Note: This class works with any service that conforms to `LLMServiceProtocol`.
 public class LLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `LLMTask`.
-
-     - Parameters:
-        - name: The name of the task.
-        - description: A detailed description of the task.
-        - llmService: The LLM service that will handle the request.
-        - request: The `LLMRequest` containing the prompt and configuration for the LLM service.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-
-     - Note: The `inputs` array can contain direct values for keys like `request`, or dynamic references that will be resolved at runtime.
-     */
+    /// Initializes a new `LLMTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - description: A detailed description of the task.
+    ///    - llmService: The LLM service that will handle the request.
+    ///    - request: The `LLMRequest` containing the prompt and configuration for the LLM service.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
+    ///
+    /// - Note: The `inputs` array can contain direct values for keys like `request`, or dynamic references that will be resolved at runtime.
     public init(
         name: String? = nil,
         description: String? = nil,

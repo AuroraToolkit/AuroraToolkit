@@ -9,41 +9,39 @@ import AuroraCore
 import Foundation
 import NaturalLanguage
 
-/**
- A simple in-memory semantic search over a static document set, using any `MLServiceProtocol`
- that emits `[[Double]]` embeddings under the `"embeddings"` key.
-
- - **Inputs**
-    - `query`: `String` to search for, **or**
-    - `vector`: `[Double]` raw embedding to search with.
- - **Outputs**
-    - `results`: `[[String: Any]]` — an array of `"document"`: `String`
-    - `"score"`: `Double` (cosine similarity)
-
- ### Example
- ```swift
- let docs = ["The cat sat", "A quick brown fox"]
- // load the built-in sentence embedding for English
- guard let sentenceEmbedding = NLEmbedding.sentenceEmbedding(for: .english) else {
-    fatalError("Embedding model unavailable")
- }
- let embeddingService = EmbeddingService(
-    name: "SentenceEmbedding",
-    embedding: sentenceEmbedding
- )
- let searchService = SemanticSearchService(
-    name: "DemoSearch",
-    embeddingService: embeddingService,
-    documents: docs,
-    topK: 1
- )
- let resp = try await searchService.run(
- request: MLRequest(inputs: ["query": "fast fox"])
- )
- let hits = resp.outputs["results"] as! [[String: Any]]
- // hits[0]["document"] == "A quick brown fox"
-
- */
+/// A simple in-memory semantic search over a static document set, using any `MLServiceProtocol`
+/// that emits `[[Double]]` embeddings under the `"embeddings"` key.
+///
+/// - **Inputs**
+///    - `query`: `String` to search for, **or**
+///    - `vector`: `[Double]` raw embedding to search with.
+/// - **Outputs**
+///    - `results`: `[[String: Any]]` — an array of `"document"`: `String`
+///    - `"score"`: `Double` (cosine similarity)
+///
+/// ### Example
+/// ```swift
+/// let docs = ["The cat sat", "A quick brown fox"]
+/// // load the built-in sentence embedding for English
+/// guard let sentenceEmbedding = NLEmbedding.sentenceEmbedding(for: .english) else {
+///    fatalError("Embedding model unavailable")
+/// }
+/// let embeddingService = EmbeddingService(
+///    name: "SentenceEmbedding",
+///    embedding: sentenceEmbedding
+/// )
+/// let searchService = SemanticSearchService(
+///    name: "DemoSearch",
+///    embeddingService: embeddingService,
+///    documents: docs,
+///    topK: 1
+/// )
+/// let resp = try await searchService.run(
+/// request: MLRequest(inputs: ["query": "fast fox"])
+/// )
+/// let hits = resp.outputs["results"] as! [[String: Any]]
+/// // hits[0]["document"] == "A quick brown fox"
+///
 public final class SemanticSearchService: MLServiceProtocol {
     public var name: String
     private let embeddingService: MLServiceProtocol
@@ -56,14 +54,12 @@ public final class SemanticSearchService: MLServiceProtocol {
         let score: Double
     }
 
-    /**
-     - Parameters:
-        - name: Identifier for this service.
-        - embeddingService: Any service that implements `MLServiceProtocol` and returns `[[Double]]` under `"embeddings"`.
-        - documents: The corpus of texts to search.
-        - topK: How many top results to return (default: 5).
-        - logger: Optional logger for debugging.
-     */
+    /// - Parameters:
+    ///    - name: Identifier for this service.
+    ///    - embeddingService: Any service that implements `MLServiceProtocol` and returns `[[Double]]` under `"embeddings"`.
+    ///    - documents: The corpus of texts to search.
+    ///    - topK: How many top results to return (default: 5).
+    ///    - logger: Optional logger for debugging.
     public init(
         name: String,
         embeddingService: MLServiceProtocol,

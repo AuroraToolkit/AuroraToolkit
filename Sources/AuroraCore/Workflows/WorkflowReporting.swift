@@ -9,11 +9,9 @@ import Foundation
 
 // MARK: - Workflow Component Report
 
-/**
-    A report for an individual workflow component (either a task or a task group).
-
-    This report includes information such as the component's ID, name, description, state, execution time, outputs, and any error messages.
- */
+/// A report for an individual workflow component (either a task or a task group).
+///
+/// This report includes information such as the component's ID, name, description, state, execution time, outputs, and any error messages.
 public struct WorkflowComponentReport {
     public let id: UUID
     public let name: String
@@ -215,11 +213,9 @@ public extension Workflow.Component {
 
 // MARK: - Overall Workflow Report
 
-/**
-    A report that summarizes the overall workflow execution.
-
-    This report includes information such as the workflow's ID, name, description, state, execution time, outputs, component reports, and any error messages.
- */
+/// A report that summarizes the overall workflow execution.
+///
+/// This report includes information such as the workflow's ID, name, description, state, execution time, outputs, component reports, and any error messages.
 public struct WorkflowReport {
     public let id: UUID
     public let name: String
@@ -274,14 +270,12 @@ public extension Workflow {
 // MARK: - Report Printing Extensions
 
 public extension WorkflowComponentReport {
-    /**
-     Returns a formatted string representation of the report.
-
-     - Parameters:
-         - compact: When true, prints child reports in a condensed format.
-         - showOutputs: When true, includes the outputs in the report.
-         - indent: A string to prepend to each line (for nested reports).
-      */
+    /// Returns a formatted string representation of the report.
+    ///
+    /// - Parameters:
+    ///     - compact: When true, prints child reports in a condensed format.
+    ///     - showOutputs: When true, includes the outputs in the report.
+    ///     - indent: A string to prepend to each line (for nested reports).
     func printedReport(compact: Bool = false, showOutputs: Bool = true, indent: String = "") -> String {
         var output = ""
         output += "\(indent)Type: \(type)\n" // NEW
@@ -313,13 +307,11 @@ public extension WorkflowComponentReport {
 }
 
 public extension WorkflowReport {
-    /**
-     Returns a formatted string representation of the overall workflow report.
-
-     - Parameters:
-         - compact: When true, child components are printed in a condensed format.
-         - showOutputs: When true, includes the outputs in the report.
-      */
+    /// Returns a formatted string representation of the overall workflow report.
+    ///
+    /// - Parameters:
+    ///     - compact: When true, child components are printed in a condensed format.
+    ///     - showOutputs: When true, includes the outputs in the report.
     func printedReport(compact: Bool = false, showOutputs: Bool = true) -> String {
         var output = "Workflow Report:\n"
         output += "ID: \(id)\n"

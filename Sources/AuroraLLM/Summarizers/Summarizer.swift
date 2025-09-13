@@ -8,35 +8,29 @@
 import AuroraCore
 import Foundation
 
-/**
- The `Summarizer` class provides an implementation of the `SummarizerProtocol`, delegating all summarization tasks to an LLM service.
- */
+/// The `Summarizer` class provides an implementation of the `SummarizerProtocol`, delegating all summarization tasks to an LLM service.
 public class Summarizer: SummarizerProtocol {
     private let llmService: LLMServiceProtocol
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `Summarizer` instance with the specified LLM service.
-
-     - Parameters:
-        - llmService: The LLM service to use for summarization.
-        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-     */
+    /// Initializes a new `Summarizer` instance with the specified LLM service.
+    ///
+    /// - Parameters:
+    ///    - llmService: The LLM service to use for summarization.
+    ///    - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
     public init(llmService: LLMServiceProtocol, logger: CustomLogger? = nil) {
         self.llmService = llmService
         self.logger = logger
     }
 
-    /**
-        Summarizes a text using the LLM service.
-
-        - Parameters:
-            - text: The text to summarize.
-            - options: The summarization options to configure the LLM response.
-            - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-
-        - Returns: The summarized text.
-     */
+    /// Summarizes a text using the LLM service.
+    ///
+    /// - Parameters:
+    ///     - text: The text to summarize.
+    ///     - options: The summarization options to configure the LLM response.
+    ///     - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
+    ///
+    /// - Returns: The summarized text.
     public func summarize(_ text: String, options: SummarizerOptions? = nil, logger: CustomLogger? = nil) async throws -> String {
         let logger = logger ?? self.logger
 
@@ -57,17 +51,15 @@ public class Summarizer: SummarizerProtocol {
         }
     }
 
-    /**
-        Summarizes multiple texts using the LLM service.
-
-        - Parameters:
-            - texts: An array of texts to summarize.
-            - type: The type of summary to generate (e.g., `.single`, or `.multiple`).
-            - options: The summarization options to configure the LLM response.
-            - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-
-        - Returns: An array of summarized texts corresponding to the input texts.
-     */
+    /// Summarizes multiple texts using the LLM service.
+    ///
+    /// - Parameters:
+    ///     - texts: An array of texts to summarize.
+    ///     - type: The type of summary to generate (e.g., `.single`, or `.multiple`).
+    ///     - options: The summarization options to configure the LLM response.
+    ///     - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
+    ///
+    /// - Returns: An array of summarized texts corresponding to the input texts.
     public func summarizeGroup(
         _ texts: [String],
         type: SummaryType,
@@ -131,13 +123,11 @@ public class Summarizer: SummarizerProtocol {
         }
     }
 
-    /**
-     Constructs the appropriate system-level instruction based on the summary type.
-
-     - Parameter type: The type of summary to generate (e.g., `.single`, or `.multiple`).
-
-     - Returns: The appropriate system instruction for the summary type.
-     */
+    /// Constructs the appropriate system-level instruction based on the summary type.
+    ///
+    /// - Parameter type: The type of summary to generate (e.g., `.single`, or `.multiple`).
+    ///
+    /// - Returns: The appropriate system instruction for the summary type.
     private func summaryInstruction(for type: SummaryType) -> String {
         switch type {
         case .single:
@@ -156,17 +146,15 @@ public class Summarizer: SummarizerProtocol {
         }
     }
 
-    /**
-     Sends the messages to the LLM service for summarization and returns the result.
-
-     - Parameters:
-        - messages: The conversation messages to be sent to the LLM service.
-        - options: The summarization options to configure the LLM response.
-
-     - Returns: The summarized result returned by the LLM service.
-
-     - Throws: An error if the LLM service fails to process the request.
-     */
+    /// Sends the messages to the LLM service for summarization and returns the result.
+    ///
+    /// - Parameters:
+    ///    - messages: The conversation messages to be sent to the LLM service.
+    ///    - options: The summarization options to configure the LLM response.
+    ///
+    /// - Returns: The summarized result returned by the LLM service.
+    ///
+    /// - Throws: An error if the LLM service fails to process the request.
     private func sendToLLM(_ messages: [LLMMessage], options: SummarizerOptions? = nil) async throws -> String {
         let maxTokens = min(options?.maxTokens ?? llmService.maxOutputTokens, llmService.maxOutputTokens)
 

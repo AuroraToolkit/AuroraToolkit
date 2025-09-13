@@ -11,20 +11,18 @@ import AuroraTaskLibrary
 import Foundation
 import NaturalLanguage
 
-/**
- Example workflow demonstrating triage of a GitHub issue:
-
- 1.  Classify the issue type (bug_report, feature_request, question)
- 2.  Extract the primary intent (top label)
- 3.  Tag any error codes or code tokens via NLTagger
- 4.  Semantic‐search against a static “past issues” corpus
-
- The final report prints:
- • Candidate issue types
- • Primary intent
- • Extracted code/error tokens
- • Top-K matching past issues
- */
+/// Example workflow demonstrating triage of a GitHub issue:
+///
+/// 1.  Classify the issue type (bug_report, feature_request, question)
+/// 2.  Extract the primary intent (top label)
+/// 3.  Tag any error codes or code tokens via NLTagger
+/// 4.  Semantic‐search against a static "past issues" corpus
+///
+/// The final report prints:
+/// • Candidate issue types
+/// • Primary intent
+/// • Extracted code/error tokens
+/// • Top-K matching past issues
 struct IssueTriageWorkflowExample {
     // Your “past issues” knowledge base
     private let pastIssues: [String] = [

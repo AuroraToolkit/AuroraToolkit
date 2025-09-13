@@ -1,8 +1,0 @@
-modules:
- - module: AuroraCore
- - module: AuroraLLM
- - module: AuroraTaskLibrary
-output: docs/
-theme: apple
-merge_modules: none
-

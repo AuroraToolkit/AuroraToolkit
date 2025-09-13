@@ -10,10 +10,8 @@ import AuroraLLM
 import AuroraTaskLibrary
 import Foundation
 
-/**
- Example workflow demonstrating fetching customer feedback from an app store,
- analyzing it for insights, and generating actionable suggestions.
- */
+/// Example workflow demonstrating fetching customer feedback from an app store,
+/// analyzing it for insights, and generating actionable suggestions.
 
 struct CustomerFeedbackAnalysisWorkflow {
     func execute() async {

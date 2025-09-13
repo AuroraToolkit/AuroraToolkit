@@ -8,23 +8,19 @@
 import AuroraCore
 import Foundation
 
-/**
- `LLMServiceFactory` is responsible for creating instances of LLM services like OpenAI, Anthropic, and Ollama.
-
- The factory ensures that the correct service is instantiated based on the service name and retrieves the required API key from the secure storage.
-
- - Note: This factory can be extended by adding new services to the switch case.
- */
+/// `LLMServiceFactory` is responsible for creating instances of LLM services like OpenAI, Anthropic, and Ollama.
+///
+/// The factory ensures that the correct service is instantiated based on the service name and retrieves the required API key from the secure storage.
+///
+/// - Note: This factory can be extended by adding new services to the switch case.
 public class LLMServiceFactory {
-    /**
-     Creates and returns an LLM service for the given context based on the service name.
-
-     The method checks for the API key in `SecureStorage` and uses it to instantiate the appropriate LLM service, such as OpenAI, Anthropic, or Ollama.
-
-     - Parameter context: The context object containing the LLM service name.
-
-     - Returns: An instance of the corresponding `LLMServiceProtocol`, or `nil` if the API key is missing or the service is not supported.
-     */
+    /// Creates and returns an LLM service for the given context based on the service name.
+    ///
+    /// The method checks for the API key in `SecureStorage` and uses it to instantiate the appropriate LLM service, such as OpenAI, Anthropic, or Ollama.
+    ///
+    /// - Parameter context: The context object containing the LLM service name.
+    ///
+    /// - Returns: An instance of the corresponding `LLMServiceProtocol`, or `nil` if the API key is missing or the service is not supported.
     public func createService(for context: Context) -> LLMServiceProtocol? {
         // Retrieve the API key (if applicable) from secure storage for services like OpenAI or Anthropic
         let apiKey = SecureStorage.getAPIKey(for: context.llmServiceVendor)

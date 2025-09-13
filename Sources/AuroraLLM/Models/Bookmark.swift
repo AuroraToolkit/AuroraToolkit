@@ -7,11 +7,9 @@
 
 import Foundation
 
-/**
- Represents a bookmark within the context, linking to a specific `ContextItem` by its ID.
-
- Bookmarks store a label, timestamp, and the ID of the associated context item, providing a way to mark important moments or pieces of content within the context.
- */
+/// Represents a bookmark within the context, linking to a specific `ContextItem` by its ID.
+///
+/// Bookmarks store a label, timestamp, and the ID of the associated context item, providing a way to mark important moments or pieces of content within the context.
 public struct Bookmark: Identifiable, Codable, Equatable {
     /// Unique identifier for the bookmark.
     public let id: UUID
@@ -25,13 +23,11 @@ public struct Bookmark: Identifiable, Codable, Equatable {
     /// The timestamp when the bookmark was created.
     public let timestamp: Date
 
-    /**
-     Initializes a new bookmark for a given context item with a specified label.
-
-     - Parameters:
-        - contextItemID: The ID of the `ContextItem` this bookmark refers to.
-        - label: A descriptive label for the bookmark.
-     */
+    /// Initializes a new bookmark for a given context item with a specified label.
+    ///
+    /// - Parameters:
+    ///    - contextItemID: The ID of the `ContextItem` this bookmark refers to.
+    ///    - label: A descriptive label for the bookmark.
     public init(contextItemID: UUID, label: String) {
         id = UUID()
         self.contextItemID = contextItemID
@@ -39,17 +35,15 @@ public struct Bookmark: Identifiable, Codable, Equatable {
         timestamp = Date()
     }
 
-    /**
-     Equatable conformance for `Bookmark`.
-
-     Two bookmarks are considered equal if they have the same ID, context item ID, label, and timestamp.
-
-     - Parameters:
-        - lhs: The first bookmark to compare.
-        - rhs: The second bookmark to compare.
-
-     - Returns: `true` if the bookmarks are equal, otherwise `false`.
-     */
+    /// Equatable conformance for `Bookmark`.
+    ///
+    /// Two bookmarks are considered equal if they have the same ID, context item ID, label, and timestamp.
+    ///
+    /// - Parameters:
+    ///    - lhs: The first bookmark to compare.
+    ///    - rhs: The second bookmark to compare.
+    ///
+    /// - Returns: `true` if the bookmarks are equal, otherwise `false`.
     public static func == (lhs: Bookmark, rhs: Bookmark) -> Bool {
         return lhs.id == rhs.id &&
             lhs.contextItemID == rhs.contextItemID &&

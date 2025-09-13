@@ -9,60 +9,55 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
-  `ExtractRelationsLLMTask` extracts relationships between entities mentioned in the input strings.
-
-  - **Inputs**
-     - `strings`: The list of strings to analyze for relationships.
-     - `relationTypes`: Optional predefined types of relationships to extract (e.g., "works_at", "located_in").
-     - `maxTokens`: The maximum number of tokens allowed for the LLM response. Defaults to 500.
-
-  - **Outputs**
-     - `relations`: A dictionary where keys are relationship types and values are arrays of tuples representing the entities involved in the relationship.
-     - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-     - `rawResponse`: The original unmodified raw response text from the LLM.
-
-  ### Use Cases:
-  - Extract organizational structures, geographical locations, or professional roles from text.
-  - Analyze structured relationships in unstructured data.
-  - Create knowledge graphs for downstream tasks.
-
-  ### Example:
-  **Input Strings:**
-  - "Sam Altman is the CEO of OpenAI, headquartered in San Francisco."
-  - "Elon Musk founded SpaceX and Tesla."
-
- **Output JSON:**
-
- ```
- {
-     "relations": {
-         "works_at": [["Sam Altman", "OpenAI"]],
-         "located_in": [["OpenAI", "San Francisco"]],
-         "founded": [["Elon Musk", "SpaceX"], ["Elon Musk", "Tesla"]]
-     }
- }
- ```
-
- */
+/// `ExtractRelationsLLMTask` extracts relationships between entities mentioned in the input strings.
+///
+/// - **Inputs**
+///    - `strings`: The list of strings to analyze for relationships.
+///    - `relationTypes`: Optional predefined types of relationships to extract (e.g., "works_at", "located_in").
+///    - `maxTokens`: The maximum number of tokens allowed for the LLM response. Defaults to 500.
+///
+/// - **Outputs**
+///    - `relations`: A dictionary where keys are relationship types and values are arrays of tuples representing the entities involved in the relationship.
+///    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+///    - `rawResponse`: The original unmodified raw response text from the LLM.
+///
+/// ### Use Cases:
+/// - Extract organizational structures, geographical locations, or professional roles from text.
+/// - Analyze structured relationships in unstructured data.
+/// - Create knowledge graphs for downstream tasks.
+///
+/// ### Example:
+/// **Input Strings:**
+/// - "Sam Altman is the CEO of OpenAI, headquartered in San Francisco."
+/// - "Elon Musk founded SpaceX and Tesla."
+///
+/// **Output JSON:**
+///
+/// ```
+/// {
+///     "relations": {
+///         "works_at": [["Sam Altman", "OpenAI"]],
+///         "located_in": [["OpenAI", "San Francisco"]],
+///         "founded": [["Elon Musk", "SpaceX"], ["Elon Musk", "Tesla"]]
+///     }
+/// }
+/// ```
 public class ExtractRelationsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `ExtractRelationsTask`.
-
-     - Parameters:
-        - name: The name of the task.
-        - llmService: The LLM service used for relationship extraction.
-        - strings: The list of strings to analyze for relationships.
-        - relationTypes: Optional predefined types of relationships to extract.
-        - maxTokens: The maximum number of tokens allowed for the LLM response. Defaults to 500.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-     */
+    /// Initializes a new `ExtractRelationsTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - llmService: The LLM service used for relationship extraction.
+    ///    - strings: The list of strings to analyze for relationships.
+    ///    - relationTypes: Optional predefined types of relationships to extract.
+    ///    - maxTokens: The maximum number of tokens allowed for the LLM response. Defaults to 500.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

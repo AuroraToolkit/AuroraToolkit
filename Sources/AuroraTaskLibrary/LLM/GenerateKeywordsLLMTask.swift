@@ -9,43 +9,39 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
- `GenerateKeywordsTask` extracts and optionally categorizes keywords from a list of strings using an LLM service.
-
- - **Inputs**
-    - `strings`: The list of strings to extract keywords from.
-    - `maxKeywords`: Maximum number of keywords to generate per string. Defaults to `5`.
-    - `categories`: Optional predefined categories for grouping keywords. If provided, keywords will be grouped under these categories.
- - **Outputs**
-    - `keywords`: A dictionary where keys are input strings and values are arrays of generated keywords.
-    - `categorizedKeywords`: A dictionary of categories mapping to their associated keywords (if categories are provided).
-    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-    - `rawResponse`: The original unmodified raw response text from the LLM.
-
- ### Use Cases:
- - Summarize the main topics or themes of articles, blogs, or reports.
- - Organize keywords into logical categories for better interpretation.
- - Extract key terms from user feedback or reviews for data analysis.
- */
+/// `GenerateKeywordsTask` extracts and optionally categorizes keywords from a list of strings using an LLM service.
+///
+/// - **Inputs**
+///    - `strings`: The list of strings to extract keywords from.
+///    - `maxKeywords`: Maximum number of keywords to generate per string. Defaults to `5`.
+///    - `categories`: Optional predefined categories for grouping keywords. If provided, keywords will be grouped under these categories.
+/// - **Outputs**
+///    - `keywords`: A dictionary where keys are input strings and values are arrays of generated keywords.
+///    - `categorizedKeywords`: A dictionary of categories mapping to their associated keywords (if categories are provided).
+///    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+///    - `rawResponse`: The original unmodified raw response text from the LLM.
+///
+/// ### Use Cases:
+/// - Summarize the main topics or themes of articles, blogs, or reports.
+/// - Organize keywords into logical categories for better interpretation.
+/// - Extract key terms from user feedback or reviews for data analysis.
 public class GenerateKeywordsLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `GenerateKeywordsLLMTask`.
-
-      - Parameters:
-         - name: The name of the task.
-         - llmService: The LLM service to use for generating keywords.
-         - strings: The list of strings to extract keywords from.
-         - categories: Optional predefined categories for grouping keywords.
-         - maxKeywords: The maximum number of keywords per string. Defaults to 5.
-         - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
-         - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-     */
+    /// Initializes a new `GenerateKeywordsLLMTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - llmService: The LLM service to use for generating keywords.
+    ///    - strings: The list of strings to extract keywords from.
+    ///    - categories: Optional predefined categories for grouping keywords.
+    ///    - maxKeywords: The maximum number of keywords per string. Defaults to 5.
+    ///    - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

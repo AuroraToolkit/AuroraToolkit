@@ -10,58 +10,54 @@ import AuroraML
 import Foundation
 import NaturalLanguage
 
-/**
- `IntentExtractionMLTask` wraps any `MLServiceProtocol` that extracts user intents (and optional parameters) from text into a WorkflowComponent.
-
- - **Inputs**
-    - `strings`: `[String]` of texts to extract intents from.
- - **Outputs**
-    - `intents`: `[[String: Any]]` — an array (per input string) of intent dictionaries.
-
- Each intent dictionary should include at minimum:
- - `"name"`: the intent identifier (e.g. `"setReminder"`)
- - `"confidence"`: `Double?` (optional)
- - `"parameters"`: `[String: Any]?` (optional map of slot names to values)
-
- ### Example
- ```swift
- let mockIntents: [[String: Any]] = [
-    ["name":"setReminder","confidence":0.98,"parameters":["time":"5pm","task":"walk dog"]],
-    ["name":"getWeather","confidence":0.85,"parameters":["city":"San Francisco"]]
- ]
- let service = MockMLService(
-    name: "intent-mock",
-    response: MLResponse(outputs: ["intents": mockIntents], info: nil)
- )
- let task = IntentExtractionMLTask(
-    service: service,
-    strings: ["Remind me at 5pm to walk the dog","What's the weather in San Francisco?"],
-    model: model
- )
-
- guard case let .task(wrapped) = task.toComponent() else { fatalError() }
- let outputs = try await wrapped.execute()
- let extracted = outputs["intents"] as! [[String: Any]]
- print(extracted)
- ```
- */
+/// `IntentExtractionMLTask` wraps any `MLServiceProtocol` that extracts user intents (and optional parameters) from text into a WorkflowComponent.
+///
+/// - **Inputs**
+///    - `strings`: `[String]` of texts to extract intents from.
+/// - **Outputs**
+///    - `intents`: `[[String: Any]]` — an array (per input string) of intent dictionaries.
+///
+/// Each intent dictionary should include at minimum:
+/// - `"name"`: the intent identifier (e.g. `"setReminder"`)
+/// - `"confidence"`: `Double?` (optional)
+/// - `"parameters"`: `[String: Any]?` (optional map of slot names to values)
+///
+/// ### Example
+/// ```swift
+/// let mockIntents: [[String: Any]] = [
+///    ["name":"setReminder","confidence":0.98,"parameters":["time":"5pm","task":"walk dog"]],
+///    ["name":"getWeather","confidence":0.85,"parameters":["city":"San Francisco"]]
+/// ]
+/// let service = MockMLService(
+///    name: "intent-mock",
+///    response: MLResponse(outputs: ["intents": mockIntents], info: nil)
+/// )
+/// let task = IntentExtractionMLTask(
+///    service: service,
+///    strings: ["Remind me at 5pm to walk the dog","What's the weather in San Francisco?"],
+///    model: model
+/// )
+///
+/// guard case let .task(wrapped) = task.toComponent() else { fatalError() }
+/// let outputs = try await wrapped.execute()
+/// let extracted = outputs["intents"] as! [[String: Any]]
+/// print(extracted)
+/// ```
 public class IntentExtractionMLTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.
     private let logger: CustomLogger?
 
-    /**
-     - Parameters:
-        - name: Optional override for the workflow task name.
-        - description: Optional override for description.
-        - model: The `NLModel` to use for intent extraction.
-        - slotSchemes: The tagging schemes to use for extracting parameters (default is `.nameType` and `.lexicalClass`).
-        - maxResults: The maximum number of results to return.
-        - strings: The texts to extract intents from.
-        - inputs: Any additional inputs (fallbacks).
-        - logger: An optional logger for logging task execution details.
-     */
+    /// - Parameters:
+    ///    - name: Optional override for the workflow task name.
+    ///    - description: Optional override for description.
+    ///    - model: The `NLModel` to use for intent extraction.
+    ///    - slotSchemes: The tagging schemes to use for extracting parameters (default is `.nameType` and `.lexicalClass`).
+    ///    - maxResults: The maximum number of results to return.
+    ///    - strings: The texts to extract intents from.
+    ///    - inputs: Any additional inputs (fallbacks).
+    ///    - logger: An optional logger for logging task execution details.
     public init(
         name: String? = nil,
         description: String? = nil,

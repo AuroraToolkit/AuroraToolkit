@@ -6,36 +6,34 @@ import Foundation
 
 // swiftlint:disable orphaned_doc_comment
 
-/**
- These examples use a mix of Anthropic, OpenAI, Google, and Ollama models.
-
- To run these examples, you must have the following environment variables set:
-    - OPENAI_API_KEY: Your OpenAI API key
-    - ANTHROPIC_API_KEY: Your Anthropic API key
-    - GOOGLE_API_KEY: Your Google API key
-
-    You can set these environment variables in the `Examples` scheme or by using the following commands:
-    ```
-    export OPENAI_API_KEY="your-openai-api-key"
-    export ANTHROPIC_API_KEY="your-anthropic-api-key"
-    export GOOGLE_API_KEY="your-google-api-key"
-    ```
-
-    Additionally, you must have the Ollama service running locally on port 11434.
-
-    These examples demonstrate how to:
-    - Make requests to different LLM services
-    - Stream requests to a service
-    - Route requests between services based on token limits
-    - Route requests between services based on the domain
-
-    Each example is self-contained and demonstrates a specific feature of the Aurora Core framework.
-
- To run these examples, execute the following command in the terminal from the root directory of the project:
-    ```
-    swift run AuroraExamples
-    ```
- */
+/// These examples use a mix of Anthropic, OpenAI, Google, and Ollama models.
+///
+/// To run these examples, you must have the following environment variables set:
+///    - OPENAI_API_KEY: Your OpenAI API key
+///    - ANTHROPIC_API_KEY: Your Anthropic API key
+///    - GOOGLE_API_KEY: Your Google API key
+///
+///    You can set these environment variables in the `Examples` scheme or by using the following commands:
+///    ```
+///    export OPENAI_API_KEY="your-openai-api-key"
+///    export ANTHROPIC_API_KEY="your-anthropic-api-key"
+///    export GOOGLE_API_KEY="your-google-api-key"
+///    ```
+///
+///    Additionally, you must have the Ollama service running locally on port 11434.
+///
+///    These examples demonstrate how to:
+///    - Make requests to different LLM services
+///    - Stream requests to a service
+///    - Route requests between services based on token limits
+///    - Route requests between services based on the domain
+///
+///    Each example is self-contained and demonstrates a specific feature of the Aurora Core framework.
+///
+/// To run these examples, execute the following command in the terminal from the root directory of the project:
+///    ```
+///    swift run AuroraExamples
+///    ```
 
 // Uncomment the following line to disable debug logs
 // CustomLogger.shared.toggleDebugLogs(false)

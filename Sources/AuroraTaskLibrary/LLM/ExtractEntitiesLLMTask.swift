@@ -9,40 +9,38 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
-  `ExtractEntitiesTask` extracts named entities from a list of strings using an LLM service.
-
-  - **Inputs**
-     - `strings`: The array of strings to extract entities from.
-     - `entityTypes`: An optional array of entity types to extract (e.g., "Person", "Organization", "Location"). If not provided, all entity types will be extracted.
-     - `maxTokens`: The maximum number of tokens allowed for the LLM response. Defaults to 500.
-
- - **Outputs**
-    - `entities`: A dictionary where keys are the entity types and values are arrays of the extracted entities.
-    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-    - `rawResponse`: The original unmodified raw response text from the LLM.
-
-  ### Use Cases:
-  - Extract names, dates, and other entities from user-generated content for analytics or reporting.
-  - Enhance search capabilities by tagging documents with extracted entities.
-  - Build knowledge graphs or enrich datasets with structured information.
-
-  ### Example:
-  **Input Strings:**
-  - "Sam Altman is the CEO of OpenAI."
-  - "Apple is headquartered in Cupertino, California."
-
-    **Output JSON:**
- ```
- {
-     "entities": {
-         "Person": ["Sam Altman"],
-         "Organization": ["OpenAI", "Apple"],
-         "Location": ["Cupertino, California"]
-     }
- }
- ```
- */
+/// `ExtractEntitiesTask` extracts named entities from a list of strings using an LLM service.
+///
+/// - **Inputs**
+///    - `strings`: The array of strings to extract entities from.
+///    - `entityTypes`: An optional array of entity types to extract (e.g., "Person", "Organization", "Location"). If not provided, all entity types will be extracted.
+///    - `maxTokens`: The maximum number of tokens allowed for the LLM response. Defaults to 500.
+///
+/// - **Outputs**
+///   - `entities`: A dictionary where keys are the entity types and values are arrays of the extracted entities.
+///   - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+///   - `rawResponse`: The original unmodified raw response text from the LLM.
+///
+/// ### Use Cases:
+/// - Extract names, dates, and other entities from user-generated content for analytics or reporting.
+/// - Enhance search capabilities by tagging documents with extracted entities.
+/// - Build knowledge graphs or enrich datasets with structured information.
+///
+/// ### Example:
+/// **Input Strings:**
+/// - "Sam Altman is the CEO of OpenAI."
+/// - "Apple is headquartered in Cupertino, California."
+///
+/// **Output JSON:**
+/// ```
+/// {
+///     "entities": {
+///         "Person": ["Sam Altman"],
+///         "Organization": ["OpenAI", "Apple"],
+///         "Location": ["Cupertino, California"]
+///     }
+/// }
+/// ```
 public class ExtractEntitiesLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
@@ -50,17 +48,15 @@ public class ExtractEntitiesLLMTask: WorkflowComponent {
     // Add logger property and parameter, error logging only
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `ExtractEntitiesTask`.
-
-     - Parameters:
-        - name: The name of the task.
-        - llmService: The LLM service to process entity extraction.
-        - strings: The array of strings to process.
-        - entityTypes: An optional array of entity types to extract. If not provided, all types will be extracted.
-        - maxTokens: The maximum number of tokens allowed for the LLM response. Defaults to 500.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-     */
+    /// Initializes a new `ExtractEntitiesTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - llmService: The LLM service to process entity extraction.
+    ///    - strings: The array of strings to process.
+    ///    - entityTypes: An optional array of entity types to extract. If not provided, all types will be extracted.
+    ///    - maxTokens: The maximum number of tokens allowed for the LLM response. Defaults to 500.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

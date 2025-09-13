@@ -8,35 +8,31 @@
 import AuroraCore
 import Foundation
 
-/**
- `TrimmingTask` is responsible for trimming strings to fit within a specified token limit.
-
- - **Inputs**
- - `strings`: An array of strings to be trimmed. Can contain one or multiple items.
- - `tokenLimit`: The maximum allowed token count (default is 1,024).
- - `buffer`: A buffer percentage to apply when calculating the token limit (default is 5%).
- - `strategy`: The trimming strategy to apply (default is `.middle`).
- - **Outputs**
- - `trimmedStrings`: An array of trimmed strings.
-
- This task can be integrated in a workflow where string trimming is required to fit within a token limit.
- */
+/// `TrimmingTask` is responsible for trimming strings to fit within a specified token limit.
+///
+/// - **Inputs**
+/// - `strings`: An array of strings to be trimmed. Can contain one or multiple items.
+/// - `tokenLimit`: The maximum allowed token count (default is 1,024).
+/// - `buffer`: A buffer percentage to apply when calculating the token limit (default is 5%).
+/// - `strategy`: The trimming strategy to apply (default is `.middle`).
+/// - **Outputs**
+/// - `trimmedStrings`: An array of trimmed strings.
+///
+/// This task can be integrated in a workflow where string trimming is required to fit within a token limit.
 public class TrimmingTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.
     private let logger: CustomLogger?
 
-    /**
-     - Parameters:
-        - name: The name of the task.
-        - strings: An array of strings to be trimmed. Can contain one or multiple items.
-        - tokenLimit: The maximum allowed token count (default is 1,024).
-        - buffer: A buffer percentage to apply when calculating the token limit (default is 5%).
-        - strategy: The trimming strategy to apply (default is `.middle`).
-        - inputs: Additional inputs for the task. If a value for a key is provided, it will overwritten by the parameter.
-        - logger: An optional logger for logging task execution details.
-     */
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - strings: An array of strings to be trimmed. Can contain one or multiple items.
+    ///    - tokenLimit: The maximum allowed token count (default is 1,024).
+    ///    - buffer: A buffer percentage to apply when calculating the token limit (default is 5%).
+    ///    - strategy: The trimming strategy to apply (default is `.middle`).
+    ///    - inputs: Additional inputs for the task. If a value for a key is provided, it will overwritten by the parameter.
+    ///    - logger: An optional logger for logging task execution details.
     public init(
         name: String? = nil,
         strings: [String]? = nil,
@@ -73,14 +69,12 @@ public class TrimmingTask: WorkflowComponent {
         }
     }
 
-    /**
-     Convenience initializer for creating a `TrimmingTask` to trim a single string.
-
-     - Parameter string: The single string to be trimmed.
-     - Parameter tokenLimit: The maximum allowed token count (default is 1,024).
-     - Parameter buffer: A buffer percentage to apply when calculating the token limit (default is 5%).
-     - Parameter strategy: The trimming strategy to apply (default is `.middle`).
-     */
+    /// Convenience initializer for creating a `TrimmingTask` to trim a single string.
+    ///
+    /// - Parameter string: The single string to be trimmed.
+    /// - Parameter tokenLimit: The maximum allowed token count (default is 1,024).
+    /// - Parameter buffer: A buffer percentage to apply when calculating the token limit (default is 5%).
+    /// - Parameter strategy: The trimming strategy to apply (default is `.middle`).
     public convenience init(string: String, tokenLimit: Int = 1024, buffer: Double = 0.05, strategy: String.TrimmingStrategy = .middle) {
         self.init(strings: [string], tokenLimit: tokenLimit, buffer: buffer, strategy: strategy)
     }

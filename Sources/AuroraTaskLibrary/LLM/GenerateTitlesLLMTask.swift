@@ -9,41 +9,37 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
- `GenerateTitlesTask` generates succinct and informative titles for a given list of strings using an LLM service.
-
- - **Inputs**
-    - `strings`: The list of strings to generate titles for.
-    - `languages`: An optional array of languages (ISO 639-1 format) for the generated titles. Defaults to English if not provided.
-    - `maxTokens`: Maximum tokens for the LLM response. Defaults to `100`.
- - **Outputs**
-    - `titles`: A dictionary where keys are the original strings and values are dictionaries of generated titles keyed by language.
-    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-    - `rawResponse`: The original unmodified raw response text from the LLM.
-
- ### Use Cases
- - Generate multilingual headlines for articles, blog posts, or content summaries.
- - Suggest titles for user-generated content or creative works in different locales.
- - Simplify and condense complex information into concise titles.
- */
+/// `GenerateTitlesTask` generates succinct and informative titles for a given list of strings using an LLM service.
+///
+/// - **Inputs**
+///    - `strings`: The list of strings to generate titles for.
+///    - `languages`: An optional array of languages (ISO 639-1 format) for the generated titles. Defaults to English if not provided.
+///    - `maxTokens`: Maximum tokens for the LLM response. Defaults to `100`.
+/// - **Outputs**
+///    - `titles`: A dictionary where keys are the original strings and values are dictionaries of generated titles keyed by language.
+///    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+///    - `rawResponse`: The original unmodified raw response text from the LLM.
+///
+/// ### Use Cases
+/// - Generate multilingual headlines for articles, blog posts, or content summaries.
+/// - Suggest titles for user-generated content or creative works in different locales.
+/// - Simplify and condense complex information into concise titles.
 public class GenerateTitlesLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `GenerateTitlesLLMTask`.
-
-     - Parameters:
-        - name: Optionally pass the name of the task.
-        - llmService: The LLM service to use for title generation.
-        - strings: The list of strings to generate titles for. Defaults to `nil` (can be resolved dynamically).
-        - languages: An optional array of languages (ISO 639-1 format) for the titles. Defaults to English if not provided.
-        - maxTokens: The maximum number of tokens for each title. Defaults to `100`.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-     */
+    /// Initializes a new `GenerateTitlesLLMTask`.
+    ///
+    /// - Parameters:
+    ///    - name: Optionally pass the name of the task.
+    ///    - llmService: The LLM service to use for title generation.
+    ///    - strings: The list of strings to generate titles for. Defaults to `nil` (can be resolved dynamically).
+    ///    - languages: An optional array of languages (ISO 639-1 format) for the titles. Defaults to English if not provided.
+    ///    - maxTokens: The maximum number of tokens for each title. Defaults to `100`.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

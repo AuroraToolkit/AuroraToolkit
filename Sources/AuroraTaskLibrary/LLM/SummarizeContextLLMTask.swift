@@ -9,35 +9,31 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
- `SummarizeContextTask` is responsible for summarizing context items within a `ContextController` using the connected LLM service.
-
- - **Inputs**
-    - `ContextController`: The context controller containing the context to be summarized.
-    - `SummaryType`: The type of summary to be performed (e.g., context, general text).
-    - `SummarizerOptions`: Additional summarizer configuration options (e.g. model, temperature).
- - **Outputs**
-    - `summarizedContext`: The context containing the summarized content.
-
- This task can be integrated in a workflow where context items need to be summarized.
- */
+/// `SummarizeContextTask` is responsible for summarizing context items within a `ContextController` using the connected LLM service.
+///
+/// - **Inputs**
+///    - `ContextController`: The context controller containing the context to be summarized.
+///    - `SummaryType`: The type of summary to be performed (e.g., context, general text).
+///    - `SummarizerOptions`: Additional summarizer configuration options (e.g. model, temperature).
+/// - **Outputs**
+///    - `summarizedContext`: The context containing the summarized content.
+///
+/// This task can be integrated in a workflow where context items need to be summarized.
 public class SummarizeContextLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Optional logger for logging events and errors.
     private var logger: CustomLogger?
 
-    /**
-     Initializes a new `SummarizeContextLLMTask` instance.
-
-     - Parameters:
-        - name: Optionally pass the name of the task.
-        - contextController: The `ContextController` instance containing the context to be summarized.
-        - summaryType: The type of summary to be performed (`single` or `multiple`).
-        - options: Optional `SummarizerOptions` to provide additional configuration options (e.g., model, temperature).
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: Optional `CustomLogger` for logging events and errors.
-     */
+    /// Initializes a new `SummarizeContextLLMTask` instance.
+    ///
+    /// - Parameters:
+    ///    - name: Optionally pass the name of the task.
+    ///    - contextController: The `ContextController` instance containing the context to be summarized.
+    ///    - summaryType: The type of summary to be performed (`single` or `multiple`).
+    ///    - options: Optional `SummarizerOptions` to provide additional configuration options (e.g., model, temperature).
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional `CustomLogger` for logging events and errors.
     public init(
         name: String? = nil,
         contextController: ContextController,

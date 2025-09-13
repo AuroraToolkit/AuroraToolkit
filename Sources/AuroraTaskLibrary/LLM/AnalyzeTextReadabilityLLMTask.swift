@@ -9,40 +9,36 @@ import AuroraCore
 import AuroraLLM
 import Foundation
 
-/**
- `AnalyzeTextReadabilityTask` analyzes the readability of input strings using an LLM service.
-
- - **Inputs**
-    - `strings`: The list of strings to analyze for readability.
-    - `maxTokens`: The maximum number of tokens allowed for the LLM response. Defaults to 500.
-
- - **Outputs**
-    - `readabilityScores`: A dictionary where keys are the input strings and values are their readability scores (e.g., Flesch–Kincaid grade level, average word length).
-    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
-    - `rawResponse`: The original unmodified raw response text from the LLM.
-
- ### Use Cases
- - Assess the complexity of text content for target audiences.
- - Pre-process content to ensure it meets accessibility standards.
- - Compare readability metrics across different content pieces.
- */
+/// `AnalyzeTextReadabilityTask` analyzes the readability of input strings using an LLM service.
+///
+/// - **Inputs**
+///    - `strings`: The list of strings to analyze for readability.
+///    - `maxTokens`: The maximum number of tokens allowed for the LLM response. Defaults to 500.
+///
+/// - **Outputs**
+///    - `readabilityScores`: A dictionary where keys are the input strings and values are their readability scores (e.g., Flesch–Kincaid grade level, average word length).
+///    - `thoughts`: An array of strings containing the LLM's chain-of-thought entries, if any.
+///    - `rawResponse`: The original unmodified raw response text from the LLM.
+///
+/// ### Use Cases
+/// - Assess the complexity of text content for target audiences.
+/// - Pre-process content to ensure it meets accessibility standards.
+/// - Compare readability metrics across different content pieces.
 public class AnalyzeTextReadabilityLLMTask: WorkflowComponent {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.
     private let logger: CustomLogger?
 
-    /**
-     Initializes a new `AnalyzeTextReadabilityLLMTask`.
-
-     - Parameters:
-        - name: The name of the task.
-        - llmService: The LLM service that will handle the readability analysis request.
-        - strings: The list of strings to analyze for readability. Defaults to `nil` (can be resolved dynamically).
-        - maxTokens: The maximum number of tokens allowed for the response. Defaults to 500.
-        - inputs: Additional inputs for the task. Defaults to an empty dictionary.
-        - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
-     */
+    /// Initializes a new `AnalyzeTextReadabilityLLMTask`.
+    ///
+    /// - Parameters:
+    ///    - name: The name of the task.
+    ///    - llmService: The LLM service that will handle the readability analysis request.
+    ///    - strings: The list of strings to analyze for readability. Defaults to `nil` (can be resolved dynamically).
+    ///    - maxTokens: The maximum number of tokens allowed for the response. Defaults to 500.
+    ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for debugging and monitoring. Defaults to `nil`.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,
