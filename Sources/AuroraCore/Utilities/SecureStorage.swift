@@ -52,7 +52,7 @@ public class SecureStorage {
         var dataTypeRef: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
         if status == errSecSuccess, let data = dataTypeRef as? Data {
-            return String(data: data, encoding: .utf8)
+            return String(decoding: data, as: UTF8.self)
         }
         return nil
     }
@@ -106,7 +106,7 @@ public class SecureStorage {
         var dataTypeRef: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
         if status == errSecSuccess, let data = dataTypeRef as? Data {
-            return String(data: data, encoding: .utf8)
+            return String(decoding: data, as: UTF8.self)
         }
         return nil
     }

@@ -1,11 +1,82 @@
+# macOS
 .DS_Store
+
+# Swift Package Manager
 /.build
 /Packages
-xcuserdata/
-DerivedData/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+
+# Xcode
+xcuserdata/
+DerivedData/
+*.xcworkspace
+!Package.swift.xcworkspace
+
+# Environment & secrets
 .netrc
 .env
+
+# Documentation build artifacts  
 docs/undocumented.json
+
+# --- AI agents: per-user state, caches, secrets (do not commit) ---
+# Generic local AI state
+.ai-local/
+.ai-cache/
+.llm/
+*.llmcache
+*.prompt-history
+*.promptlog
+*.agent.local.*
+*.ai.local.*
+*.ai.user.*
+
+# Common AI tools (per-user configs and caches)
+.cursor/
+.windsurf/
+.continue/
+.cody/
+.tabnine/
+.codeium/
+.cline/
+.aider*
+
+# AI service local configs (user machines)
+.openai/
+.anthropic/
+.ollama/
+
+# Claude Code artifacts
+.claude/
+claude.profile.*
+!claude.profile.example
+
+# --- IDE-specific local state ---
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+# IntelliJ / CLion / AppCode
+.idea/
+*.iml
+
+# Vim/Neovim
+.vim/
+.nvim/
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
 

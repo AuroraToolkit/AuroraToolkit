@@ -121,56 +121,81 @@ public final class LogicDomainRouter: LLMDomainRouterProtocol {
     /// Applies the chosen `EvaluationStrategy` and returns a domain
     /// or `nil` if unresolved.
     public func determineDomain(for request: LLMRequest) async throws -> String? {
+        let result: String?
         switch strategy {
         case .firstMatch:
-            for r in rules where r.predicate(request) {
-                logger?.debug("[\(name)] '\(r.name)' matched → \(r.domain)",
-                              category: "LogicDomainRouter")
-                return r.domain
-            }
-
+            result = handleFirstMatch(for: request)
         case .highestPriority:
-            var winner: LogicRule?
-            for r in rules where r.predicate(request) {
-                if winner == nil || r.priority > winner!.priority { winner = r }
-            }
-            if let win = winner {
-                logger?.debug("[\(name)] '\(win.name)' matched (highestPriority \(win.priority))",
-                              category: "LogicDomainRouter")
-                return win.domain
-            }
-
+            result = handleHighestPriority(for: request)
         case let .topKThenResolve(k, resolver):
-            var bucket: [LogicRule] = []
-            for r in rules where r.predicate(request) {
-                bucket.append(r)
-                if bucket.count == k { break }
-            }
-            if let result = resolver(bucket) {
-                logger?.debug("[\(name)] topK resolver chose '\(result)'", category: "LogicDomainRouter")
-                return result.lowercased()
-            }
-
+            result = handleTopKThenResolve(for: request, k: k, resolver: resolver)
         case .probabilisticWeights(let selector, var rng):
             let matches = rules.filter { $0.predicate(request) }
             let weighted = selector(matches)
             if let choice = Self.weightedRandom(weighted, using: &rng) {
                 logger?.debug("[\(name)] probabilistic picked '\(choice)'",
                               category: "LogicDomainRouter")
-                return choice
+                result = choice
+            } else {
+                result = nil
             }
-
         case let .custom(resolver):
-            let matches = rules.filter { $0.predicate(request) }
-            if let result = resolver(matches) {
-                logger?.debug("[\(name)] custom resolver chose '\(result)'", category: "LogicDomainRouter")
-                return result.lowercased()
-            }
+            result = handleCustom(for: request, resolver: resolver)
+        }
+
+        if let result = result {
+            return result
         }
 
         logger?.debug("[\(name)] no rule matched → \(defaultDomain ?? "nil")",
                       category: "LogicDomainRouter")
         return defaultDomain
+    }
+
+    // MARK: - Strategy Handlers
+
+    private func handleFirstMatch(for request: LLMRequest) -> String? {
+        for r in rules where r.predicate(request) {
+            logger?.debug("[\(name)] '\(r.name)' matched → \(r.domain)",
+                          category: "LogicDomainRouter")
+            return r.domain
+        }
+        return nil
+    }
+
+    private func handleHighestPriority(for request: LLMRequest) -> String? {
+        var winner: LogicRule?
+        for r in rules where r.predicate(request) {
+            if winner == nil || r.priority > winner!.priority { winner = r }
+        }
+        if let win = winner {
+            logger?.debug("[\(name)] '\(win.name)' matched (highestPriority \(win.priority))",
+                          category: "LogicDomainRouter")
+            return win.domain
+        }
+        return nil
+    }
+
+    private func handleTopKThenResolve(for request: LLMRequest, k: Int, resolver: ([LogicRule]) -> String?) -> String? {
+        var bucket: [LogicRule] = []
+        for r in rules where r.predicate(request) {
+            bucket.append(r)
+            if bucket.count == k { break }
+        }
+        if let result = resolver(bucket) {
+            logger?.debug("[\(name)] topK resolver chose '\(result)'", category: "LogicDomainRouter")
+            return result.lowercased()
+        }
+        return nil
+    }
+
+    private func handleCustom(for request: LLMRequest, resolver: ([LogicRule]) -> String?) -> String? {
+        let matches = rules.filter { $0.predicate(request) }
+        if let result = resolver(matches) {
+            logger?.debug("[\(name)] custom resolver chose '\(result)'", category: "LogicDomainRouter")
+            return result.lowercased()
+        }
+        return nil
     }
 
     /// Helper for weighted random draw.

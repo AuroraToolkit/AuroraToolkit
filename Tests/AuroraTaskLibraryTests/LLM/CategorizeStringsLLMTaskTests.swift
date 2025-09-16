@@ -169,16 +169,16 @@ final class CategorizeStringsLLMTaskTests: XCTestCase {
 
         // Verify structure and reasonable categorization instead of exact match
         XCTAssertFalse(categorizedStrings.isEmpty, "Results should not be empty.")
-        
+
         // Verify all input strings are categorized somewhere
         let allCategorizedStrings = categorizedStrings.values.flatMap { $0 }
         XCTAssertEqual(Set(allCategorizedStrings), Set(stringsToCategorize), "All input strings should be categorized.")
-        
+
         // Verify only valid categories are used
         let usedCategories = Set(categorizedStrings.keys)
         let allowedCategories = Set(categories)
         XCTAssertTrue(usedCategories.isSubset(of: allowedCategories), "Only specified categories should be used.")
-        
+
         // Verify reasonable categorization (either is acceptable)
         let waterCategorizations = categorizedStrings.compactMap { key, value in
             value.contains("Water is essential for life.") ? key : nil
@@ -186,11 +186,11 @@ final class CategorizeStringsLLMTaskTests: XCTestCase {
         let equationCategorizations = categorizedStrings.compactMap { key, value in
             value.contains("E=mc^2 is a famous equation.") ? key : nil
         }
-        
+
         XCTAssertTrue(waterCategorizations.contains("Science"), "Water statement should be in Science category.")
-        XCTAssertTrue(equationCategorizations.contains("Science") || equationCategorizations.contains("Mathematics"), 
+        XCTAssertTrue(equationCategorizations.contains("Science") || equationCategorizations.contains("Mathematics"),
                       "Equation should be in Science or Mathematics category.")
-        
+
         print("Categorization results: \(categorizedStrings)")
     }
 
@@ -226,7 +226,7 @@ final class CategorizeStringsLLMTaskTests: XCTestCase {
             XCTFail("Output 'categorizedStrings' not found or invalid.")
             return
         }
-        
+
         XCTAssertFalse(categorizedStrings.isEmpty, "Should successfully infer categories.")
         XCTAssertEqual(categorizedStrings["Technology"], ["Apple is a tech company."])
         XCTAssertEqual(categorizedStrings["Astronomy"], ["The sun is a star."])

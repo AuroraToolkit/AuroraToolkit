@@ -15,24 +15,29 @@ import Foundation
 
 struct CustomerFeedbackAnalysisWorkflow {
     func execute() async {
-        // Set up the required API key for your LLM service (e.g., OpenAI, Anthropic, or Ollama)
+        guard let llmService = setupLLMService() else { return }
+        let summarizer = Summarizer(llmService: llmService)
+        var workflow = createWorkflow(llmService: llmService, summarizer: summarizer)
+
+        await executeWorkflow(&workflow)
+        await printWorkflowResults(workflow)
+    }
+
+    private func setupLLMService() -> OpenAIService? {
         let openAIKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
         guard !openAIKey.isEmpty else {
             print("No API key provided. Please set the OPENAI_API_KEY environment variable.")
-            return
+            return nil
         }
+        return OpenAIService(apiKey: openAIKey, logger: CustomLogger.shared)
+    }
 
-        // Initialize the LLM service
-        let llmService = OpenAIService(apiKey: openAIKey, logger: CustomLogger.shared)
-        let summarizer = Summarizer(llmService: llmService)
-
-        // URL to retrieve app store reviews
+    private func createWorkflow(llmService: OpenAIService, summarizer: Summarizer) -> Workflow {
         let countryCode = "us" // Change to your country code if needed
         let appId = "284708449" // Replace with your app ID, e.g. UrbanSpoon app
         let appStoreReviewsURL = "https://itunes.apple.com/\(countryCode)/rss/customerreviews/page=1/id=\(appId)/sortBy=mostRecent/json"
 
-        // Workflow initialization
-        var workflow = Workflow(
+        return Workflow(
             name: "Customer Feedback Analysis Workflow",
             description: "Fetch, analyze, and generate insights from app store reviews.",
             logger: CustomLogger.shared
@@ -116,14 +121,24 @@ struct CustomerFeedbackAnalysisWorkflow {
                 inputs: ["strings": "{ExtractReviewText.strings}"]
             )
         }
+    }
 
+    private func executeWorkflow(_ workflow: inout Workflow) async {
         print("Executing \(workflow.name)...")
         print(workflow.description)
-
-        // Execute the workflow
         await workflow.start()
+    }
 
-        // Print the workflow outputs
+    private func printWorkflowResults(_ workflow: Workflow) async {
+        printSummaries(workflow)
+        printLanguageAnalysis(workflow)
+        printKeywordAnalysis(workflow)
+        printSentimentAnalysis(workflow)
+        printActionableInsights(workflow)
+        await printWorkflowReport(workflow)
+    }
+
+    private func printSummaries(_ workflow: Workflow) {
         if let summaries = workflow.outputs["SummarizeReviewFindings.summaries"] as? [String] {
             print("Review Findings Summaries:")
             for (index, summary) in summaries.enumerated() {
@@ -132,8 +147,9 @@ struct CustomerFeedbackAnalysisWorkflow {
         } else {
             print("No summaries generated.")
         }
+    }
 
-        // Gather and process additional results
+    private func printLanguageAnalysis(_ workflow: Workflow) {
         if let detectedLanguages = workflow.outputs["DetectReviewLanguages.languages"] as? [String: String] {
             let languages = detectedLanguages.values
                 .reduce(into: [String: Int]()) { counts, language in
@@ -145,7 +161,9 @@ struct CustomerFeedbackAnalysisWorkflow {
                 print("- \(language): \(count) review(s)")
             }
         }
+    }
 
+    private func printKeywordAnalysis(_ workflow: Workflow) {
         if let keywordsDict = workflow.outputs["ExtractReviewKeywords.keywords"] as? [String: [String]] {
             // Extract and display the flat list of keywords
             let keywords = Set(keywordsDict.values.flatMap { $0 }).sorted()
@@ -159,8 +177,9 @@ struct CustomerFeedbackAnalysisWorkflow {
                 print("- \(category): \(keywords.joined(separator: ", "))")
             }
         }
+    }
 
-        // Collect sentiment data
+    private func printSentimentAnalysis(_ workflow: Workflow) {
         if let sentiments = workflow.outputs["AnalyzeReviewSentiment.sentiments"] as? [String: [String: Any]] {
             var sentimentCounts = ["Positive": 0, "Neutral": 0, "Negative": 0]
             var sentimentExamples = ["Positive": [String](), "Neutral": [String](), "Negative": [String]()]
@@ -194,7 +213,9 @@ struct CustomerFeedbackAnalysisWorkflow {
                 examples.forEach { print("  \(String(describing: $0))") }
             }
         }
+    }
 
+    private func printActionableInsights(_ workflow: Workflow) {
         if let suggestions = workflow.outputs["GenerateReviewSuggestions.titles"] as? [String: [String: String]] {
             print("\nActionable Insights:")
             for (review, titles) in suggestions {
@@ -206,9 +227,10 @@ struct CustomerFeedbackAnalysisWorkflow {
         } else {
             print("No suggestions generated.")
         }
+    }
 
+    private func printWorkflowReport(_ workflow: Workflow) async {
         print("\n-------\n")
-
         let report = await workflow.generateReport()
         print(report.printedReport(compact: true, showOutputs: false))
     }

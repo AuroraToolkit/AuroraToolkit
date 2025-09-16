@@ -7,6 +7,7 @@
 
 import Foundation
 
+// swiftlint:disable nesting
 /// Represents the response from Anthropic's LLM models, conforming to `LLMResponseProtocol`.
 ///
 /// This struct captures relevant fields from the response, including generated content, message metadata, and token usage statistics if provided by the API.
@@ -85,3 +86,4 @@ public struct AnthropicLLMResponse: LLMResponseProtocol, Codable {
         case usage
     }
 }
+// swiftlint:enable nesting

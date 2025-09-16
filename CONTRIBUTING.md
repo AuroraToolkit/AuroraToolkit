@@ -32,9 +32,32 @@ Thank you for considering contributing to AuroraCore! We welcome contributions f
 
 8. **Create a Pull Request**: Go to the original repository and create a pull request. Provide a clear description of your changes and why they should be merged.
 
-## Code Style
+## Code Style and Quality
 
 Please follow the existing code style in the project. Consistency is key to maintaining readability.
+
+### Code Formatting
+- Use SwiftLint for code style enforcement. Run `swiftlint` before committing.
+- Follow the `.editorconfig` settings for consistent formatting across editors.
+- All code must pass SwiftLint validation regardless of which tools or AI agents you use.
+
+### Using AI Agents and IDEs
+You're welcome to use AI agents (Claude Code, Cursor, ChatGPT, etc.) to help with development. However:
+- **Don't commit personal agent configs, caches, or prompt histories** - these are ignored by `.gitignore`
+- **The repository is the source of truth** - all changes must pass tests, linters, and formatters
+- **Maintain code quality** - AI-generated code should be reviewed and tested just like manually written code
+- If an agent suggests project-wide settings (formatter rules, linting configs), propose them via PR as normal code changes
+
+### Required Checks
+Before submitting a PR, ensure your code passes:
+```bash
+# Code style and linting
+swiftlint
+
+# Build and tests
+swift build
+swift test
+```
 
 ## Reporting Issues
 

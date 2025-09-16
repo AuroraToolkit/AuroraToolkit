@@ -216,59 +216,85 @@ public struct Workflow {
             step += 1
             logger?.debug("\(name) Step \(step)")
 
-            // Check state before executing each component
-            let currentState = await stateManager.getState()
-
-            switch currentState {
-            case .inProgress:
-                break
-            case .canceled:
-                logger?.debug("Workflow \(name) execution canceled.", category: "Workflow")
-                return
-            case .paused:
-                logger?.debug("Workflow \(name) execution paused.", category: "Workflow")
-                await waitUntilResumed() // Wait until the state changes
-            default:
-                logger?.debug("Workflow \(name) in unexpected state: \(currentState)", category: "Workflow")
-                throw NSError(
-                    domain: "Workflow",
-                    code: 2,
-                    userInfo: [NSLocalizedDescriptionKey: "Workflow in unexpected state: \(currentState)"]
-                )
+            do {
+                try await checkWorkflowState()
+                try await executeComponent(component)
+                componentsManager.complete(component)
+            } catch is WorkflowCanceledException {
+                return // Exit gracefully when canceled
             }
-
-            switch component {
-            case let .task(task):
-                let taskOutputs = try await executeTask(task, workflowOutputs: outputs)
-                outputs.merge(taskOutputs.mapKeys { "\(task.name).\($0)" }) { _, new in new }
-
-            case let .taskGroup(group):
-                let groupOutputs = try await executeTaskGroup(group, workflowOutputs: outputs)
-                outputs.merge(groupOutputs.mapKeys { "\(group.name).\($0)" }) { _, new in new }
-
-            case var .subflow(subflow):
-                // Execute the subflow.
-                await subflow.workflow.start()
-                // Merge subflow outputs (optionally, you can namespace these).
-                outputs.merge(subflow.workflow.outputs) { _, new in new }
-
-            case let .logic(logicComponent):
-                // Evaluate the logic component, which returns new components.
-                let newComponents = try await logicComponent.evaluate()
-                componentsManager.insert(newComponents)
-
-            case let .trigger(triggerComponent):
-                do {
-                    let newComponents = try await triggerComponent.waitForTrigger()
-                    componentsManager.insert(newComponents)
-                } catch {
-                    logger?.error("Trigger \(triggerComponent.name) failed: \(error.localizedDescription)", category: "Workflow")
-                }
-            }
-
-            componentsManager.complete(component)
         }
 
+        await finalizeWorkflow()
+    }
+
+    private func checkWorkflowState() async throws {
+        let currentState = await stateManager.getState()
+
+        switch currentState {
+        case .inProgress:
+            break
+        case .canceled:
+            logger?.debug("Workflow \(name) execution canceled.", category: "Workflow")
+            throw WorkflowCanceledException()
+        case .paused:
+            logger?.debug("Workflow \(name) execution paused.", category: "Workflow")
+            await waitUntilResumed()
+        default:
+            logger?.debug("Workflow \(name) in unexpected state: \(currentState)", category: "Workflow")
+            throw NSError(
+                domain: "Workflow",
+                code: 2,
+                userInfo: [NSLocalizedDescriptionKey: "Workflow in unexpected state: \(currentState)"]
+            )
+        }
+    }
+
+    private mutating func executeComponent(_ component: Component) async throws {
+        switch component {
+        case let .task(task):
+            try await executeTaskComponent(task)
+        case let .taskGroup(group):
+            try await executeTaskGroupComponent(group)
+        case var .subflow(subflow):
+            try await executeSubflowComponent(&subflow)
+        case let .logic(logicComponent):
+            try await executeLogicComponent(logicComponent)
+        case let .trigger(triggerComponent):
+            try await executeTriggerComponent(triggerComponent)
+        }
+    }
+
+    private mutating func executeTaskComponent(_ task: Task) async throws {
+        let taskOutputs = try await executeTask(task, workflowOutputs: outputs)
+        outputs.merge(taskOutputs.mapKeys { "\(task.name).\($0)" }) { _, new in new }
+    }
+
+    private mutating func executeTaskGroupComponent(_ group: TaskGroup) async throws {
+        let groupOutputs = try await executeTaskGroup(group, workflowOutputs: outputs)
+        outputs.merge(groupOutputs.mapKeys { "\(group.name).\($0)" }) { _, new in new }
+    }
+
+    private mutating func executeSubflowComponent(_ subflow: inout Subflow) async throws {
+        await subflow.workflow.start()
+        outputs.merge(subflow.workflow.outputs) { _, new in new }
+    }
+
+    private mutating func executeLogicComponent(_ logicComponent: Logic) async throws {
+        let newComponents = try await logicComponent.evaluate()
+        componentsManager.insert(newComponents)
+    }
+
+    private mutating func executeTriggerComponent(_ triggerComponent: Trigger) async throws {
+        do {
+            let newComponents = try await triggerComponent.waitForTrigger()
+            componentsManager.insert(newComponents)
+        } catch {
+            logger?.error("Trigger \(triggerComponent.name) failed: \(error.localizedDescription)", category: "Workflow")
+        }
+    }
+
+    private func finalizeWorkflow() async {
         let finalState = await stateManager.getState()
         if finalState == .canceled {
             logger?.debug("Workflow \(name) canceled during execution.", category: "Workflow")
@@ -278,6 +304,8 @@ public struct Workflow {
             logger?.debug("Workflow \(name) completed successfully.", category: "Workflow")
         }
     }
+
+    private struct WorkflowCanceledException: Error {}
 
     /// Resolves the inputs for a task using the outputs of previously executed tasks.
     ///
@@ -628,11 +656,13 @@ public struct Workflow {
         ///  How tasks are executed, sequentially, or in parallel
         public let mode: ExecutionMode
 
+        // swiftlint:disable nesting
         /// Execute tasks sequentially in the order they were added, or simultaneously in parallel.
         public enum ExecutionMode {
             case sequential
             case parallel
         }
+        // swiftlint:enable nesting
 
         /// Holds the execution details of the task group.
         public let detailsHolder = ExecutionDetailsHolder()

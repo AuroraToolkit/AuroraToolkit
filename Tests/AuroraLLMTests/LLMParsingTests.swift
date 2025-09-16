@@ -40,7 +40,7 @@ final class LLMParsingTests: XCTestCase {
         XCTAssertEqual(result.thoughts, ["just thinking"])
         XCTAssertEqual(result.jsonBody, "no json here")
     }
-    
+
     func testExtractThoughts_multipleThinkBlocks() {
         let input = "<think>first thought</think><think>second thought</think>{\"x\":10}"
         let result = input.extractThoughtsAndStripJSON()

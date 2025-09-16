@@ -91,7 +91,7 @@ public class Summarizer: SummarizerProtocol {
                 // Use JSON input for structured summarization of individual texts
                 let jsonInput: [String: Any] = ["texts": texts]
                 let jsonData = try JSONSerialization.data(withJSONObject: jsonInput, options: [])
-                let jsonString = String(data: jsonData, encoding: .utf8)!
+                let jsonString = String(decoding: jsonData, as: UTF8.self)
 
                 // Create messages for the LLM
                 let messages: [LLMMessage] = [

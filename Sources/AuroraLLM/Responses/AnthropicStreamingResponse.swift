@@ -7,6 +7,7 @@
 
 import Foundation
 
+// swiftlint:disable nesting
 /// Represents a streaming response from Anthropic's LLM service.
 ///
 /// This struct captures various components of the streaming response, including content deltas,
@@ -100,3 +101,4 @@ public struct AnthropicLLMStreamingResponse: Codable {
         case usage
     }
 }
+// swiftlint:enable nesting

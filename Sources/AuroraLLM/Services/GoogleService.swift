@@ -238,13 +238,26 @@ public class GoogleService: LLMServiceProtocol {
 
     // Maps the internal LLMRequest to the Google API specific request structure.
     private func mapToGoogleRequest(_ request: LLMRequest, serviceSystemPrompt: String?) throws -> GoogleGenerateContentRequest {
+        let effectiveSystemPrompt = resolveSystemPrompt(from: request, serviceSystemPrompt: serviceSystemPrompt)
+        let googleContents = processMessages(request.messages)
+        let googleSystemInstruction = createSystemInstruction(from: effectiveSystemPrompt)
+        let effectiveMaxOutput = try calculateEffectiveMaxOutput(for: request)
+        let generationConfig = createGenerationConfig(for: request, maxOutput: effectiveMaxOutput)
+
+        logSystemPromptSource(request: request, effectiveSystemPrompt: effectiveSystemPrompt)
+
+        return GoogleGenerateContentRequest(
+            contents: googleContents,
+            systemInstruction: googleSystemInstruction,
+            generationConfig: generationConfig,
+            safetySettings: nil
+        )
+    }
+
+    private func processMessages(_ messages: [LLMMessage]) -> [GoogleContent] {
         var googleContents: [GoogleContent] = []
 
-        // Use helper function for consistent system prompt resolution
-        let effectiveSystemPrompt = resolveSystemPrompt(from: request, serviceSystemPrompt: serviceSystemPrompt)
-
-        // Process non-system messages
-        for message in request.messages {
+        for message in messages {
             let role: String
             switch message.role {
             case .user: role = "user"
@@ -261,21 +274,15 @@ public class GoogleService: LLMServiceProtocol {
             googleContents.append(GoogleContent(role: role, parts: [GooglePart(text: message.content)]))
         }
 
-        var googleSystemInstruction: GoogleContent?
-        if let promptText = effectiveSystemPrompt, !promptText.isEmpty {
-            googleSystemInstruction = GoogleContent(role: nil, parts: [GooglePart(text: promptText)])
-        }
+        return googleContents
+    }
 
-        // Log the effective system prompt source for debugging
-        if effectiveSystemPrompt != nil {
-            if request.systemPrompt != nil {
-                logger?.debug("GoogleService: Using request.systemPrompt override", category: "GoogleService")
-            } else {
-                logger?.debug("GoogleService: Using service default systemPrompt", category: "GoogleService")
-            }
-        }
+    private func createSystemInstruction(from systemPrompt: String?) -> GoogleContent? {
+        guard let promptText = systemPrompt, !promptText.isEmpty else { return nil }
+        return GoogleContent(role: nil, parts: [GooglePart(text: promptText)])
+    }
 
-        // Apply output token policy here before setting maxOutputTokens in config
+    private func calculateEffectiveMaxOutput(for request: LLMRequest) throws -> Int {
         var effectiveMaxOutput = request.maxTokens
         switch outputTokenPolicy {
         case .adjustToServiceLimits:
@@ -287,23 +294,26 @@ public class GoogleService: LLMServiceProtocol {
             }
             // Use request.maxTokens as it's within limits
         }
+        return effectiveMaxOutput
+    }
 
-        let generationConfig = GoogleGenerationConfig(
+    private func createGenerationConfig(for request: LLMRequest, maxOutput: Int) -> GoogleGenerationConfig {
+        return GoogleGenerationConfig(
             temperature: request.temperature,
             topP: request.options?.topP,
-            maxOutputTokens: effectiveMaxOutput, // Use adjusted value
+            maxOutputTokens: maxOutput,
             stopSequences: request.options?.stopSequences
         )
+    }
 
-        // Note: Input token policy (trimming) should be handled by LLMManager *before* calling sendRequest
-        // This service assumes the input request fits within the allowed input limits based on the policy.
-
-        return GoogleGenerateContentRequest(
-            contents: googleContents,
-            systemInstruction: googleSystemInstruction,
-            generationConfig: generationConfig,
-            safetySettings: nil
-        )
+    private func logSystemPromptSource(request: LLMRequest, effectiveSystemPrompt: String?) {
+        if effectiveSystemPrompt != nil {
+            if request.systemPrompt != nil {
+                logger?.debug("GoogleService: Using request.systemPrompt override", category: "GoogleService")
+            } else {
+                logger?.debug("GoogleService: Using service default systemPrompt", category: "GoogleService")
+            }
+        }
     }
 
     // MARK: - Streaming Delegate Inner Class
@@ -373,74 +383,96 @@ public class GoogleService: LLMServiceProtocol {
         // Processes the data buffer, attempting to parse complete JSON chunks.
         private func processBuffer() {
             while !receivedDataBuffer.isEmpty {
-                // Find the next potential JSON object (simple boundary check)
-                guard let firstBrace = receivedDataBuffer.firstIndex(of: UInt8(ascii: "{")),
-                      let lastBrace = receivedDataBuffer.lastIndex(of: UInt8(ascii: "}"))
-                else {
-                    // No complete object structure found in buffer yet, wait for more data
-                    logger?.debug("GoogleService [StreamingDelegate] Buffer does not contain complete {} structure yet.", category: "GoogleService.StreamingDelegate")
-                    break
+                guard let jsonBounds = findJsonBounds() else { break }
+                guard let trimmedData = extractAndTrimJsonData(bounds: jsonBounds) else { continue }
+
+                if processJsonChunk(data: trimmedData) {
+                    cleanupProcessedData(bounds: jsonBounds)
+                } else {
+                    break // Failed to process, wait for more data
                 }
+            }
+        }
 
-                // Check if the last brace comes after the first brace
-                guard lastBrace >= firstBrace else {
-                    logger?.debug("GoogleService [StreamingDelegate] Found braces out of order, waiting for more data.", category: "GoogleService.StreamingDelegate")
-                    break // Wait for more data if braces seem out of order
+        private func findJsonBounds() -> (first: Data.Index, last: Data.Index)? {
+            guard let firstBrace = receivedDataBuffer.firstIndex(of: UInt8(ascii: "{")),
+                  let lastBrace = receivedDataBuffer.lastIndex(of: UInt8(ascii: "}")) else {
+                logger?.debug("GoogleService [StreamingDelegate] Buffer does not contain complete {} structure yet.", category: "GoogleService.StreamingDelegate")
+                return nil
+            }
+
+            guard lastBrace >= firstBrace else {
+                logger?.debug("GoogleService [StreamingDelegate] Found braces out of order, waiting for more data.", category: "GoogleService.StreamingDelegate")
+                return nil
+            }
+
+            return (firstBrace, lastBrace)
+        }
+
+        private func extractAndTrimJsonData(bounds: (first: Data.Index, last: Data.Index)) -> Data? {
+            let potentialJsonData = receivedDataBuffer[bounds.first ... bounds.last]
+            let trimmedData = potentialJsonData.filter { $0 >= 32 } // Filter out control chars
+
+            guard !trimmedData.isEmpty else {
+                receivedDataBuffer.removeSubrange(bounds.first ... bounds.last)
+                return nil
+            }
+
+            return trimmedData
+        }
+
+        private func processJsonChunk(data: Data) -> Bool {
+            do {
+                let chunk = try JSONDecoder().decode(GoogleStreamedGenerateContentResponse.self, from: data)
+                handleValidChunk(chunk)
+                return true
+            } catch {
+                logger?.debug("GoogleService [StreamingDelegate] Failed to decode potential JSON chunk. Error: \(error). Waiting for more data or task completion.", category: "GoogleService.StreamingDelegate")
+                return false
+            }
+        }
+
+        private func handleValidChunk(_ chunk: GoogleStreamedGenerateContentResponse) {
+            handleTextDelta(from: chunk)
+            handleUsageMetadata(from: chunk)
+            handlePromptFeedback(from: chunk)
+            handleFinishReason(from: chunk)
+        }
+
+        private func handleTextDelta(from chunk: GoogleStreamedGenerateContentResponse) {
+            if let textDelta = chunk.candidates?.first?.content.parts.first?.text, !textDelta.isEmpty {
+                accumulatedText += textDelta
+                onPartialResponse(textDelta)
+            }
+        }
+
+        private func handleUsageMetadata(from chunk: GoogleStreamedGenerateContentResponse) {
+            if let metadata = chunk.usageMetadata {
+                finalUsageMetadata = metadata
+                logger?.debug("GoogleService [StreamingDelegate] Received usage metadata.", category: "GoogleService.StreamingDelegate")
+            }
+        }
+
+        private func handlePromptFeedback(from chunk: GoogleStreamedGenerateContentResponse) {
+            if let feedback = chunk.promptFeedback {
+                finalPromptFeedback = feedback
+                if let reason = feedback.blockReason {
+                    logger?.info("GoogleService [StreamingDelegate] Prompt blocked. Reason: \(reason)", category: "GoogleService.StreamingDelegate")
                 }
+            }
+        }
 
-                let potentialJsonData = receivedDataBuffer[firstBrace ... lastBrace]
+        private func handleFinishReason(from chunk: GoogleStreamedGenerateContentResponse) {
+            if chunk.candidates?.first?.finishReason != nil {
+                logger?.debug("GoogleService [StreamingDelegate] Finish reason received: \(chunk.candidates?.first?.finishReason ?? "N/A")", category: "GoogleService.StreamingDelegate")
+            }
+        }
 
-                // Trim leading/trailing whitespace/newlines just in case (simple filter)
-                let trimmedData = potentialJsonData.filter { $0 >= 32 } // Filter out control chars roughly
-
-                // Ensure data is not empty after filtering
-                guard !trimmedData.isEmpty else {
-                    // Remove the range that resulted in empty data (likely just whitespace/control chars)
-                    receivedDataBuffer.removeSubrange(firstBrace ... lastBrace)
-                    continue // Try finding the next object
-                }
-
-                do {
-                    let chunk = try JSONDecoder().decode(GoogleStreamedGenerateContentResponse.self, from: trimmedData)
-                    // logger?.debug("GoogleService [StreamingDelegate] Successfully decoded JSON chunk.", category: "GoogleService.StreamingDelegate") // Can be verbose
-
-                    // --- Process the valid chunk ---
-                    if let textDelta = chunk.candidates?.first?.content.parts.first?.text {
-                        if !textDelta.isEmpty { // Avoid calling back with empty strings if possible
-                            accumulatedText += textDelta
-                            onPartialResponse(textDelta)
-                            // logger?.debug("GoogleService [StreamingDelegate] Received delta: \(textDelta.prefix(50))...", category: "GoogleService.StreamingDelegate")
-                        }
-                    }
-                    if let metadata = chunk.usageMetadata {
-                        finalUsageMetadata = metadata
-                        logger?.debug("GoogleService [StreamingDelegate] Received usage metadata.", category: "GoogleService.StreamingDelegate")
-                    }
-                    if let feedback = chunk.promptFeedback {
-                        finalPromptFeedback = feedback
-                        if let reason = feedback.blockReason {
-                            logger?.info("GoogleService [StreamingDelegate] Prompt blocked. Reason: \(reason)", category: "GoogleService.StreamingDelegate")
-                        }
-                    }
-                    if chunk.candidates?.first?.finishReason != nil {
-                        logger?.debug("GoogleService [StreamingDelegate] Finish reason received: \(chunk.candidates?.first?.finishReason ?? "N/A")", category: "GoogleService.StreamingDelegate")
-                    }
-                    // --- End Processing ---
-
-                    // Remove the processed data (including the closing brace) from the buffer
-                    receivedDataBuffer.removeSubrange(firstBrace ... lastBrace)
-                    // Also remove any leading characters before the first brace we processed
-                    if firstBrace > receivedDataBuffer.startIndex {
-                        receivedDataBuffer.removeSubrange(receivedDataBuffer.startIndex ..< firstBrace)
-                    }
-
-                } catch {
-                    // Decoding failed. If buffer seems to only contain this failed chunk, maybe discard it? Risky.
-                    // Let's assume incomplete and wait for more data / finalization.
-                    logger?.debug("GoogleService [StreamingDelegate] Failed to decode potential JSON chunk. Error: \(error). Waiting for more data or task completion.", category: "GoogleService.StreamingDelegate")
-                    break // Break loop and wait for more data or task completion
-                }
-            } // End while loop
+        private func cleanupProcessedData(bounds: (first: Data.Index, last: Data.Index)) {
+            receivedDataBuffer.removeSubrange(bounds.first ... bounds.last)
+            if bounds.first > receivedDataBuffer.startIndex {
+                receivedDataBuffer.removeSubrange(receivedDataBuffer.startIndex ..< bounds.first)
+            }
         }
 
         // Handles the completion of the URLSession task, either successfully or with an error.

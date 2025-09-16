@@ -249,7 +249,7 @@ public enum JSONElement: Equatable {
         let options: JSONSerialization.WritingOptions = prettyPrinted ? .prettyPrinted : []
         guard let jsonObject = toAny() else { return nil }
         guard let data = try? JSONSerialization.data(withJSONObject: jsonObject, options: options) else { return nil }
-        return String(data: data, encoding: .utf8)
+        return String(decoding: data, as: UTF8.self)
     }
 
     /// Returns the JSONElement as an `Any` object.

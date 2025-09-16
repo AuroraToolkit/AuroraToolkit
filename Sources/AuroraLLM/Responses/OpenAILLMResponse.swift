@@ -7,6 +7,7 @@
 
 import Foundation
 
+// swiftlint:disable nesting
 /// Represents the response from OpenAI's LLM models, conforming to `LLMResponseProtocol`.
 ///
 /// The OpenAI API returns a list of choices, and this struct captures the first choice as the primary response.
@@ -74,3 +75,4 @@ public struct OpenAILLMResponse: LLMResponseProtocol, Codable {
         return LLMTokenUsage(promptTokens: usage.promptTokens, completionTokens: usage.completionTokens, totalTokens: usage.totalTokens)
     }
 }
+// swiftlint:enable nesting
