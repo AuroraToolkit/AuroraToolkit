@@ -8,7 +8,7 @@ AuroraLLM provides a unified interface for working with multiple Large Language 
 
 ### Key Features
 
-- **Multi-Service Support**: Unified interface for Anthropic, OpenAI, Google, and Ollama services
+- **Multi-Service Support**: Unified interface for Anthropic, OpenAI, Google, Ollama, and Apple Foundation Models services
 - **Intelligent Routing**: Domain-based routing to optimize requests across different LLM services
 - **Context Management**: Advanced context storage and retrieval for conversational workflows
 - **Request Optimization**: Automatic token management and request optimization
@@ -29,6 +29,7 @@ AuroraLLM provides a unified interface for working with multiple Large Language 
 - ``AnthropicService``
 - ``OpenAIService``
 - ``OllamaService``
+- ``FoundationModelService``
 
 ### Domain Routing
 
@@ -54,6 +55,7 @@ AuroraLLM provides a unified interface for working with multiple Large Language 
 - ``AnthropicLLMResponse``
 - ``OpenAILLMResponse``
 - ``OllamaLLMResponse``
+- ``FoundationModelResponse``
 - ``LLMTokenUsage``
 
 ### Configuration
@@ -112,6 +114,40 @@ let sportsQuestion = LLMRequest(messages: [
     LLMMessage(role: .user, content: "Who won the Super Bowl?")
 ])
 let response = await manager.routeRequest(sportsQuestion)
+```
+
+### Apple Foundation Models (iOS 26+/macOS 26+)
+
+For on-device AI processing using Apple's Foundation Models, you can use the FoundationModelService:
+
+```swift
+import AuroraLLM
+
+// Check if Foundation Models is available on this device
+guard FoundationModelService.isAvailable() else {
+    print("Foundation Models not available (requires iOS 26+ and Apple Intelligence)")
+    return
+}
+
+// Create the service (no API key required)
+if let service = FoundationModelService.createIfAvailable() {
+    let manager = LLMManager()
+    manager.registerService(service)
+    
+    // Send a request using on-device AI
+    let request = LLMRequest(
+        messages: [
+            LLMMessage(role: .user, content: "Summarize this text in one sentence.")
+        ],
+        maxTokens: 100 // Stay within 4,096 token limit
+    )
+    
+    if let response = await manager.sendRequest(request) {
+        print("On-device response: \(response.text)")
+    }
+} else {
+    print("Foundation Models not available (Apple Intelligence may not be enabled)")
+}
 ```
 
 ### Context Management

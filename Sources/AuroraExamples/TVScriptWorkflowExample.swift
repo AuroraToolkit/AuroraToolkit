@@ -34,14 +34,22 @@ struct TVScriptWorkflowExample {
             return
         }
 
-        // Initialize LLM service, e.g., Anthropic, OpenAI, or Ollama
-//        let anthropicService = AnthropicService(apiKey: anthropicAIKey, logger: CustomLogger.shared)
-//        let ollamaService = OllamaService(logger: CustomLogger.shared)
-//        let openAIService = OpenAIService(apiKey: openAIKey, logger: CustomLogger.shared)
-        let googleService = GoogleService(apiKey: googleKey, logger: CustomLogger.shared)
+        var aiService: LLMServiceProtocol!
 
         // Choose which service to use for generating the TV script
-        let aiService = googleService
+//        aiService = AnthropicService(apiKey: anthropicAIKey, logger: CustomLogger.shared)
+//        aiService = OllamaService(logger: CustomLogger.shared)
+//        aiService = OpenAIService(apiKey: openAIKey, logger: CustomLogger.shared)
+//        aiService = GoogleService(apiKey: googleKey, logger: CustomLogger.shared)
+
+        if #available(iOS 26, macOS 26, visionOS 26, *) {
+            do {
+                aiService = try FoundationModelService(logger: CustomLogger.shared)
+            } catch {
+                print("Failed to initialize FoundationModelService: \(error)")
+                return
+            }
+        }
 
         // Workflow initialization
         var workflow = Workflow(

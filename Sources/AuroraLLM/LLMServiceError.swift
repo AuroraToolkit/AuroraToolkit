@@ -22,6 +22,12 @@ public enum LLMServiceError: Error, Equatable {
     /// Error thrown when the constructed or provided URL is invalid.
     case invalidURL
 
+    /// Error thrown when a service is not available on the current platform or configuration.
+    case serviceUnavailable(message: String)
+
+    /// Error thrown when a request to the service fails.
+    case requestFailed(message: String)
+
     /// Custom error type for providing more descriptive error messages.
     case custom(message: String)
 }

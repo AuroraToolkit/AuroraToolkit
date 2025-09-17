@@ -109,4 +109,14 @@ print("--------------------\n")
 print("Triage Github Issues Workflow Example:\n")
 await IssueTriageWorkflowExample().execute(on: "App crashes with error E401 when I press Save")
 
+print("--------------------\n")
+
+print("Foundation Model Example:\n")
+await FoundationModelExample().execute()
+
+print("--------------------\n")
+
+print("Two Model Conversation Example:\n")
+await MultiModelConversationExample().execute()
+
 // swiftlint:enable orphaned_doc_comment
