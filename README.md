@@ -1,11 +1,11 @@
 # AuroraToolkit
 
-**AuroraToolkit** is a suite of tools designed to simplify the integration of AI capabilities into your projects. This package offers robust support for AI-driven workflows, including task orchestration, workflow management, on-device ML services, and seamless integration with large language models (LLMs) like Anthropic Claude, Google Gemini, OpenAI ChatGPT, and open-source Ollama models. Its modular architecture empowers developers to customize, extend, and integrate with external services effortlessly.
+**AuroraToolkit** is a suite of tools designed to simplify the integration of AI capabilities into your projects. This package offers robust support for AI-driven workflows, including task orchestration, workflow management, on-device ML services, and seamless integration with large language models (LLMs) like Anthropic Claude, Google Gemini, OpenAI ChatGPT, open-source models via Ollama, and Apple's Foundation Models. Its modular architecture empowers developers to customize, extend, and integrate with external services effortlessly.
 
 The AuroraToolkit main package is organized into several modules to enhance flexibility and maintainability:
 
 - **AuroraCore**: The foundational library for workflow orchestration, utilities, and declarative task management.
-- **AuroraLLM**: A dedicated package for integrating large language models (LLMs) such as Anthropic, Google, OpenAI, and Ollama.
+- **AuroraLLM**: A dedicated package for integrating large language models (LLMs) such as Anthropic, Google, OpenAI,  Ollama, and on-device Apple Foundation Models.
 - **AuroraML**: On-device ML services (classification, intent extraction, tagging, embedding, semantic search) and corresponding Workflow tasks.  
 - **AuroraTaskLibrary**: A growing collection of prebuilt, reusable tasks designed to accelerate development.
 - **AuroraExamples**: Practical examples demonstrating how to leverage the toolkit for real-world scenarios.
@@ -19,7 +19,7 @@ Whether you're building sophisticated AI-powered applications or integrating mod
 - **Declarative Workflows**: Define workflows and subflows declaratively, similar to SwiftUI, enabling clear and concise task orchestration.
 - **Dynamic Workflows**: Use logic and triggers to create dynamic workflows that adapt to changing conditions, scheduled intervals, or user input.
 - **Reusable Tasks**: A library of prebuilt tasks for common development needs, from URL fetching to context summarization, accelerates your workflow setup.
-- **LLM Integration**: Effortless integration with major LLM providers like Anthropic, Google, OpenAI, and Ollama, with support for token management, domain-specific routing, and fallback strategies.
+- **LLM Integration**: Effortless integration with major LLM providers like Anthropic, Google, OpenAI, Ollama, and Apple, with support for token management, domain-specific routing, and fallback strategies.
 - **On-device ML Tasks**: Integrate on-device ML-based tasks for classification, intent extraction, tagging, embedding, and semantic search, enhancing privacy and performance.
 - **Hybrid LLM + On-Device Pipelines**: Combine on-device ML tasks with cloud or local LLMs for advanced end-to-end pipelines.
 - **Domain-Specific Routing**: Automatically route requests to the most appropriate LLM service based on predefined domains, optimizing task execution and resource allocation.
@@ -163,26 +163,6 @@ let router = CoreMLDomainRouter(
 )
 ```
 
-#### Contrastive Domain Resolution (DualDomainRouter)
-Use both a primary and secondary router, with optional thresholds and fallback logic:
-
-```swift
-let router = DualDomainRouter(
-    name: "SiriStyleRouter",
-    primary: router1,
-    secondary: router2,
-    supportedDomains: ["private", "public", "unsure"],
-    confidenceThreshold: 0.25,
-    fallbackDomain: "unsure",
-    fallbackConfidenceThreshold: 0.30,
-    resolveConflict: { primary, secondary in
-        if let p = primary, p.confidence >= 0.90 { return p.label }
-        if let s = secondary, s.confidence >= 0.90 { return s.label }
-        return "unsure"
-    }
-)
-```
-
 #### Logic-Based Domain Routing (LogicDomainRouter)
 Use a custom logic-based router to determine the domain based on privacy rules:
 
@@ -211,89 +191,6 @@ Use a custom logic-based router to determine the domain based on privacy rules:
     )
 ```
 
-
-#### LLM-Based Routing (LLMDomainRouter)
-
-```swift
-import AuroraLLM
-
-let manager = LLMManager()
-
-// Configure the Domain Routing Service (Ollama)
-let router = LLMDomainRouter(
-    name: "Domain Router",
-    service: OllamaService(),
-    supportedDomains: ["sports", "movies", "books"]
-)
-manager.registerDomainRouter(router)
-
-// Configure the Sports Service (Anthropic)
-let sportsService = AnthropicService(
-    name: "SportsService",
-    apiKey: "your-anthropic-api-key",
-    maxOutputTokens: 256,
-    systemPrompt: """
-You are a sports expert. Answer the following sports-related questions concisely and accurately.
-"""
-)
-manager.registerService(sportsService, withRoutings: [.domain(["sports"])])
-
-// Configure the Movies Service (OpenAI)
-let moviesService = OpenAIService(
-    name: "MoviesService",
-    apiKey: "your-openai-api-key",
-    maxOutputTokens: 256,
-    systemPrompt: """
-You are a movie critic. Answer the following movie-related questions concisely and accurately.
-"""
-)
-manager.registerService(moviesService, withRoutings: [.domain(["movies"])])
-
-// Configure the Books Service (Ollama)
-let booksService = OllamaService(
-    name: "BooksService",
-    baseURL: "http://localhost:11434",
-    maxOutputTokens: 256,
-    systemPrompt: """
-You are a literary expert. Answer the following books-related questions concisely and accurately.
-"""
-)
-manager.registerService(booksService, withRoutings: [.domain(["books"])])
-
-// Configure the Fallback Service (OpenAI)
-let fallbackService = OpenAIService(
-    name: "FallbackService",
-    apiKey: "your-openai-api-key",
-    maxOutputTokens: 512,
-    systemPrompt: """
-You are a helpful assistant. Answer any general questions accurately and concisely.
-"""
-)
-manager.registerFallbackService(fallbackService)
-
-// Example questions
-let questions = [
-    "Who won the Super Bowl in 2022?",  // Sports domain
-    "What won Best Picture in 2021?",   // Movies domain
-    "Who wrote The Great Gatsby?",      // Books domain
-    "What is the capital of France?"    // General (fallback)
-]
-
-// Process each question
-for question in questions {
-    print("\nProcessing question: \(question)")
-
-    let request = LLMRequest(messages: [LLMMessage(role: .user, content: question)])
-
-    if let response = await manager.routeRequest(request) {
-        print("Response from \(response.vendor ?? "Uknown"): \(response.text)")
-    } else {
-        print("No response received.")
-    }
-}
-```
-
-
 ## Running Tests
 
 AuroraToolkit includes tests for multiple language model services. The Ollama tests will always run, as they do not require any API keys. For testing Anthropic, Google, or OpenAI services, you will need to manually provide your API keys.
@@ -316,6 +213,7 @@ Some test and example files use OpenAI or Anthropic services and need API keys t
 - For Google, add the environment variable `GOOGLE_API_KEY` with a valid test API key.
 - For OpenAI, add the environment variable `OPENAI_API_KEY` with a valid test API key.
 - Ollama does not require API keys, but does require the Ollama service to be running at the default service URL, `http://localhost:11434`.
+- FoundationModel does not require API keys, but does require iOS/visionOS/macOS 26+.
 
 ### Important:
 - **Never commit your API keys to the repository**. The tests are designed to run with Ollama by default, and you can enable additional tests for Anthropic, Google, and OpenAI by manually adding your keys for local testing.
@@ -352,20 +250,28 @@ This script:
 
 ### Viewing Documentation
 
-#### Archive Format (Xcode)
-Open individual `.doccarchive` files with Xcode:
-- Navigate to `.build/plugins/Swift-DocC/outputs/`
-- Double-click any `.doccarchive` file to open in Xcode
-
-#### Web Format (Browser)
-Serve the exported documentation with a local web server:
+#### Archive Format (Recommended)
+Open `.doccarchive` files directly with Xcode for the best viewing experience:
 
 ```bash
-# Serve a specific module
-python3 -m http.server 8000 --directory docs/AuroraCore
+# Open a specific module
+open docs/AuroraCore.doccarchive
 
-# Or serve all modules
-python3 -m http.server 8000 --directory docs
+# Or open all modules at once
+open docs/*.doccarchive
+
+# Or from build output
+open .build/plugins/Swift-DocC/outputs/AuroraCore.doccarchive
+```
+
+#### Preview Mode (For Active Development)
+Use Swift-DocC's built-in preview mode for live documentation development:
+
+```bash
+# Preview with auto-reload during development
+swift package --disable-sandbox preview-documentation --target AuroraCore
+
+# Preview opens in your browser with live updates as you edit documentation
 ```
 
 ### Documentation Structure

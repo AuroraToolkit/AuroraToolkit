@@ -23,7 +23,7 @@ build_module_docs() {
     swift package generate-documentation --target "$module"
     
     if [ $? -eq 0 ]; then
-        echo "✅ Successfully built documentation for $module"
+        echo "Successfully built documentation for $module"
         
         # Copy the generated archive to our docs directory
         ARCHIVE_PATH=".build/plugins/Swift-DocC/outputs/$module.doccarchive"
@@ -32,7 +32,7 @@ build_module_docs() {
             echo "📁 Documentation archive copied to $DOC_OUTPUT/$module.doccarchive"
         fi
     else
-        echo "❌ Failed to build documentation for $module"
+        echo "Failed to build documentation for $module"
         exit 1
     fi
 }
@@ -51,9 +51,9 @@ export_for_hosting() {
         --output-path "$DOC_OUTPUT/$module"
         
     if [ $? -eq 0 ]; then
-        echo "✅ Successfully exported $module for hosting"
+        echo "Successfully exported $module for hosting"
     else
-        echo "❌ Failed to export $module for hosting"
+        echo "Failed to export $module for hosting"
         exit 1
     fi
 }
@@ -77,11 +77,10 @@ echo "🎉 Documentation build complete!"
 echo ""
 echo "Available documentation:"
 for module in "${MODULES[@]}"; do
-    echo "  - $module: $DOC_OUTPUT/$module/"
+    echo "  - $module: $DOC_OUTPUT/$module.doccarchive"
 done
 echo ""
-echo "To view locally:"
-echo "  1. Archive format: Open .doccarchive files with Xcode"
-echo "  2. Web format: Serve the individual module directories with a local web server"
-echo "     Example: python3 -m http.server 8000 --directory $DOC_OUTPUT/AuroraCore"
+echo "To view documentation:"
+echo "  1. Archive format (Recommended): open $DOC_OUTPUT/AuroraCore.doccarchive"
+echo "  2. Preview mode: swift package --disable-sandbox preview-documentation --target AuroraCore"
 echo ""
