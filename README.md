@@ -44,6 +44,7 @@ The foundational library providing the core framework for workflows, task orches
 A dedicated package for managing large language models (LLMs) and facilitating AI-driven workflows. It includes multi-model management, domain routing, and token handling. Provides support for various LLM vendors, including Anthropic, Google, OpenAI, and Ollama.
 
 Includes native support for:
+- `FoundationModelService`: On-device LLMs using Apple Foundation Models (iOS/macOS/visionOS 26+).
 - `CoreMLDomainRouter`: On-device domain classification using compiled Core ML models (`.mlmodelc`).
 - `DualDomainRouter`: Combines a primary and contrastive router with customizable resolution strategies for maximum accuracy.
 

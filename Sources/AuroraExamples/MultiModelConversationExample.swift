@@ -17,7 +17,7 @@ import Foundation
 /// - Manage turn-based dialogue with configurable personalities
 /// - Support different interaction types (rap battles, teaching, word games, etc.)
 public struct MultiModelConversationExample {
-    
+
     struct ConversationScenario {
         let name: String
         let description: String
@@ -40,19 +40,19 @@ public struct MultiModelConversationExample {
         // Select random scenario
         let scenarios = createScenarios()
         let selectedScenario = scenarios.randomElement()!
-        
+
         print("Selected scenario: \(selectedScenario.name)")
         print("Description: \(selectedScenario.description)")
-        
+
         // Determine how many models to use (up to available services, max personalities)
         let maxParticipants = min(selectedScenario.personalities.count, services.count)
         let participants = Array(services.shuffled().prefix(maxParticipants))
-        
+
         print("Participants (\(participants.count)):")
         for (index, participant) in participants.enumerated() {
             print("  \(index + 1). \(participant.vendor) - \(participant.name)")
         }
-        
+
         print("\n" + String(repeating: "=", count: 60))
 
         await runConversation(
@@ -113,7 +113,7 @@ public struct MultiModelConversationExample {
 
         return services
     }
-    
+
     private func createScenarios() -> [ConversationScenario] {
         return [
             ConversationScenario(
@@ -137,7 +137,7 @@ public struct MultiModelConversationExample {
                 continuationPrompt: "Continue the learning dialogue. Build on what was just shared."
             ),
             ConversationScenario(
-                name: "Word Association Chain", 
+                name: "Word Association Chain",
                 description: "Rapid-fire word associations that build creative connections",
                 personalities: [
                     "You are playing word association. Start with the given word and make a creative connection to something new. Briefly explain your association with wit and creativity. Keep it snappy and surprising!",
@@ -148,7 +148,7 @@ public struct MultiModelConversationExample {
             )
         ]
     }
-    
+
     private func runConversation(
         participants: [LLMServiceProtocol],
         scenario: ConversationScenario,
@@ -168,7 +168,7 @@ public struct MultiModelConversationExample {
                 let participantIndex = responseCount % participants.count
                 let currentParticipant = participants[participantIndex]
                 let personality = scenario.personalities[min(participantIndex, scenario.personalities.count - 1)]
-                
+
                 let (response, responseTime) = try await getModelResponseWithTiming(
                     service: currentParticipant,
                     personality: personality,
@@ -177,12 +177,12 @@ public struct MultiModelConversationExample {
 
                 print("\(currentParticipant.vendor) (\(currentParticipant.name)) [\(String(format: "%.2f", responseTime))s]: \(response)")
                 conversationHistory.append(LLMMessage(role: .assistant, content: response))
-                
+
                 // Add continuation prompt if not the last response
                 if responseCount < numberOfResponses - 1 {
                     conversationHistory.append(LLMMessage(role: .user, content: scenario.continuationPrompt))
                 }
-                
+
                 // Add spacing between responses
                 if responseCount < numberOfResponses - 1 {
                     print()
