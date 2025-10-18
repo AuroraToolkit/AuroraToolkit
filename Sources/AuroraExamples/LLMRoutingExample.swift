@@ -9,11 +9,14 @@ import Foundation
 /// An example demonstrating how to route requests between multiple LLM services (Ollama and OpenAI) based on token limits.
 struct LLMRoutingExample {
     func execute() async {
-        // Set your OpenAI API key as an environment variable to run this example, e.g., `export OPENAI_API_KEY="your-api-key"`
-        let openAIKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
-        if openAIKey.isEmpty {
-            print("No API key provided. Please set the OPENAI_API_KEY environment variable.")
-            return
+        // Set up the required API key for your LLM service with fallback logic
+        // 1. Try SecureStorage first, 2. Fall back to environment variable, 3. Use nil as last resort
+        let openAIKey = SecureStorage.getAPIKey(for: "OpenAI") ?? ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
+        
+        if openAIKey == nil {
+            print("⚠️  No OpenAI API key found in SecureStorage or environment variables.")
+            print("   The example will continue but API calls may fail.")
+            print("   To fix: Set OPENAI_API_KEY environment variable or use SecureStorage.saveAPIKey()")
         }
 
         // Initialize the LLMManager

@@ -14,30 +14,28 @@ import Foundation
 
 struct TVScriptWorkflowExample {
     func execute() async {
-        // Set your Anthropic API key as an environment variable to run this example, e.g., `export Anthropic_API_KEY="your-api-key"`
-        let anthropicAIKey = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"] ?? ""
-        if anthropicAIKey.isEmpty {
-            print("No API key provided. Please set the ANTHROPIC_API_KEY environment variable.")
-            return
-        }
-
-        // Set your OpenAI API key as an environment variable to run this example, e.g., `export OPENAI_API_KEY="your-api-key"`
-        let openAIKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
-        if openAIKey.isEmpty {
-            print("No API key provided. Please set the OPENAI_API_KEY environment variable.")
-            return
-        }
-        // Set your Google API key as an environment variable to run this example, e.g., `export GOOGLE_API_KEY="your-api-key"`
-        let googleKey = ProcessInfo.processInfo.environment["GOOGLE_API_KEY"] ?? ""
-        if googleKey.isEmpty {
-            print("No API key provided. Please set the GOOGLE_API_KEY environment variable.")
-            return
+        // Set up the required API keys with fallback logic
+        // 1. Try SecureStorage first, 2. Fall back to environment variable, 3. Use nil as last resort
+        let anthropicAIKey = SecureStorage.getAPIKey(for: "Anthropic") ?? ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
+        let openAIKey = SecureStorage.getAPIKey(for: "OpenAI") ?? ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
+        let googleKey = SecureStorage.getAPIKey(for: "Google") ?? ProcessInfo.processInfo.environment["GOOGLE_API_KEY"]
+        
+        // Check which keys are missing and provide helpful warnings
+        var missingKeys: [String] = []
+        if anthropicAIKey == nil { missingKeys.append("ANTHROPIC_API_KEY") }
+        if openAIKey == nil { missingKeys.append("OPENAI_API_KEY") }
+        if googleKey == nil { missingKeys.append("GOOGLE_API_KEY") }
+        
+        if !missingKeys.isEmpty {
+            print("⚠️  Missing API keys: \(missingKeys.joined(separator: ", "))")
+            print("   The example will continue but API calls may fail.")
+            print("   To fix: Set environment variables or use SecureStorage.saveAPIKey()")
         }
 
         var aiService: LLMServiceProtocol!
 
         // Choose which service to use for generating the TV script
-//        aiService = AnthropicService(apiKey: anthropicAIKey, logger: CustomLogger.shared)
+       aiService = AnthropicService(apiKey: anthropicAIKey, logger: CustomLogger.shared)
 //        aiService = OllamaService(logger: CustomLogger.shared)
 //        aiService = OpenAIService(apiKey: openAIKey, logger: CustomLogger.shared)
 //        aiService = GoogleService(apiKey: googleKey, logger: CustomLogger.shared)

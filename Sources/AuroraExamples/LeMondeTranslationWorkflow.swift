@@ -15,14 +15,17 @@ import Foundation
 
 struct LeMondeTranslationWorkflow {
     func execute() async {
-        // Set up the required API key for your LLM service (e.g., OpenAI, Anthropic, or Ollama)
-        let openAIKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
-        guard !openAIKey.isEmpty else {
-            print("No API key provided. Please set the OPENAI_API_KEY environment variable.")
-            return
+        // Set up the required API key for your LLM service with fallback logic
+        // 1. Try SecureStorage first, 2. Fall back to environment variable, 3. Use nil as last resort
+        let openAIKey = SecureStorage.getAPIKey(for: "OpenAI") ?? ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
+        
+        if openAIKey == nil {
+            print("⚠️  No OpenAI API key found in SecureStorage or environment variables.")
+            print("   The example will continue but API calls may fail.")
+            print("   To fix: Set OPENAI_API_KEY environment variable or use SecureStorage.saveAPIKey()")
         }
 
-        // Initialize the LLM service
+        // Initialize the LLM service (will use nil key if none found)
         let llmService = OpenAIService(apiKey: openAIKey, logger: CustomLogger.shared)
         let summarizer = Summarizer(llmService: llmService)
 

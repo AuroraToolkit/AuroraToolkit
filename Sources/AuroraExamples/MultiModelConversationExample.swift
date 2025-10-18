@@ -65,25 +65,37 @@ public struct MultiModelConversationExample {
     private func initializeAvailableServices() async -> [LLMServiceProtocol] {
         var services: [LLMServiceProtocol] = []
 
+        // Set up API keys with fallback logic
+        // 1. Try SecureStorage first, 2. Fall back to environment variable, 3. Use nil as last resort
+        let anthropicKey = SecureStorage.getAPIKey(for: "Anthropic") ?? ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
+        let openAIKey = SecureStorage.getAPIKey(for: "OpenAI") ?? ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
+        let googleKey = SecureStorage.getAPIKey(for: "Google") ?? ProcessInfo.processInfo.environment["GOOGLE_API_KEY"]
+
         // Try to initialize Anthropic service
-        if let anthropicKey = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"], !anthropicKey.isEmpty {
+        if let anthropicKey = anthropicKey {
             let anthropicService = AnthropicService(apiKey: anthropicKey, maxOutputTokens: 512)
             services.append(anthropicService)
             print("✓ Anthropic service initialized")
+        } else {
+            print("⚠️  Anthropic API key not found - service will be skipped")
         }
 
         // Try to initialize OpenAI service
-        if let openAIKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !openAIKey.isEmpty {
+        if let openAIKey = openAIKey {
             let openAIService = OpenAIService(apiKey: openAIKey, maxOutputTokens: 512)
             services.append(openAIService)
             print("✓ OpenAI service initialized")
+        } else {
+            print("⚠️  OpenAI API key not found - service will be skipped")
         }
 
         // Try to initialize Google service
-        if let googleKey = ProcessInfo.processInfo.environment["GOOGLE_API_KEY"], !googleKey.isEmpty {
+        if let googleKey = googleKey {
             let googleService = GoogleService(apiKey: googleKey, maxOutputTokens: 512)
             services.append(googleService)
             print("✓ Google service initialized")
+        } else {
+            print("⚠️  Google API key not found - service will be skipped")
         }
 
         // Try to initialize Ollama service (no API key needed)

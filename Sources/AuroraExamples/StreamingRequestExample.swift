@@ -9,17 +9,20 @@ import Foundation
 /// An example demonstrating how to send a streaming request to the LLM service.
 struct StreamingRequestExample {
     func execute() async {
-        // Set your Anthropic API key as an environment variable to run this example, e.g., `export ANTHROPIC_API_KEY="your-api-key"`
-        let apiKey = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"] ?? ""
-        if apiKey.isEmpty {
-            print("No API key provided. Please set the ANTHROPIC_API_KEY environment variable.")
-            return
+        // Set up the required API key for your LLM service with fallback logic
+        // 1. Try SecureStorage first, 2. Fall back to environment variable, 3. Use nil as last resort
+        let apiKey = SecureStorage.getAPIKey(for: "Anthropic") ?? ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
+        
+        if apiKey == nil {
+            print("⚠️  No Anthropic API key found in SecureStorage or environment variables.")
+            print("   The example will continue but API calls may fail.")
+            print("   To fix: Set ANTHROPIC_API_KEY environment variable or use SecureStorage.saveAPIKey()")
         }
 
         // Initialize the LLMManager
         let manager = LLMManager(logger: CustomLogger.shared)
 
-        // Create and register a service
+        // Create and register a service (will use nil key if none found)
         let realService = AnthropicService(apiKey: apiKey, logger: CustomLogger.shared)
         manager.registerService(realService)
 
