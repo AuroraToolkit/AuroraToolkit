@@ -154,6 +154,152 @@ public struct Tasks {
         return [:]
     }
     
+    /// Summarize text strings and return as dictionary
+    /// - Parameters:
+    ///   - strings: Array of text strings to summarize
+    ///   - maxTokens: Maximum number of tokens to generate (default: 300)
+    /// - Returns: Dictionary mapping input text to summary
+    /// - Throws: An error if summarization fails
+    public static func summarizeAsDictionary(_ strings: [String], maxTokens: Int = 300) async throws -> [String: String] {
+        let service = try getDefaultService()
+        let summarizer = Summarizer(llmService: service)
+        let task = SummarizeStringsLLMTask(
+            name: "Summarization",
+            summarizer: summarizer,
+            summaryType: .single,
+            strings: strings,
+            options: SummarizerOptions(maxTokens: maxTokens)
+        )
+        
+        let component = task.toComponent()
+        guard case .task(let workflowTask) = component else {
+            throw TasksError.taskExecutionFailed("Failed to extract task from component")
+        }
+        let outputs = try await workflowTask.execute()
+        
+        // Extract summaries as dictionary
+        if let summariesDict = outputs["summaries"] as? [String: String] {
+            return summariesDict
+        }
+        return [:]
+    }
+    
+    /// Extract keywords from text strings and return as dictionary
+    /// - Parameters:
+    ///   - strings: Array of text strings to extract keywords from
+    ///   - maxTokens: Maximum number of tokens to generate (default: 200)
+    /// - Returns: Dictionary mapping input text to array of keywords
+    /// - Throws: An error if keyword extraction fails
+    public static func extractKeywordsAsDictionary(_ strings: [String], maxTokens: Int = 200) async throws -> [String: [String]] {
+        let service = try getDefaultService()
+        let task = GenerateKeywordsLLMTask(
+            name: "KeywordExtraction",
+            llmService: service,
+            strings: strings,
+            maxTokens: maxTokens
+        )
+        
+        let component = task.toComponent()
+        guard case .task(let workflowTask) = component else {
+            throw TasksError.taskExecutionFailed("Failed to extract task from component")
+        }
+        let outputs = try await workflowTask.execute()
+        
+        // Extract keywords as dictionary
+        if let keywordsDict = outputs["keywords"] as? [String: [String]] {
+            return keywordsDict
+        }
+        return [:]
+    }
+    
+    /// Translate text strings and return as dictionary
+    /// - Parameters:
+    ///   - strings: Array of text strings to translate
+    ///   - targetLanguage: The target language code (e.g., "es", "fr", "de")
+    ///   - maxTokens: Maximum number of tokens to generate (default: 500)
+    /// - Returns: Dictionary mapping input text to translated text
+    /// - Throws: An error if translation fails
+    public static func translateAsDictionary(_ strings: [String], to targetLanguage: String, maxTokens: Int = 500) async throws -> [String: String] {
+        let service = try getDefaultService()
+        let task = TranslateStringsLLMTask(
+            name: "Translation",
+            llmService: service,
+            strings: strings,
+            targetLanguage: targetLanguage,
+            maxTokens: maxTokens
+        )
+        
+        let component = task.toComponent()
+        guard case .task(let workflowTask) = component else {
+            throw TasksError.taskExecutionFailed("Failed to extract task from component")
+        }
+        let outputs = try await workflowTask.execute()
+        
+        // Extract translations as dictionary
+        if let translationsDict = outputs["translations"] as? [String: String] {
+            return translationsDict
+        }
+        return [:]
+    }
+    
+    /// Extract entities from text strings and return as dictionary
+    /// - Parameters:
+    ///   - strings: Array of text strings to extract entities from
+    ///   - maxTokens: Maximum number of tokens to generate (default: 300)
+    /// - Returns: Dictionary mapping input text to array of entities
+    /// - Throws: An error if entity extraction fails
+    public static func extractEntitiesAsDictionary(_ strings: [String], maxTokens: Int = 300) async throws -> [String: [String]] {
+        let service = try getDefaultService()
+        let task = ExtractEntitiesLLMTask(
+            name: "EntityExtraction",
+            llmService: service,
+            strings: strings,
+            maxTokens: maxTokens
+        )
+        
+        let component = task.toComponent()
+        guard case .task(let workflowTask) = component else {
+            throw TasksError.taskExecutionFailed("Failed to extract task from component")
+        }
+        let outputs = try await workflowTask.execute()
+        
+        // Extract entities as dictionary
+        if let entitiesDict = outputs["entities"] as? [String: [String]] {
+            return entitiesDict
+        }
+        return [:]
+    }
+    
+    /// Categorize text strings and return as dictionary
+    /// - Parameters:
+    ///   - strings: Array of text strings to categorize
+    ///   - categories: Array of category names
+    ///   - maxTokens: Maximum number of tokens to generate (default: 200)
+    /// - Returns: Dictionary mapping category to array of texts in that category
+    /// - Throws: An error if categorization fails
+    public static func categorizeAsDictionary(_ strings: [String], into categories: [String], maxTokens: Int = 200) async throws -> [String: [String]] {
+        let service = try getDefaultService()
+        let task = CategorizeStringsLLMTask(
+            name: "Categorization",
+            llmService: service,
+            strings: strings,
+            categories: categories,
+            maxTokens: maxTokens
+        )
+        
+        let component = task.toComponent()
+        guard case .task(let workflowTask) = component else {
+            throw TasksError.taskExecutionFailed("Failed to extract task from component")
+        }
+        let outputs = try await workflowTask.execute()
+        
+        // Extract categorized content as dictionary
+        if let categorizedContent = outputs["categorizedStrings"] as? [String: [String]] {
+            return categorizedContent
+        }
+        return [:]
+    }
+    
     /// Summarize text content
     /// - Parameters:
     ///   - text: The text to summarize
