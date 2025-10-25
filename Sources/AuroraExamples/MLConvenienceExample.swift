@@ -68,6 +68,35 @@ struct MLConvenienceExample {
             print("Traditional search failed: \(error.localizedDescription)")
         }
         
+        // Traditional classification setup
+        let modelsDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .appendingPathComponent("models")
+        let blogClassifierURL = modelsDir.appendingPathComponent("BlogCategoriesClassifier.mlmodelc")
+        
+        if let blogModel = try? NLModel(contentsOf: blogClassifierURL) {
+            let traditionalClassificationService = ClassificationService(
+                name: "TraditionalBlogClassifier",
+                model: blogModel,
+                scheme: "category",
+                maxResults: 3,
+                logger: CustomLogger.shared
+            )
+            
+            let traditionalClassificationRequest = MLRequest(inputs: ["strings": ["Building a SwiftUI app with Core Data"]])
+            do {
+                let traditionalClassificationResponse = try await traditionalClassificationService.run(request: traditionalClassificationRequest)
+                if let tags = traditionalClassificationResponse.outputs["tags"] as? [Tag] {
+                    print("Traditional Classification Results:")
+                    for tag in tags {
+                        print("  • \(tag.label) (confidence: \(String(format: "%.3f", tag.confidence ?? 0)))")
+                    }
+                }
+            } catch {
+                print("Traditional classification failed: \(error.localizedDescription)")
+            }
+        }
+        
         // --- After: Using ML Convenience APIs ---
         print("\n--- Using ML Convenience APIs (After) ---")
         
@@ -123,23 +152,92 @@ struct MLConvenienceExample {
             print("   Semantic search failed: \(error.localizedDescription)")
         }
         
-        // 3. Classification (Note: Requires actual model files)
-        print("\n3. Text classification with ML.sentiment:")
-        print("   Note: This requires a sentiment classification model to be registered")
-        print("   Use ML.registerDefaultModel(for: .sentiment, from: modelURL) to set up")
+        // 3. Classification using existing models
+        do {
+            print("\n3. Text classification with existing models:")
+            
+            // Load the blog categories classifier
+            let modelsDir = URL(fileURLWithPath: #file)
+                .deletingLastPathComponent()
+                .appendingPathComponent("models")
+            let blogClassifierURL = modelsDir.appendingPathComponent("BlogCategoriesClassifier.mlmodelc")
+            let supportClassifierURL = modelsDir.appendingPathComponent("SupportTicketsClassifier.mlmodelc")
+            
+            if let blogModel = try? NLModel(contentsOf: blogClassifierURL) {
+                let blogService = ClassificationService(
+                    name: "BlogCategories",
+                    model: blogModel,
+                    scheme: "category",
+                    maxResults: 3,
+                    logger: CustomLogger.shared
+                )
+                
+                let blogText = "Building a SwiftUI app with Core Data integration and custom animations"
+                let blogTags = try await blogService.classify(blogText)
+                print("   Blog classification for: '\(blogText)'")
+                for tag in blogTags {
+                    print("     • \(tag.label) (confidence: \(String(format: "%.3f", tag.confidence ?? 0)))")
+                }
+            }
+            
+            if let supportModel = try? NLModel(contentsOf: supportClassifierURL) {
+                let supportService = ClassificationService(
+                    name: "SupportTickets",
+                    model: supportModel,
+                    scheme: "ticketType",
+                    maxResults: 2,
+                    logger: CustomLogger.shared
+                )
+                
+                let supportText = "I can't log into my account and keep getting an error message"
+                let supportTags = try await supportService.classify(supportText)
+                print("   Support ticket classification for: '\(supportText)'")
+                for tag in supportTags {
+                    print("     • \(tag.label) (confidence: \(String(format: "%.3f", tag.confidence ?? 0)))")
+                }
+            }
+        } catch {
+            print("   Classification failed: \(error.localizedDescription)")
+        }
         
-        // This would work with a proper model:
-        // let tags = try await ML.sentiment.classify("I love this new feature!")
-        // print("   Classification results: \(tags)")
-        
-        // 4. Intent Extraction (Note: Requires actual model files)
-        print("\n4. Intent extraction with ML.intents:")
-        print("   Note: This requires an intent classification model to be registered")
-        print("   Use ML.registerDefaultModel(for: .intents, from: modelURL) to set up")
-        
-        // This would work with a proper model:
-        // let intents = try await ML.intents.extractIntents(from: "Play some music")
-        // print("   Intent extraction results: \(intents)")
+        // 4. Intent Extraction using existing models
+        do {
+            print("\n4. Intent extraction with existing models:")
+            
+            // Load the support tickets classifier for intent extraction
+            let modelsDir = URL(fileURLWithPath: #file)
+                .deletingLastPathComponent()
+                .appendingPathComponent("models")
+            let supportClassifierURL = modelsDir.appendingPathComponent("SupportTicketsClassifier.mlmodelc")
+            
+            if let supportModel = try? NLModel(contentsOf: supportClassifierURL) {
+                let intentService = IntentExtractionService(
+                    name: "SupportIntentExtraction",
+                    model: supportModel,
+                    maxResults: 2,
+                    logger: CustomLogger.shared
+                )
+                
+                let intentTexts = [
+                    "I need help resetting my password",
+                    "My account was charged twice this month",
+                    "The app keeps crashing when I try to upload photos"
+                ]
+                
+                for text in intentTexts {
+                    let intents = try await intentService.extractIntents(from: text)
+                    print("   Intent extraction for: '\(text)'")
+                    for intent in intents {
+                        if let name = intent["name"] as? String,
+                           let confidence = intent["confidence"] as? Double {
+                            print("     • \(name) (confidence: \(String(format: "%.3f", confidence)))")
+                        }
+                    }
+                }
+            }
+        } catch {
+            print("   Intent extraction failed: \(error.localizedDescription)")
+        }
         
         // 5. Advanced Workflow Example
         do {
