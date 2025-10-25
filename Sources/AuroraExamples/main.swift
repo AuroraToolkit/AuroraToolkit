@@ -65,7 +65,8 @@ struct ExampleRunner {
             ("Two Model Conversation", { await MultiModelConversationExample().execute() }),
             ("Convenience API", { await ConvenienceAPIExample().execute() }),
             ("ML Convenience API", { await MLConvenienceExample().execute() }),
-            ("Tasks Convenience API", { await TasksConvenienceExample().execute() })
+            ("Tasks Convenience API", { await TasksConvenienceExample().execute() }),
+            ("AuroraCore Convenience API", { await AuroraCoreConvenienceExample().execute() })
         ]
         
         while true {
@@ -176,7 +177,8 @@ struct ExampleRunner {
             ("Two Model Conversation", { await MultiModelConversationExample().execute() }),
             ("Convenience API", { await ConvenienceAPIExample().execute() }),
             ("ML Convenience API", { await MLConvenienceExample().execute() }),
-            ("Tasks Convenience API", { await TasksConvenienceExample().execute() })
+            ("Tasks Convenience API", { await TasksConvenienceExample().execute() }),
+            ("AuroraCore Convenience API", { await AuroraCoreConvenienceExample().execute() })
         ]
         
         await runAllExamples(examples)
@@ -202,7 +204,8 @@ struct ExampleRunner {
             ("Two Model Conversation", { await MultiModelConversationExample().execute() }),
             ("Convenience API", { await ConvenienceAPIExample().execute() }),
             ("ML Convenience API", { await MLConvenienceExample().execute() }),
-            ("Tasks Convenience API", { await TasksConvenienceExample().execute() })
+            ("Tasks Convenience API", { await TasksConvenienceExample().execute() }),
+            ("AuroraCore Convenience API", { await AuroraCoreConvenienceExample().execute() })
         ]
         
         if index >= 1 && index <= examples.count {
@@ -237,11 +240,11 @@ if arguments.count > 1 {
         print("  swift run AuroraExamples help      # Show this help")
         print()
         print("Interactive Options:")
-        print("  • Enter a number (1-19) to run a specific example")
+        print("  • Enter a number (1-20) to run a specific example")
         print("  • Enter 'all' or 'a' to run all examples")
         print("  • Enter 'quit', 'q', or 'exit' to exit")
     default:
-        if let index = Int(choice), index >= 1 && index <= 19 {
+        if let index = Int(choice), index >= 1 && index <= 20 {
             print("🎯 Running Example \(index) (Non-Interactive Mode)")
             print("===============================================")
             print()

@@ -71,4 +71,12 @@ public struct WorkflowBuilder {
     public static func buildArray(_ components: [[WorkflowComponent]]) -> [Workflow.Component] {
         components.flatMap { $0.map { $0.toComponent() } }
     }
+    
+    /// Builds an array of tasks into workflow components.
+    ///
+    /// - Parameter tasks: An array of tasks to include.
+    /// - Returns: An array of `Workflow.Component` objects representing the tasks.
+    public static func buildArray(_ tasks: [Workflow.Task]) -> [Workflow.Component] {
+        tasks.map { $0.toComponent() }
+    }
 }
