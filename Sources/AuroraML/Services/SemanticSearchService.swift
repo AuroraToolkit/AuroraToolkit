@@ -134,3 +134,73 @@ public final class SemanticSearchService: MLServiceProtocol {
         return MLResponse(outputs: ["results": topResults], info: nil)
     }
 }
+
+// MARK: - Convenience Extensions
+
+extension SemanticSearchService {
+    /// Create a semantic search service with default English sentence embeddings
+    /// - Parameters:
+    ///   - name: Identifier for this service
+    ///   - documents: The corpus of texts to search
+    ///   - topK: How many top results to return (default: 5)
+    ///   - logger: Optional logger for debugging
+    /// - Returns: A configured semantic search service
+    public static func withDefaultEmbeddings(
+        name: String,
+        documents: [String],
+        topK: Int = 5,
+        logger: CustomLogger? = nil
+    ) -> SemanticSearchService {
+        let embeddingService = EmbeddingService.defaultSentence
+        return SemanticSearchService(
+            name: name,
+            embeddingService: embeddingService,
+            documents: documents,
+            topK: topK,
+            logger: logger
+        )
+    }
+    
+    /// Search for documents similar to the query
+    /// - Parameter query: The search query
+    /// - Returns: Array of search results with documents and scores
+    /// - Throws: An error if search fails
+    public func search(_ query: String) async throws -> [[String: Any]] {
+        let request = MLRequest(inputs: ["query": query])
+        let response = try await run(request: request)
+        return response.outputs["results"] as? [[String: Any]] ?? []
+    }
+    
+    /// Search using a pre-computed embedding vector
+    /// - Parameter vector: The embedding vector to search with
+    /// - Returns: Array of search results with documents and scores
+    /// - Throws: An error if search fails
+    public func search(with vector: [Double]) async throws -> [[String: Any]] {
+        let request = MLRequest(inputs: ["vector": vector])
+        let response = try await run(request: request)
+        return response.outputs["results"] as? [[String: Any]] ?? []
+    }
+    
+    /// Get the top search result
+    /// - Parameter query: The search query
+    /// - Returns: The top result document and score, or nil if no results
+    /// - Throws: An error if search fails
+    public func topResult(for query: String) async throws -> (document: String, score: Double)? {
+        let results = try await search(query)
+        guard let topResult = results.first,
+              let document = topResult["document"] as? String,
+              let score = topResult["score"] as? Double else {
+            return nil
+        }
+        return (document: document, score: score)
+    }
+    
+    /// Find the most similar document to the query
+    /// - Parameter query: The search query
+    /// - Returns: The most similar document text, or nil if no results
+    /// - Throws: An error if search fails
+    public func findMostSimilar(to query: String) async throws -> String? {
+        let result = try await topResult(for: query)
+        return result?.document
+    }
+}

@@ -63,7 +63,8 @@ struct ExampleRunner {
             ("Github Issues Triage Workflow", { await IssueTriageWorkflowExample().execute(on: "App crashes with error E401 when I press Save") }),
             ("Foundation Model", { await FoundationModelExample().execute() }),
             ("Two Model Conversation", { await MultiModelConversationExample().execute() }),
-            ("Convenience API", { await ConvenienceAPIExample().execute() })
+            ("Convenience API", { await ConvenienceAPIExample().execute() }),
+            ("ML Convenience API", { await MLConvenienceExample().execute() })
         ]
         
         while true {
@@ -172,7 +173,8 @@ struct ExampleRunner {
             ("Github Issues Triage Workflow", { await IssueTriageWorkflowExample().execute(on: "App crashes with error E401 when I press Save") }),
             ("Foundation Model", { await FoundationModelExample().execute() }),
             ("Two Model Conversation", { await MultiModelConversationExample().execute() }),
-            ("Convenience API", { await ConvenienceAPIExample().execute() })
+            ("Convenience API", { await ConvenienceAPIExample().execute() }),
+            ("ML Convenience API", { await MLConvenienceExample().execute() })
         ]
         
         await runAllExamples(examples)
@@ -196,7 +198,8 @@ struct ExampleRunner {
             ("Github Issues Triage Workflow", { await IssueTriageWorkflowExample().execute(on: "App crashes with error E401 when I press Save") }),
             ("Foundation Model", { await FoundationModelExample().execute() }),
             ("Two Model Conversation", { await MultiModelConversationExample().execute() }),
-            ("Convenience API", { await ConvenienceAPIExample().execute() })
+            ("Convenience API", { await ConvenienceAPIExample().execute() }),
+            ("ML Convenience API", { await MLConvenienceExample().execute() })
         ]
         
         if index >= 1 && index <= examples.count {
@@ -231,11 +234,11 @@ if arguments.count > 1 {
         print("  swift run AuroraExamples help      # Show this help")
         print()
         print("Interactive Options:")
-        print("  • Enter a number (1-17) to run a specific example")
+        print("  • Enter a number (1-18) to run a specific example")
         print("  • Enter 'all' or 'a' to run all examples")
         print("  • Enter 'quit', 'q', or 'exit' to exit")
     default:
-        if let index = Int(choice), index >= 1 && index <= 17 {
+        if let index = Int(choice), index >= 1 && index <= 18 {
             print("🎯 Running Example \(index) (Non-Interactive Mode)")
             print("===============================================")
             print()

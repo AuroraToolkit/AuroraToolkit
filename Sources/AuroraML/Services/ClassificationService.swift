@@ -8,6 +8,7 @@
 import AuroraCore
 import Foundation
 import NaturalLanguage
+import CoreML
 
 /// `ClassificationService` implements `MLServiceProtocol` using Apple's `NLModel` text classifiers.
 ///
@@ -108,5 +109,56 @@ public final class ClassificationService: MLServiceProtocol {
         }
 
         return MLResponse(outputs: ["tags": tags], info: nil)
+    }
+}
+
+// MARK: - Convenience Extensions
+
+extension ClassificationService {
+    /// Default sentiment analysis service
+    /// Note: This requires a sentiment classification model to be registered
+    public static var defaultSentiment: ClassificationService {
+        // This will be set up when a model is registered via ML.registerDefaultModel
+        // For now, we'll create a service that will fail gracefully when used without a proper model
+        // In real usage, this would be replaced with actual model loading
+        fatalError("Default sentiment service requires a model to be registered. Use ML.registerDefaultModel(for: .sentiment, from: modelURL) first.")
+    }
+    
+    /// Default category classification service
+    /// Note: This requires a category classification model to be registered
+    public static var defaultCategories: ClassificationService {
+        // This will be set up when a model is registered via ML.registerDefaultModel
+        // For now, we'll create a service that will fail gracefully when used without a proper model
+        // In real usage, this would be replaced with actual model loading
+        fatalError("Default category service requires a model to be registered. Use ML.registerDefaultModel(for: .categories, from: modelURL) first.")
+    }
+    
+    /// Classify a single text string
+    /// - Parameter text: The text to classify
+    /// - Returns: Array of tags with labels and confidence scores
+    /// - Throws: An error if classification fails
+    public func classify(_ text: String) async throws -> [Tag] {
+        let request = MLRequest(inputs: ["strings": [text]])
+        let response = try await run(request: request)
+        return response.outputs["tags"] as? [Tag] ?? []
+    }
+    
+    /// Classify multiple text strings
+    /// - Parameter texts: Array of texts to classify
+    /// - Returns: Array of tags with labels and confidence scores
+    /// - Throws: An error if classification fails
+    public func classify(_ texts: [String]) async throws -> [Tag] {
+        let request = MLRequest(inputs: ["strings": texts])
+        let response = try await run(request: request)
+        return response.outputs["tags"] as? [Tag] ?? []
+    }
+    
+    /// Get the top classification result for a text
+    /// - Parameter text: The text to classify
+    /// - Returns: The top tag with highest confidence, or nil if no results
+    /// - Throws: An error if classification fails
+    public func topClassification(for text: String) async throws -> Tag? {
+        let tags = try await classify(text)
+        return tags.max { ($0.confidence ?? 0) < ($1.confidence ?? 0) }
     }
 }

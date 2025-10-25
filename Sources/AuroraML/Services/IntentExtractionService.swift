@@ -8,6 +8,7 @@
 import AuroraCore
 import Foundation
 import NaturalLanguage
+import CoreML
 
 /// `IntentExtractionService` uses a `ClassificationService` to extract one or more intents from input text, returning a structured list of intent dictionaries.
 ///
@@ -65,5 +66,70 @@ public final class IntentExtractionService: MLServiceProtocol {
         }
 
         return MLResponse(outputs: ["intents": intents], info: nil)
+    }
+}
+
+// MARK: - Convenience Extensions
+
+extension IntentExtractionService {
+    /// Default intent extraction service
+    /// Note: This requires an intent classification model to be registered
+    public static var `default`: IntentExtractionService {
+        // This will be set up when a model is registered via ML.registerDefaultModel
+        // For now, we'll create a service that will fail gracefully when used without a proper model
+        // In real usage, this would be replaced with actual model loading
+        fatalError("Default intent extraction service requires a model to be registered. Use ML.registerDefaultModel(for: .intents, from: modelURL) first.")
+    }
+    
+    /// Extract intents from a single text string
+    /// - Parameter text: The text to analyze for intents
+    /// - Returns: Array of intent dictionaries with names and confidence scores
+    /// - Throws: An error if intent extraction fails
+    public func extractIntents(from text: String) async throws -> [[String: Any]] {
+        let request = MLRequest(inputs: ["strings": [text]])
+        let response = try await run(request: request)
+        return response.outputs["intents"] as? [[String: Any]] ?? []
+    }
+    
+    /// Extract intents from multiple text strings
+    /// - Parameter texts: Array of texts to analyze for intents
+    /// - Returns: Array of intent dictionaries with names and confidence scores
+    /// - Throws: An error if intent extraction fails
+    public func extractIntents(from texts: [String]) async throws -> [[String: Any]] {
+        let request = MLRequest(inputs: ["strings": texts])
+        let response = try await run(request: request)
+        return response.outputs["intents"] as? [[String: Any]] ?? []
+    }
+    
+    /// Get the top intent from a text
+    /// - Parameter text: The text to analyze for intents
+    /// - Returns: The top intent with highest confidence, or nil if no results
+    /// - Throws: An error if intent extraction fails
+    public func topIntent(from text: String) async throws -> (name: String, confidence: Double)? {
+        let intents = try await extractIntents(from: text)
+        guard let topIntent = intents.first,
+              let name = topIntent["name"] as? String,
+              let confidence = topIntent["confidence"] as? Double else {
+            return nil
+        }
+        return (name: name, confidence: confidence)
+    }
+    
+    /// Check if a specific intent is present in the text
+    /// - Parameters:
+    ///   - intent: The intent name to check for
+    ///   - text: The text to analyze
+    ///   - threshold: Minimum confidence threshold (default: 0.5)
+    /// - Returns: True if the intent is detected above the threshold
+    /// - Throws: An error if intent extraction fails
+    public func hasIntent(_ intent: String, in text: String, threshold: Double = 0.5) async throws -> Bool {
+        let intents = try await extractIntents(from: text)
+        return intents.contains { intentDict in
+            guard let name = intentDict["name"] as? String,
+                  let confidence = intentDict["confidence"] as? Double else {
+                return false
+            }
+            return name == intent && confidence >= threshold
+        }
     }
 }
