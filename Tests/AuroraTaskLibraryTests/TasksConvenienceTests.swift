@@ -102,35 +102,6 @@ final class TasksConvenienceTests: XCTestCase {
         XCTAssertNotNil(parseJSONClosure)
     }
     
-    // MARK: - Workflow Builder Tests
-    
-    func testTasksWorkflowBuilder() {
-        // Test workflow builder method
-        let workflow = Tasks.workflow("TestWorkflow") {
-            Workflow.Task(name: "TestTask") { inputs in
-                return ["result": "test"]
-            }
-        }
-        
-        XCTAssertEqual(workflow.name, "TestWorkflow")
-        XCTAssertNotNil(workflow)
-    }
-    
-    func testTasksWorkflowBuilderWithDescription() {
-        // Test workflow builder with description
-        let workflow = Tasks.workflow(
-            "TestWorkflow",
-            description: "A test workflow"
-        ) {
-            Workflow.Task(name: "TestTask") { inputs in
-                return ["result": "test"]
-            }
-        }
-        
-        XCTAssertEqual(workflow.name, "TestWorkflow")
-        XCTAssertNotNil(workflow)
-    }
-    
     // MARK: - ML Task Integration Tests
     
     func testTasksMLIntegration() {

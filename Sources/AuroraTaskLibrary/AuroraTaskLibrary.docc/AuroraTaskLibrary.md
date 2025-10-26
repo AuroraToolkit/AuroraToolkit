@@ -16,6 +16,7 @@ Each task is designed to work seamlessly with the Aurora workflow system, provid
 - **Data Processing**: Parsing tasks for JSON, RSS, and other data formats
 - **Network Operations**: URL fetching and web-based data retrieval
 - **Workflow Ready**: All tasks designed for seamless integration into Aurora workflows
+- **Convenience APIs**: Simplified top-level APIs for common task operations
 
 ## Topics
 
@@ -58,6 +59,10 @@ Each task is designed to work seamlessly with the Aurora workflow system, provid
 ### Utility Tasks
 
 - ``TrimmingTask``
+
+### Convenience APIs
+
+- ``Tasks``
 
 ## Getting Started
 
@@ -188,6 +193,44 @@ let workflow = Workflow(
         inputs: ["strings": "{ContentCategorization.categorized_content}"]
     )
 }
+```
+
+### Convenience APIs
+
+For simpler use cases, AuroraTaskLibrary provides convenient top-level APIs that reduce boilerplate:
+
+```swift
+import AuroraTaskLibrary
+
+// Simple sentiment analysis
+let sentiments = try await Tasks.analyzeSentiment([
+    "I love this product!",
+    "This is terrible.",
+    "It's okay, nothing special."
+])
+print("Sentiments: \(sentiments)")
+
+// Text summarization
+let summary = try await Tasks.summarize("Long article text here...")
+print("Summary: \(summary)")
+
+// Keyword extraction
+let keywords = try await Tasks.extractKeywords([
+    "Swift is a powerful programming language",
+    "Machine learning is transforming industries"
+])
+print("Keywords: \(keywords)")
+
+// Data fetching and parsing
+let content = try await Tasks.fetch("https://api.example.com/data")
+let articles = try await Tasks.parseRSS(content)
+
+// Entity extraction and categorization
+let entities = try await Tasks.extractEntities(["Apple Inc. announced new products"])
+let categories = try await Tasks.categorize(
+    ["The new iPhone features advanced AI capabilities"], 
+    into: ["Technology", "Business", "Science"]
+)
 ```
 
 ## Architecture

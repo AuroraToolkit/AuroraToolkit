@@ -11,6 +11,7 @@ AuroraCore provides the fundamental building blocks for the Aurora Toolkit ecosy
 - **Workflows**: A declarative system for orchestrating complex task execution with support for sequential and parallel processing
 - **Utilities**: Essential helper functions for debugging, secure storage, token handling, and execution timing
 - **Type Safety**: Strong typing support with comprehensive type handling utilities
+- **Convenience APIs**: Simplified top-level APIs for common workflow and task operations
 
 ## Topics
 
@@ -26,6 +27,10 @@ AuroraCore provides the fundamental building blocks for the Aurora Toolkit ecosy
 - ``CustomLogger``
 - ``ExecutionTimer``
 - ``SecureStorage``
+
+### Convenience APIs
+
+- ``AuroraCore``
 
 ## Getting Started
 
@@ -62,6 +67,47 @@ import AuroraCore
 // Use the custom logger for detailed debugging
 CustomLogger.shared.log("Application started", level: .info)
 CustomLogger.shared.logError("Something went wrong", error: someError)
+```
+
+### Convenience APIs
+
+For simpler workflow creation, AuroraCore provides convenient top-level APIs:
+
+```swift
+import AuroraCore
+
+// Create workflows with simplified syntax
+var workflow = AuroraCore.workflow("My Workflow") {
+    AuroraCore.task("Step1") { _ in
+        print("Executing step 1")
+        return ["result": "completed"]
+    }
+    
+    AuroraCore.task("Step2") { inputs in
+        print("Executing step 2")
+        return ["final": "done"]
+    }
+}
+
+// Run workflows with simplified execution
+let outputs = try await workflow.run()
+print("Workflow completed with outputs: \(outputs)")
+
+// Utility tasks for common operations
+var utilityWorkflow = AuroraCore.workflow("Utility Demo") {
+    AuroraCore.delay(1.0, name: "Wait")
+    AuroraCore.print("Hello, World!", name: "Greeting")
+    AuroraCore.conditional(
+        condition: true,
+        name: "Check"
+    ) {
+        AuroraCore.task("Success") { _ in
+            return ["status": "success"]
+        }
+    }
+}
+
+await utilityWorkflow.start()
 ```
 
 ## Architecture

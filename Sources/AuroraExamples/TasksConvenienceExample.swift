@@ -232,10 +232,10 @@ struct TasksConvenienceExample {
         }
         
         // 9. Simple Workflow Creation
-        print("\n9. Simple workflow creation with Tasks.workflow:")
+        print("\n9. Simple workflow creation with AuroraCore.workflow:")
         
-        var simpleWorkflow = Tasks.workflow("Content Analysis Pipeline") {
-            Workflow.Task(name: "TextProcessor") { inputs in
+        var simpleWorkflow = AuroraCore.workflow("Content Analysis Pipeline") {
+            AuroraCore.task("TextProcessor") { inputs in
                 let inputText = inputs["text"] as? String ?? "Hello, world!"
                 let wordCount = inputText.components(separatedBy: .whitespaces).count
                 let charCount = inputText.count

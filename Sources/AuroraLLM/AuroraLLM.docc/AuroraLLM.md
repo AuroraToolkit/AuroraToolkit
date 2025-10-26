@@ -13,6 +13,7 @@ AuroraLLM provides a unified interface for working with multiple Large Language 
 - **Context Management**: Advanced context storage and retrieval for conversational workflows
 - **Request Optimization**: Automatic token management and request optimization
 - **Streaming Support**: Real-time response streaming for interactive applications
+- **Convenience APIs**: Simplified top-level APIs for common LLM operations
 
 ## Topics
 
@@ -64,6 +65,10 @@ AuroraLLM provides a unified interface for working with multiple Large Language 
 - ``LLMServiceFactory``
 - ``LLMServiceError``
 
+### Convenience APIs
+
+- ``LLM``
+
 ## Getting Started
 
 AuroraLLM makes it easy to work with multiple LLM services through a unified interface. Here's how to get started:
@@ -91,6 +96,33 @@ let request = LLMRequest(
 if let response = await manager.sendRequest(request) {
     print("Response: \(response.text)")
 }
+```
+
+### Convenience APIs
+
+For simpler use cases, AuroraLLM provides convenient top-level APIs that reduce boilerplate:
+
+```swift
+import AuroraLLM
+
+// Simple text generation with default service
+let response = try await LLM.send("What is machine learning?")
+print("Response: \(response)")
+
+// Streaming responses
+try await LLM.stream("Tell me a story") { partialResponse in
+    print(partialResponse, terminator: "")
+}
+
+// Use specific services
+let anthropicResponse = try await LLM.anthropic.send("Explain quantum computing")
+let openaiResponse = try await LLM.openai.send("Write a haiku about coding")
+
+// Configure token limits
+let detailedResponse = try await LLM.send(
+    "Analyze this data", 
+    maxTokens: 2048
+)
 ```
 
 ### Domain-Based Routing

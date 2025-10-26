@@ -13,6 +13,7 @@ AuroraML provides a comprehensive framework for integrating and managing machine
 - **Multiple ML Services**: Ready-to-use services for common ML tasks
 - **Flexible Architecture**: Easy integration of custom ML models and services
 - **Performance Optimized**: Efficient model loading and inference management
+- **Convenience APIs**: Simplified top-level APIs for common ML operations
 
 ## Topics
 
@@ -34,6 +35,10 @@ AuroraML provides a comprehensive framework for integrating and managing machine
 ### Models and Data Types
 
 - ``Tag``
+
+### Convenience APIs
+
+- ``ML``
 
 ## Getting Started
 
@@ -129,6 +134,37 @@ let services = await manager.getServices()
 for service in services {
     print("Available service: \(service.name)")
 }
+```
+
+### Convenience APIs
+
+For simpler use cases, AuroraML provides convenient top-level APIs that reduce boilerplate:
+
+```swift
+import AuroraML
+import NaturalLanguage
+
+// Register a default model for classification
+let modelURL = URL(fileURLWithPath: "path/to/your/model.mlmodelc")
+try ML.registerDefaultModel(at: modelURL)
+
+// Simple text classification
+let tags = try await ML.classify("This is a positive review")
+print("Classification: \(tags)")
+
+// Generate embeddings
+let embeddings = try await ML.embed("Hello, world!")
+print("Embedding dimension: \(embeddings.count)")
+
+// Semantic search
+let searchResults = try await ML.search("machine learning applications")
+for result in searchResults {
+    print("Found: \(result.content)")
+}
+
+// Intent extraction
+let intents = try await ML.extractIntents(from: "I need help with my account")
+print("Detected intents: \(intents)")
 ```
 
 ## Architecture

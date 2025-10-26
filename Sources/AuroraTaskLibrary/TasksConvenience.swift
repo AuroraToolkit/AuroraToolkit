@@ -550,26 +550,6 @@ public struct Tasks {
         return JSONElement.null
     }
     
-    // MARK: - Workflow Builder
-    
-    /// Create a simple workflow with a declarative builder
-    /// - Parameters:
-    ///   - name: The name of the workflow
-    ///   - description: Optional description
-    ///   - builder: The workflow builder closure
-    /// - Returns: A configured workflow
-    public static func workflow(
-        _ name: String,
-        description: String? = nil,
-        @WorkflowBuilder builder: () -> [Workflow.Component]
-    ) -> Workflow {
-        return Workflow(
-            name: name,
-            description: description ?? "Tasks convenience workflow",
-            logger: CustomLogger.shared,
-            builder
-        )
-    }
     
     // MARK: - ML Task Convenience Methods
     
