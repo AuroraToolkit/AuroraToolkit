@@ -27,8 +27,7 @@ final class SecureStorageTests: XCTestCase {
 
     func testSaveAndGetAPIKey() throws {
         // Save API key
-        let saveResult = SecureStorage.saveAPIKey(testAPIKey, for: testServiceName)
-        XCTAssertTrue(saveResult, "API key should be saved successfully.")
+        try SecureStorage.saveAPIKey(testAPIKey, for: testServiceName)
 
         // Retrieve API key
         let retrievedKey = SecureStorage.getAPIKey(for: testServiceName)
@@ -43,7 +42,7 @@ final class SecureStorageTests: XCTestCase {
 
     func testDeleteAPIKey() throws {
         // Save API key
-        SecureStorage.saveAPIKey(testAPIKey, for: testServiceName)
+        try SecureStorage.saveAPIKey(testAPIKey, for: testServiceName)
 
         // Delete API key
         SecureStorage.deleteAPIKey(for: testServiceName)
@@ -55,8 +54,7 @@ final class SecureStorageTests: XCTestCase {
 
     func testSaveAndGetBaseURL() throws {
         // Save base URL
-        let saveResult = SecureStorage.saveBaseURL(testBaseURL, for: testServiceName)
-        XCTAssertTrue(saveResult, "Base URL should be saved successfully.")
+        try SecureStorage.saveBaseURL(testBaseURL, for: testServiceName)
 
         // Retrieve base URL
         let retrievedURL = SecureStorage.getBaseURL(for: testServiceName)
@@ -71,7 +69,7 @@ final class SecureStorageTests: XCTestCase {
 
     func testDeleteBaseURL() throws {
         // Save base URL
-        SecureStorage.saveBaseURL(testBaseURL, for: testServiceName)
+        try SecureStorage.saveBaseURL(testBaseURL, for: testServiceName)
 
         // Delete base URL
         SecureStorage.deleteBaseURL(for: testServiceName)
@@ -83,8 +81,8 @@ final class SecureStorageTests: XCTestCase {
 
     func testClearAll() throws {
         // Save multiple items
-        SecureStorage.saveAPIKey(testAPIKey, for: testServiceName)
-        SecureStorage.saveBaseURL(testBaseURL, for: testServiceName)
+        try SecureStorage.saveAPIKey(testAPIKey, for: testServiceName)
+        try SecureStorage.saveBaseURL(testBaseURL, for: testServiceName)
 
         // Verify multiple items are saved
         XCTAssertNotNil(SecureStorage.getAPIKey(for: testServiceName))
@@ -102,10 +100,10 @@ final class SecureStorageTests: XCTestCase {
         let newAPIKey = "new-api-key"
 
         // Save initial API key
-        SecureStorage.saveAPIKey(testAPIKey, for: testServiceName)
+        try SecureStorage.saveAPIKey(testAPIKey, for: testServiceName)
 
         // Overwrite with a new API key
-        SecureStorage.saveAPIKey(newAPIKey, for: testServiceName)
+        try SecureStorage.saveAPIKey(newAPIKey, for: testServiceName)
 
         // Retrieve and verify the updated API key
         let retrievedKey = SecureStorage.getAPIKey(for: testServiceName)
@@ -116,10 +114,10 @@ final class SecureStorageTests: XCTestCase {
         let newBaseURL = "https://new.example.com"
 
         // Save initial base URL
-        SecureStorage.saveBaseURL(testBaseURL, for: testServiceName)
+        try SecureStorage.saveBaseURL(testBaseURL, for: testServiceName)
 
         // Overwrite with a new base URL
-        SecureStorage.saveBaseURL(newBaseURL, for: testServiceName)
+        try SecureStorage.saveBaseURL(newBaseURL, for: testServiceName)
 
         // Retrieve and verify the updated base URL
         let retrievedURL = SecureStorage.getBaseURL(for: testServiceName)

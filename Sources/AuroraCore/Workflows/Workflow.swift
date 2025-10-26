@@ -220,7 +220,7 @@ public struct Workflow {
                 try await checkWorkflowState()
                 try await executeComponent(component)
                 componentsManager.complete(component)
-            } catch is WorkflowCanceledException {
+            } catch AuroraCoreError.workflowCanceled {
                 return // Exit gracefully when canceled
             }
         }
@@ -236,16 +236,15 @@ public struct Workflow {
             break
         case .canceled:
             logger?.debug("Workflow \(name) execution canceled.", category: "Workflow")
-            throw WorkflowCanceledException()
+            throw AuroraCoreError.workflowCanceled(workflowName: name)
         case .paused:
             logger?.debug("Workflow \(name) execution paused.", category: "Workflow")
             await waitUntilResumed()
         default:
             logger?.debug("Workflow \(name) in unexpected state: \(currentState)", category: "Workflow")
-            throw NSError(
-                domain: "Workflow",
-                code: 2,
-                userInfo: [NSLocalizedDescriptionKey: "Workflow in unexpected state: \(currentState)"]
+            throw AuroraCoreError.invalidWorkflowState(
+                currentState: String(describing: currentState),
+                expectedState: "inProgress"
             )
         }
     }
@@ -311,7 +310,6 @@ public struct Workflow {
         }
     }
 
-    private struct WorkflowCanceledException: Error {}
 
     /// Resolves the inputs for a task using the outputs of previously executed tasks.
     ///
@@ -353,7 +351,7 @@ public struct Workflow {
         // Check for cancelation before starting the task
         if await stateManager.getState() == .canceled {
             logger?.debug("Task \(task.name) canceled before execution.", category: "Workflow")
-            throw NSError(domain: "Workflow", code: 3, userInfo: [NSLocalizedDescriptionKey: "Workflow was canceled."])
+            throw AuroraCoreError.workflowCanceled(workflowName: name)
         }
 
         // Execute the task with resolved inputs

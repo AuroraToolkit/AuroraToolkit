@@ -17,9 +17,8 @@ public class SecureStorage {
     ///    - key: The API key to be saved.
     ///    - serviceName: The name of the service associated with the API key (e.g., "OpenAI", "Anthropic", "Ollama").
     ///
-    /// - Returns: A boolean indicating whether the key was saved successfully.
-    @discardableResult
-    public static func saveAPIKey(_ key: String, for serviceName: String) -> Bool {
+    /// - Throws: `AuroraCoreError.secureStorageFailed` if the operation fails.
+    public static func saveAPIKey(_ key: String, for serviceName: String) throws {
         let data = Data(key.utf8)
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -32,9 +31,11 @@ public class SecureStorage {
         // Add the new key
         let status = SecItemAdd(query as CFDictionary, nil)
         if status != errSecSuccess {
-            print("Failed to add item to Keychain. Status: \(status)")
+            throw AuroraCoreError.secureStorageFailed(
+                operation: "saveAPIKey",
+                reason: "Failed to add API key to Keychain for service '\(serviceName)'. Status: \(status)"
+            )
         }
-        return status == errSecSuccess
     }
 
     /// Retrieves an API key from the secure storage (Keychain) for a specific service.
@@ -74,9 +75,8 @@ public class SecureStorage {
     ///    - url: The base URL to be saved.
     ///    - serviceName: The name of the service associated with the base URL (e.g., "Ollama").
     ///
-    /// - Returns: A boolean indicating whether the base URL was saved successfully.
-    @discardableResult
-    public static func saveBaseURL(_ url: String, for serviceName: String) -> Bool {
+    /// - Throws: `AuroraCoreError.secureStorageFailed` if the operation fails.
+    public static func saveBaseURL(_ url: String, for serviceName: String) throws {
         let data = Data(url.utf8)
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -88,7 +88,12 @@ public class SecureStorage {
         SecItemDelete(query as CFDictionary)
         // Add the new base URL
         let status = SecItemAdd(query as CFDictionary, nil)
-        return status == errSecSuccess
+        if status != errSecSuccess {
+            throw AuroraCoreError.secureStorageFailed(
+                operation: "saveBaseURL",
+                reason: "Failed to add base URL to Keychain for service '\(serviceName)'. Status: \(status)"
+            )
+        }
     }
 
     /// Retrieves the base URL from the secure storage (Keychain) for a specific service.

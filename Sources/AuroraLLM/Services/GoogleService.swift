@@ -82,7 +82,7 @@ public class GoogleService: LLMServiceProtocol {
 
         // Save the API key securely, associated with this service's name
         if let apiKey = apiKey {
-            SecureStorage.saveAPIKey(apiKey, for: self.name) // Use the instance name
+            try? SecureStorage.saveAPIKey(apiKey, for: self.name) // Use the instance name
         } else {
             // Use .info instead of .warning
             logger?.info("GoogleService initialized without an API key for instance '\(name)'. Key must exist in SecureStorage.", category: "GoogleService")

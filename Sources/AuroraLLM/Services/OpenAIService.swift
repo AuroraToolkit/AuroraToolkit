@@ -68,7 +68,7 @@ public class OpenAIService: LLMServiceProtocol {
         self.logger = logger
 
         if let apiKey {
-            SecureStorage.saveAPIKey(apiKey, for: name)
+            try? SecureStorage.saveAPIKey(apiKey, for: name)
         }
     }
 
