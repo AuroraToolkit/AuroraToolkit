@@ -11,7 +11,7 @@ public extension String {
     /// Estimates the token count for a given string.
     /// Assumes 1 token per 4 characters as a rough estimation.
     func estimatedTokenCount() -> Int {
-        return count / 4
+        return max(1, count / 4)
     }
 
     /**
@@ -42,27 +42,32 @@ public extension String {
      - Returns: The trimmed string.
      */
     func trimmedToFit(tokenLimit: Int, buffer: Double = 0.05, strategy: TrimmingStrategy) -> String {
-        var trimmedString = self
+        guard strategy != .none else { return self }
+        
         let adjustedLimit = Int(Double(tokenLimit) * (1 - buffer))
-
-        while trimmedString.estimatedTokenCount() > adjustedLimit {
-            switch strategy {
-            case .start:
-                trimmedString = String(trimmedString.dropFirst(10))
-            case .middle:
-                let middleIndex = trimmedString.index(trimmedString.startIndex, offsetBy: trimmedString.count / 2)
-                let dropCount = 5
-                let firstHalfEndIndex = trimmedString.index(middleIndex, offsetBy: -dropCount)
-                let secondHalfStartIndex = trimmedString.index(middleIndex, offsetBy: dropCount)
-                trimmedString = String(trimmedString[..<firstHalfEndIndex]) + String(trimmedString[secondHalfStartIndex...])
-            case .end:
-                trimmedString = String(trimmedString.dropLast(10))
-            case .none:
-                return self
-            }
+        let currentTokens = estimatedTokenCount()
+        
+        guard currentTokens > adjustedLimit else { return self }
+        
+        // Calculate target character count upfront to avoid iterative trimming
+        let targetChars = adjustedLimit * 4
+        
+        switch strategy {
+        case .start:
+            let dropCount = max(0, count - targetChars)
+            return String(dropFirst(dropCount))
+        case .end:
+            let dropCount = max(0, count - targetChars)
+            return String(dropLast(dropCount))
+        case .middle:
+            let dropCount = max(0, count - targetChars)
+            let dropFromEachSide = dropCount / 2
+            let startIndex = index(startIndex, offsetBy: dropFromEachSide)
+            let endIndex = index(endIndex, offsetBy: -dropFromEachSide)
+            return String(self[startIndex..<endIndex])
+        case .none:
+            return self
         }
-
-        return trimmedString
     }
 
     /// Enum defining trimming strategies.

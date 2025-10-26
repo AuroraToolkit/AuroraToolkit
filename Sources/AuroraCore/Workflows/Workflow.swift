@@ -267,17 +267,23 @@ public struct Workflow {
 
     private mutating func executeTaskComponent(_ task: Task) async throws {
         let taskOutputs = try await executeTask(task, workflowOutputs: outputs)
-        outputs.merge(taskOutputs.mapKeys { "\(task.name).\($0)" }) { _, new in new }
+        for (key, value) in taskOutputs {
+            outputs["\(task.name).\(key)"] = value
+        }
     }
 
     private mutating func executeTaskGroupComponent(_ group: TaskGroup) async throws {
         let groupOutputs = try await executeTaskGroup(group, workflowOutputs: outputs)
-        outputs.merge(groupOutputs.mapKeys { "\(group.name).\($0)" }) { _, new in new }
+        for (key, value) in groupOutputs {
+            outputs["\(group.name).\(key)"] = value
+        }
     }
 
     private mutating func executeSubflowComponent(_ subflow: inout Subflow) async throws {
         await subflow.workflow.start()
-        outputs.merge(subflow.workflow.outputs) { _, new in new }
+        for (key, value) in subflow.workflow.outputs {
+            outputs[key] = value
+        }
     }
 
     private mutating func executeLogicComponent(_ logicComponent: Logic) async throws {
