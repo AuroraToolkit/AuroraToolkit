@@ -10,9 +10,23 @@ import Foundation
 
 /// Convenience APIs for common LLM operations, providing a FoundationModels-style simple interface.
 ///
-/// This extension provides easy-to-use static methods for the most common LLM operations,
+/// This struct provides easy-to-use static methods for the most common LLM operations,
 /// reducing the complexity of the standard AuroraLLM API for typical use cases.
-public enum LLM {
+///
+/// ### Example Usage
+/// ```swift
+/// // Simple message sending
+/// let response = try await LLM.send("Hello, world!")
+///
+/// // Streaming response
+/// try await LLM.stream("Tell me a story") { partial in
+///     print(partial)
+/// }
+///
+/// // Using specific service
+/// let response = try await LLM.send("Hello", to: LLM.anthropic)
+/// ```
+public struct LLM {
     
     // MARK: - Service Access
     
@@ -35,6 +49,15 @@ public enum LLM {
     @available(iOS 26, macOS 26, visionOS 26, *)
     public static var foundation: FoundationModelService? {
         return FoundationModelService.default
+    }
+    
+    // MARK: - Configuration
+    
+    /// Configure the default service for simple operations
+    /// - Parameter service: The LLM service to use as default
+    public static func configure(with service: LLMServiceProtocol) {
+        // Note: This is a placeholder for future implementation
+        // Currently, services are accessed directly via properties
     }
     
     // MARK: - Simple Send Methods

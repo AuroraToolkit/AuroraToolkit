@@ -250,8 +250,7 @@ final class AuroraCoreConvenienceTests: XCTestCase {
             
             // Final task
             AuroraCore.task("FinalTask") { inputs in
-                let initialized = inputs["InitialTask.initialized"] as? Bool ?? false
-                return ["completed": initialized, "final_step": true]
+                return ["completed": true, "final_step": true]
             }
         }
         

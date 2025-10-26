@@ -12,7 +12,35 @@ import Foundation
 /// This module provides simplified APIs that reduce boilerplate while maintaining the full power
 /// of the AuroraCore workflow system. It follows the same "simple surface, powerful engine" 
 /// philosophy as Apple's FoundationModels SDK.
+///
+/// ### Example Usage
+/// ```swift
+/// // Simple workflow creation
+/// let workflow = AuroraCore.workflow("My Workflow") {
+///     AuroraCore.task("My Task") { _ in
+///         return ["result": "success"]
+///     }
+/// }
+///
+/// // Auto-named workflow
+/// let autoWorkflow = AuroraCore.workflow {
+///     AuroraCore.delay(1.0)
+///     AuroraCore.print("Hello, world!")
+/// }
+///
+/// // Execute and get outputs
+/// let outputs = try await workflow.run()
+/// ```
 public struct AuroraCore {
+    
+    // MARK: - Configuration
+    
+    /// Configure default settings for AuroraCore convenience APIs
+    /// - Parameter logger: Optional logger to use for all workflows
+    public static func configure(logger: CustomLogger? = nil) {
+        // Note: This is a placeholder for future implementation
+        // Currently, logger is passed per-workflow
+    }
     
     // MARK: - Workflow Convenience APIs
     
@@ -131,7 +159,7 @@ public struct AuroraCore {
     ) -> Workflow.Task {
         let taskName = name ?? "Print_\(UUID().uuidString.prefix(4))"
         return Workflow.Task(name: taskName, description: "Print message: \(message)") { _ in
-            print(message)
+            Swift.print(message)
             return ["message_printed": message]
         }
     }
@@ -184,3 +212,4 @@ extension Workflow {
         return outputs[key] as? T
     }
 }
+

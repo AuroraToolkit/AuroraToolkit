@@ -32,6 +32,9 @@ docs/undocumented.json
 *.ai.local.*
 *.ai.user.*
 
+# AI agent documentation and analysis
+.agents/
+
 # Common AI tools (per-user configs and caches)
 .cursor/
 .windsurf/
