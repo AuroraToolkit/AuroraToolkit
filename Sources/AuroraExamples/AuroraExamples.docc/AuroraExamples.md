@@ -6,11 +6,12 @@ Comprehensive examples and tutorials for the Aurora Toolkit ecosystem.
 
 AuroraExamples provides a rich collection of working examples that demonstrate how to use the Aurora Toolkit's various components in real-world scenarios. From basic LLM requests to complex multi-stage workflows, these examples serve as both learning resources and starting points for your own applications.
 
-Each example is self-contained and includes detailed explanations, making it easy to understand the concepts and adapt the code for your specific use cases.
+Each example is self-contained and includes detailed explanations, making it easy to understand the concepts and adapt the code for your specific use cases. The examples showcase both traditional Aurora APIs and the new convenience APIs, demonstrating the evolution from complex setup to simple, powerful operations.
 
 ### Example Categories
 
 - **Basic Usage**: Fundamental operations with LLM services and Aurora components
+- **Convenience APIs**: Simplified access to Aurora functionality with minimal boilerplate
 - **Domain Routing**: Intelligent request routing based on content analysis
 - **Complex Workflows**: Multi-step processes combining LLM, ML, and data processing
 - **Real-World Applications**: Production-ready examples for common business scenarios
@@ -21,6 +22,15 @@ Each example is self-contained and includes detailed explanations, making it eas
 
 - ``BasicRequestExample``
 - ``StreamingRequestExample``
+- ``FoundationModelExample``
+
+### Convenience API Examples
+
+- ``ConvenienceAPIExample``
+- ``LLMConfigurationExample``
+- ``AuroraCoreConvenienceExample``
+- ``MLConvenienceExample``
+- ``TasksConvenienceExample``
 
 ### Routing Examples
 
@@ -36,18 +46,41 @@ Each example is self-contained and includes detailed explanations, making it eas
 - ``CustomerFeedbackAnalysisWorkflow``
 - ``IssueTriageWorkflowExample``
 - ``LeMondeTranslationWorkflow``
+- ``MultiModelConversationExample``
 - ``SupportTicketWorkflowExample``
 - ``TemperatureMonitorWorkflow``
 - ``TVScriptWorkflowExample``
 
 ## Getting Started
 
-The examples are organized from simple to complex, making it easy to learn Aurora concepts progressively:
+The examples are organized from simple to complex, making it easy to learn Aurora concepts progressively. You can run examples interactively or via command line:
+
+### Interactive Mode
+
+```bash
+swift run AuroraExamples
+```
+
+This launches an interactive menu where you can select which example to run.
+
+### Command Line Mode
+
+```bash
+# Run a specific example
+swift run AuroraExamples 1
+
+# Run all examples
+swift run AuroraExamples --all
+
+# Show help
+swift run AuroraExamples --help
+```
 
 ### 1. Start with Basic Examples
 
-Begin with ``BasicRequestExample`` to understand how to set up and use LLM services:
+Begin with ``BasicRequestExample`` to understand both traditional and convenience API approaches:
 
+**Traditional Approach:**
 ```swift
 // Initialize the LLM Manager
 let manager = LLMManager()
@@ -64,6 +97,13 @@ let request = LLMRequest(messages: [
 if let response = await manager.sendRequest(request) {
     print("Response: \(response.text)")
 }
+```
+
+**Convenience API Approach:**
+```swift
+// Simple one-liner with automatic service selection
+let response = try await LLM.send("What is the meaning of life?")
+print("Response: \(response)")
 ```
 
 ### 2. Explore Domain Routing
