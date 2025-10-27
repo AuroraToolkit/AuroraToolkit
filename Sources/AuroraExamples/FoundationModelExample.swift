@@ -57,35 +57,21 @@ public struct FoundationModelExample {
             // Example 1: Simple text generation
             print("\n--- Example 1: Simple Generation ---")
             let simplePrompt = "Explain quantum computing in one sentence."
-            let simpleRequest = LLMRequest(
-                messages: [
-                    LLMMessage(role: .user, content: simplePrompt)
-                ],
-                maxTokens: 50
-            )
 
             print("Prompt: \(simplePrompt)")
-            let simpleResponse = try await service.sendRequest(simpleRequest)
-            print("Response: \(simpleResponse.text)")
-            if let usage = simpleResponse.tokenUsage {
-                print("Token usage: \(usage.promptTokens) + \(usage.completionTokens) = \(usage.totalTokens)")
-            }
+            print("Using convenience API...")
+            let simpleResponse = try await LLM.foundation?.send(simplePrompt, maxTokens: 50) ?? "Foundation model not available"
+            print("Response: \(simpleResponse)")
 
             // Example 2: Streaming response
             print("\n--- Example 2: Streaming Response ---")
             let streamingPrompt = "List 3 benefits of on-device AI processing."
-            let streamingRequest = LLMRequest(
-                messages: [
-                    LLMMessage(role: .user, content: streamingPrompt)
-                ],
-                maxTokens: 100
-            )
 
             print("Prompt: \(streamingPrompt)")
             print("Streaming response: ", terminator: "")
-            _ = try await service.sendStreamingRequest(streamingRequest) { partial in
+            _ = try await LLM.foundation?.stream(streamingPrompt, onPartialResponse: { partial in
                 print(partial, terminator: "")
-            }
+            }, maxTokens: 100) ?? "Foundation model not available"
             print("\nStreaming complete")
 
             // Example 3: Conversation with context

@@ -41,7 +41,7 @@ public class LLMManager {
     private(set) var fallbackService: LLMServiceProtocol?
 
     /// The domain routing service used to determine the appropriate domain for a request.
-    private(set) var domainRouter: LLMDomainRouterProtocol?
+    public private(set) var domainRouter: LLMDomainRouterProtocol?
 
     /// Initializes the `LLMManager` with an optional logger.
     ///
@@ -465,6 +465,17 @@ public class LLMManager {
         trimming: String.TrimmingStrategy = .none
     ) -> LLMServiceProtocol? {
         logger?.debug("Selecting service based on multiple routing strategies: \(routings)", category: "LLMManager")
+
+        // If no routing criteria are specified, go directly to fallback service
+        if routings.isEmpty {
+            if let fallbackService {
+                logger?.debug("No routing criteria specified, using fallback service: \(fallbackService.name)", category: "LLMManager")
+                return fallbackService
+            } else {
+                logger?.debug("No routing criteria specified and no fallback service available.", category: "LLMManager")
+                return nil
+            }
+        }
 
         // Sort services by routing specificity or priority
         let sortedServices = services.values.sorted { lhs, rhs in

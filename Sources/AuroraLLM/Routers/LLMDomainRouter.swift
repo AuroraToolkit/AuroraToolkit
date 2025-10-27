@@ -21,7 +21,7 @@ public class LLMDomainRouter: LLMDomainRouterProtocol {
     private let defaultInstructions = """
     Evaluate the following request and determine the domain it belongs to. Domains we support are: %@.
 
-    If it doesn't fit any of these domains, just use unresolved as the domain. You should respond to any question with ONLY
+    If the request doesn't fit any of these domains, just use unresolved as the domain. You should respond to any question with ONLY
     the domain name if we support it, or unresolved if we don't. Do NOT try to answer the question or provide ANY additional
     information.
     """

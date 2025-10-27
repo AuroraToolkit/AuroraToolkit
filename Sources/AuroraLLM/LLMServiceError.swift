@@ -28,6 +28,9 @@ public enum LLMServiceError: Error, LocalizedError, Equatable {
     /// Error thrown when a request to the service fails.
     case requestFailed(message: String)
 
+    /// Error thrown when no default service is configured and Foundation Model is not available.
+    case noDefaultServiceConfigured
+
     /// Custom error type for providing more descriptive error messages.
     case custom(message: String)
     
@@ -45,6 +48,8 @@ public enum LLMServiceError: Error, LocalizedError, Equatable {
             return "Service is unavailable: \(message)"
         case .requestFailed(let message):
             return "Request failed: \(message)"
+        case .noDefaultServiceConfigured:
+            return "No default LLM service is configured. Foundation Model is not available on this platform."
         case .custom(let message):
             return message
         }
@@ -64,6 +69,8 @@ public enum LLMServiceError: Error, LocalizedError, Equatable {
             return message
         case .requestFailed(let message):
             return message
+        case .noDefaultServiceConfigured:
+            return "Foundation Model is not available on this platform and no alternative service has been configured"
         case .custom(let message):
             return message
         }
@@ -83,6 +90,8 @@ public enum LLMServiceError: Error, LocalizedError, Equatable {
             return "Check service status and try again later"
         case .requestFailed:
             return "Review request parameters and check network connectivity"
+        case .noDefaultServiceConfigured:
+            return "Configure a default service using LLM.configure(with: service) or ensure Foundation Model is available on iOS 26+/macOS 26+"
         case .custom:
             return "Review the error message and check service configuration"
         }

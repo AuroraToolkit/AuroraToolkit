@@ -252,7 +252,9 @@ public struct WorkflowReport {
 public extension Workflow {
     /// Generates an overall report for the workflow.
     func generateReport() async -> WorkflowReport {
-        let componentReports = componentsManager.completedComponents.map { $0.report }
+        // Include all components: completed + not yet executed
+        let allComponents = componentsManager.completedComponents + componentsManager.components
+        let componentReports = allComponents.map { $0.report }
         let executionTime = componentsManager.completedComponents.reduce(0.0) { $0 + $1.executionTime }
         return WorkflowReport(
             id: id,

@@ -115,9 +115,12 @@ struct BlogCategoryWorkflowExample {
                     LLMMessage(role: .user, content: prompt),
                 ])
                 let response = try await llm.sendRequest(request)
-                let data = response.text
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-                    .data(using: .utf8)!
+                let (_, rawResponse) = response.text.extractThoughtsAndStripJSON()
+                
+                guard let data = rawResponse.data(using: .utf8) else {
+                    throw NSError(domain: "SummarizeAndSuggest", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to convert response to data"])
+                }
+                
                 let json = try JSONDecoder().decode(
                     [String: AnyCodable].self,
                     from: data

@@ -222,6 +222,39 @@ public struct Workflow {
                 componentsManager.complete(component)
             } catch AuroraCoreError.workflowCanceled {
                 return // Exit gracefully when canceled
+            } catch {
+                // Handle task failure - mark as failed and continue with next task
+                let componentName = component.report.name
+                logger?.error("Task \(componentName) failed: \(error.localizedDescription)", category: "Workflow")
+                
+                // Update the component's execution details to mark it as failed
+                let failedDetails = ExecutionDetails(
+                    state: .failed,
+                    startedAt: Date(), // Approximate start time
+                    endedAt: Date(),
+                    executionTime: 0,
+                    outputs: [:],
+                    error: error
+                )
+                
+                // Update execution details for the specific component type
+                switch component {
+                case .task(let task):
+                    task.updateExecutionDetails(failedDetails)
+                case .taskGroup(let group):
+                    group.updateExecutionDetails(failedDetails)
+                case .logic(let logic):
+                    logic.updateExecutionDetails(failedDetails)
+                case .trigger(let trigger):
+                    trigger.updateExecutionDetails(failedDetails)
+                case .subflow(_):
+                    // For subflows, we could update the nested workflow's details
+                    // but for now, just log the failure
+                    break
+                }
+                
+                componentsManager.complete(component) // Move to completed with failed state
+                // Continue with next task instead of stopping the entire workflow
             }
         }
 

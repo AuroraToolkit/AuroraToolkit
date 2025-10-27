@@ -13,9 +13,13 @@ import Foundation
 /// This struct provides easy-to-use static methods for the most common LLM operations,
 /// reducing the complexity of the standard AuroraLLM API for typical use cases.
 ///
+/// The convenience APIs will use your explicitly configured service first (via `LLM.configure(with: service)`).
+/// If no service is configured, they will fall back to Apple's Foundation Model (on iOS 26+/macOS 26+).
+/// If neither is available, you must configure a default service.
+///
 /// ### Example Usage
 /// ```swift
-/// // Simple message sending
+/// // Simple message sending (uses configured service first, then Foundation Model)
 /// let response = try await LLM.send("Hello, world!")
 ///
 /// // Streaming response
@@ -23,10 +27,37 @@ import Foundation
 ///     print(partial)
 /// }
 ///
+/// // Configure a default service if Foundation Model is not available
+/// LLM.configure(with: LLM.anthropic)
+///
 /// // Using specific service
 /// let response = try await LLM.send("Hello", to: LLM.anthropic)
 /// ```
 public struct LLM {
+    
+    // MARK: - Default Service Management
+    
+    /// The configured default service for convenience operations
+    private static var _defaultService: LLMServiceProtocol?
+    
+    /// Get the default service for convenience operations
+    /// - Returns: The configured service first, then Foundation Model if available
+    /// - Throws: `LLMServiceError.noDefaultServiceConfigured` if no service is available
+    private static func getDefaultService() throws -> LLMServiceProtocol {
+        if let defaultService = _defaultService {
+            return defaultService
+        }
+
+        // Next, try to use Foundation Model if available
+        if #available(iOS 26, macOS 26, visionOS 26, *) {
+            if let foundationService = FoundationModelService.createIfAvailable() {
+                return foundationService
+            }
+        }
+        
+        // If default or Foundation Model is not available, throw `noDefaultServiceConfigured` error
+        throw LLMServiceError.noDefaultServiceConfigured
+    }
     
     // MARK: - Service Access
     
@@ -56,20 +87,20 @@ public struct LLM {
     /// Configure the default service for simple operations
     /// - Parameter service: The LLM service to use as default
     public static func configure(with service: LLMServiceProtocol) {
-        // Note: This is a placeholder for future implementation
-        // Currently, services are accessed directly via properties
+        _defaultService = service
     }
     
     // MARK: - Simple Send Methods
     
-    /// Send a simple message to Anthropic and get a response
+    /// Send a simple message using the default service (configured service, or Foundation Model if available)
     /// - Parameters:
     ///   - message: The message to send
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
     /// - Returns: The response text
-    /// - Throws: An error if the request fails
+    /// - Throws: An error if the request fails or no default service is configured
     public static func send(_ message: String, maxTokens: Int = 1024) async throws -> String {
-        return try await anthropic.send(message, maxTokens: maxTokens)
+        let service = try getDefaultService()
+        return try await send(message, to: service, maxTokens: maxTokens)
     }
     
     /// Send a simple message to a specific service and get a response
@@ -87,15 +118,16 @@ public struct LLM {
     
     // MARK: - Streaming Methods
     
-    /// Send a message with streaming response
+    /// Send a message with streaming response using the default service, or Foundation model if available
     /// - Parameters:
     ///   - message: The message to send
     ///   - onPartialResponse: Closure called with each partial response
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
     /// - Returns: The complete response text
-    /// - Throws: An error if the request fails
+    /// - Throws: An error if the request fails or no default service is configured
     public static func stream(_ message: String, onPartialResponse: @escaping (String) -> Void, maxTokens: Int = 1024) async throws -> String {
-        return try await anthropic.stream(message, onPartialResponse: onPartialResponse, maxTokens: maxTokens)
+        let service = try getDefaultService()
+        return try await stream(message, to: service, onPartialResponse: onPartialResponse, maxTokens: maxTokens)
     }
     
     /// Send a message with streaming response to a specific service

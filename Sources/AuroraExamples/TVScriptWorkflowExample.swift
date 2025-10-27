@@ -49,11 +49,10 @@ struct TVScriptWorkflowExample {
             }
         }
 
-        // Workflow initialization
-        var workflow = Workflow(
-            name: "AP Tech News Script Workflow",
-            description: "Fetch and summarize AP Tech News articles for a TV news broadcast.",
-            logger: CustomLogger.shared
+        // Workflow initialization using convenience APIs
+        var workflow = AuroraCore.workflow(
+            "AP Tech News Script Workflow",
+            description: "Fetch and summarize AP Tech News articles for a TV news broadcast."
         ) {
             // Step 1: Fetch the RSS Feed
             FetchURLTask(name: "FetchFeed", url: "http://rsshub.app/apnews/topics/technology")
@@ -62,8 +61,8 @@ struct TVScriptWorkflowExample {
             RSSParsingTask(name: "ParseFeed", inputs: ["feedData": "{FetchFeed.data}"])
 
             // Step 3: Limit the number of articles to a maximum of 10
-            Workflow.Task(
-                name: "LatestArticles",
+            AuroraCore.task(
+                "LatestArticles",
                 inputs: ["articles": "{ParseFeed.articles}"]
             ) { inputs in
                 let articles = inputs["articles"] as? [RSSArticle] ?? []
@@ -76,8 +75,8 @@ struct TVScriptWorkflowExample {
             }
 
             // Step 4: Fetch each article's main details
-            Workflow.Task(
-                name: "FetchArticles",
+            AuroraCore.task(
+                "FetchArticles",
                 description: "Fetch and extract the title, summary, and canonical URL of each article.",
                 inputs: ["latestArticles": "{LatestArticles.articles}"]
             ) { inputs in
@@ -97,8 +96,8 @@ struct TVScriptWorkflowExample {
             }
 
             // Step 5: Generate a TV news script
-            Workflow.Task(
-                name: "GenerateTVScript",
+            AuroraCore.task(
+                "GenerateTVScript",
                 description: "Generate a script for a TV news anchor to read the headlines.",
                 inputs: ["articleSummaries": "{FetchArticles.articleSummaries}"]
             ) { inputs in

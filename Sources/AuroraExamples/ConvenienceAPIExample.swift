@@ -21,18 +21,26 @@ struct ConvenienceAPIExample {
         // --- Before: Traditional LLMManager setup (for comparison) ---
         print("\n--- Traditional LLMManager Setup (Before) ---")
         let manager = LLMManager()
-        let anthropicApiKey = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
+        
+        // Set up the required API key with fallback logic
+        // 1. Try SecureStorage first, 2. Fall back to environment variable, 3. Use nil as last resort
+        let anthropicApiKey = SecureStorage.getAPIKey(for: "Anthropic") ?? ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
+        
         if let apiKey = anthropicApiKey {
             manager.registerService(AnthropicService(name: "DefaultAnthropic", apiKey: apiKey))
+            
+            let prompt = "What is the capital of France?"
+            print("Prompt: \"\(prompt)\"")
+            let traditionalRequest = LLMRequest(messages: [LLMMessage(role: .user, content: prompt)])
+            if let response = await manager.sendRequest(traditionalRequest) {
+                print("Traditional Anthropic Response: \(response.text)")
+            } else {
+                print("Traditional Anthropic Request Failed: No response received")
+            }
         } else {
-            print("Warning: ANTHROPIC_API_KEY not set. Traditional Anthropic example will be skipped.")
-        }
-
-        let traditionalRequest = LLMRequest(messages: [LLMMessage(role: .user, content: "What is the capital of France?")])
-        if let response = await manager.sendRequest(traditionalRequest) {
-            print("Traditional Anthropic Response: \(response.text)")
-        } else {
-            print("Traditional Anthropic Request Failed: No response received")
+            print("Warning: No Anthropic API key found in SecureStorage or environment variables.")
+            print("   The traditional example will be skipped.")
+            print("   To fix: Set ANTHROPIC_API_KEY environment variable or use SecureStorage.saveAPIKey()")
         }
 
         // --- After: Using LLM Convenience APIs ---
@@ -40,8 +48,10 @@ struct ConvenienceAPIExample {
 
         // 1. Simple Send Request (Anthropic)
         do {
+            let prompt = "What is the capital of Germany?"
             print("\nSending simple request to Anthropic via LLM.send:")
-            let responseText = try await LLM.send("What is the capital of Germany?", to: LLM.anthropic)
+            print("Prompt: \"\(prompt)\"")
+            let responseText = try await LLM.send(prompt, to: LLM.anthropic)
             print("LLM.anthropic.send Response: \(responseText)")
         } catch {
             print("LLM.anthropic.send Failed: \(error.localizedDescription)")
@@ -49,8 +59,10 @@ struct ConvenienceAPIExample {
 
         // 2. Simple Send Request (OpenAI)
         do {
+            let prompt = "What is the capital of Spain?"
             print("\nSending simple request to OpenAI via LLM.send:")
-            let responseText = try await LLM.send("What is the capital of Spain?", to: LLM.openai)
+            print("Prompt: \"\(prompt)\"")
+            let responseText = try await LLM.send(prompt, to: LLM.openai)
             print("LLM.openai.send Response: \(responseText)")
         } catch {
             print("LLM.openai.send Failed: \(error.localizedDescription)")
@@ -58,9 +70,11 @@ struct ConvenienceAPIExample {
 
         // 3. Streaming Request (Anthropic)
         do {
+            let prompt = "Tell me a very short story about a brave knight."
             print("\nSending streaming request to Anthropic via LLM.stream:")
+            print("Prompt: \"\(prompt)\"")
             print("Streaming Anthropic Response:")
-            _ = try await LLM.stream("Tell me a very short story about a brave knight.", to: LLM.anthropic) { partialResponse in
+            _ = try await LLM.stream(prompt, to: LLM.anthropic) { partialResponse in
                 print(partialResponse, terminator: "")
             }
             print("\n(Streaming complete)")
@@ -70,9 +84,11 @@ struct ConvenienceAPIExample {
 
         // 4. Streaming Request (OpenAI)
         do {
+            let prompt = "Write a haiku about a cherry blossom."
             print("\nSending streaming request to OpenAI via LLM.stream:")
+            print("Prompt: \"\(prompt)\"")
             print("Streaming OpenAI Response:")
-            _ = try await LLM.stream("Write a haiku about a cherry blossom.", to: LLM.openai) { partialResponse in
+            _ = try await LLM.stream(prompt, to: LLM.openai) { partialResponse in
                 print(partialResponse, terminator: "")
             }
             print("\n(Streaming complete)")
@@ -82,8 +98,10 @@ struct ConvenienceAPIExample {
 
         // 5. Direct service convenience method (Ollama)
         do {
+            let prompt = "What is the best way to learn Swift?"
             print("\nSending direct request to Ollama via LLM.ollama.send:")
-            let ollamaResponse = try await LLM.ollama.send("What is the best way to learn Swift?")
+            print("Prompt: \"\(prompt)\"")
+            let ollamaResponse = try await LLM.ollama.send(prompt)
             print("LLM.ollama.send Response: \(ollamaResponse)")
         } catch {
             print("LLM.ollama.send Failed: \(error.localizedDescription)")
@@ -93,8 +111,10 @@ struct ConvenienceAPIExample {
         if #available(iOS 26, macOS 26, visionOS 26, *) {
             if let foundationService = LLM.foundation {
                 do {
+                    let prompt = "Summarize the main idea of a modular architecture."
                     print("\nSending direct request to Foundation Model via LLM.foundation.send:")
-                    let fmResponse = try await foundationService.send("Summarize the main idea of a modular architecture.")
+                    print("Prompt: \"\(prompt)\"")
+                    let fmResponse = try await foundationService.send(prompt)
                     print("LLM.foundation.send Response: \(fmResponse)")
                 } catch {
                     print("LLM.foundation.send Failed: \(error.localizedDescription)")

@@ -73,10 +73,12 @@ struct LeMondeTranslationWorkflow {
                 }
 
                 let outputs = try await unwrappedTask.execute()
-                guard let translations = outputs["translations"] as? [String] else {
+                guard let translationsDict = outputs["translations"] as? [String: String] else {
                     throw NSError(domain: "TranslateArticles", code: 3, userInfo: [NSLocalizedDescriptionKey: "Failed to retrieve translations"])
                 }
 
+                // Convert dictionary to array of translated strings (values only)
+                let translations = Array(translationsDict.values)
                 return ["articles": translations]
             }
 

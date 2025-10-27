@@ -13,7 +13,7 @@ import Foundation
 struct DomainRoutingExample {
     func execute() async {
         // Initialize the LLMManager
-        let manager = LLMManager()
+        let manager = LLMManager(logger: CustomLogger.shared)
 
         // Domains we handle
         let sports = ["sports"]
@@ -71,12 +71,12 @@ struct DomainRoutingExample {
         print(" - General Service: Context Size: \(generalService.contextWindowSize), Max Output Tokens: \(generalService.maxOutputTokens)")
         print()
 
-        let sportsquestion = "Who won the rugby championship in 2022?"
+        let sportsQuestion = "Who won the rugby championship in 2022?"
         let moviesQuestion = "What won Best Picture in 2021?"
         let booksQuestion = "Who wrote The Great Gatsby?"
         let generalQuestion = "What is the capital of France?"
 
-        let questions = [sportsquestion, moviesQuestion, booksQuestion, generalQuestion]
+        let questions = [sportsQuestion, moviesQuestion, booksQuestion, generalQuestion]
 
         for question in questions {
             print("\nSending question to the LLMManager...")
@@ -92,7 +92,7 @@ struct DomainRoutingExample {
 
             print("Response from vendor: \(responseVendor), model: \(responseModel)\n\(responseText)")
 
-            if question == sportsquestion {
+            if question == sportsQuestion {
                 assert(response?.text == "Sports Service Response")
             } else if question == moviesQuestion {
                 assert(response?.text == "Movies Service Response")

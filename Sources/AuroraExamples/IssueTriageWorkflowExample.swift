@@ -88,13 +88,13 @@ struct IssueTriageWorkflowExample {
             topK: 3
         )
 
-        // Compose the workflow
-        var workflow = Workflow(
-            name: "IssueTriage",
+        // Compose the workflow using convenience APIs
+        var workflow = AuroraCore.workflow(
+            "IssueTriage",
             description: "Classify, extract intent, tag code, and search past issues"
         ) {
             // Classification
-            Workflow.Task(name: "ClassifyIssue", inputs: ["text": issueText]) { inputs in
+            AuroraCore.task("ClassifyIssue", inputs: ["text": issueText]) { inputs in
                 let text = inputs["text"] as! String
                 let resp = try await classificationService.run(
                     request: MLRequest(inputs: ["strings": [text]])
@@ -104,7 +104,7 @@ struct IssueTriageWorkflowExample {
             }
 
             // Intent extraction
-            Workflow.Task(name: "ExtractIntent", inputs: ["text": issueText]) { inputs in
+            AuroraCore.task("ExtractIntent", inputs: ["text": issueText]) { inputs in
                 let text = inputs["text"] as! String
                 let resp = try await intentService.run(
                     request: MLRequest(inputs: ["strings": [text]])
@@ -114,7 +114,7 @@ struct IssueTriageWorkflowExample {
             }
 
             // Error-code tagging
-            Workflow.Task(name: "TagCodes", inputs: ["strings": [issueText]]) { inputs in
+            AuroraCore.task("TagCodes", inputs: ["strings": [issueText]]) { inputs in
                 let texts = inputs["strings"] as! [String]
                 let resp = try await taggingService.run(
                     request: MLRequest(inputs: ["strings": texts])
@@ -124,7 +124,7 @@ struct IssueTriageWorkflowExample {
             }
 
             // Semantic-search past issues
-            Workflow.Task(name: "SearchPastIssues", inputs: ["query": issueText]) { inputs in
+            AuroraCore.task("SearchPastIssues", inputs: ["query": issueText]) { inputs in
                 let q = inputs["query"] as! String
                 let resp = try await searchService.run(
                     request: MLRequest(inputs: ["query": q])

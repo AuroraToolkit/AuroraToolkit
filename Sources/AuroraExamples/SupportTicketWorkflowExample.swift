@@ -103,14 +103,14 @@ struct SupportTicketWorkflowExample {
             logger: CustomLogger.shared
         )
 
-        // Build and run the workflow
-        var workflow = Workflow(
-            name: "SupportTicketAnalysis",
+        // Build and run the workflow using convenience APIs
+        var workflow = AuroraCore.workflow(
+            "SupportTicketAnalysis",
             description: "Classify, extract intent, search FAQs, and tag entities"
         ) {
             // Classification
-            Workflow.Task(
-                name: "ClassifyTicket",
+            AuroraCore.task(
+                "ClassifyTicket",
                 inputs: ["text": ticketText]
             ) { inputs in
                 let text = inputs["text"] as! String
@@ -122,8 +122,8 @@ struct SupportTicketWorkflowExample {
             }
 
             // Intent extraction
-            Workflow.Task(
-                name: "ExtractIntent",
+            AuroraCore.task(
+                "ExtractIntent",
                 inputs: ["text": ticketText]
             ) { inputs in
                 let text = inputs["text"] as! String
@@ -135,8 +135,8 @@ struct SupportTicketWorkflowExample {
             }
 
             // FAQ semantic search
-            Workflow.Task(
-                name: "SearchFAQs",
+            AuroraCore.task(
+                "SearchFAQs",
                 inputs: ["query": ticketText]
             ) { inputs in
                 let query = inputs["query"] as! String
@@ -148,8 +148,8 @@ struct SupportTicketWorkflowExample {
             }
 
             // Named‐entity tagging
-            Workflow.Task(
-                name: "TagEntities",
+            AuroraCore.task(
+                "TagEntities",
                 inputs: ["strings": [ticketText]]
             ) { inputs in
                 let texts = inputs["strings"] as! [String]
@@ -170,7 +170,7 @@ struct SupportTicketWorkflowExample {
         let entities = workflow.outputs["TagEntities.entities"] as? [[Tag]] ?? []
 
         print("🛎 Support Ticket Report")
-        print("• Ticket Types: ", types.map(\.label))
+        print("• Ticket Types: ", types.map { $0.label })
         print("• Intents:      ", intents.map { $0["name"] as! String })
         print("• Top FAQs:     ", faqsOut.map { $0["document"] as! String })
         print("• Entities:     ", entities)

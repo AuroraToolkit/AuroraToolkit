@@ -47,7 +47,7 @@ struct TemperatureMonitorWorkflow {
     func highTempSubflow(for currentTemp: Double) -> Workflow.Component {
         highTempCounter.count += 1
         return Workflow.Subflow(name: "HighTempAlert", description: "Alert subflow for high temperature") {
-            Workflow.Task(name: "SendAlert", description: "Send an alert for high temperature") { _ in
+            AuroraCore.task("SendAlert", description: "Send an alert for high temperature") { _ in
                 print("Alert: Temperature (\(currentTemp)) is above safe threshold!")
                 return ["\(highTempCounter.count)": "Temperature \(currentTemp) is too high!"]
             }
@@ -57,7 +57,7 @@ struct TemperatureMonitorWorkflow {
     func normalLogSubflow(for currentTemp: Double) -> Workflow.Component {
         normalTempCount.count += 1
         return Workflow.Subflow(name: "NormalLog", description: "Logging subflow for normal temperature") {
-            Workflow.Task(name: "LogTemperature", description: "Log normal temperature") { _ in
+            AuroraCore.task("LogTemperature", description: "Log normal temperature") { _ in
                 print("Log: Temperature (\(currentTemp)) is normal.")
                 return ["\(normalTempCount.count)": "Temperature \(currentTemp) is normal."]
             }
@@ -106,14 +106,13 @@ struct TemperatureMonitorWorkflow {
         // Create a history instance to store temperature readings.
         let history = TempHistory()
 
-        // Workflow initialization
-        var workflow = Workflow(
-            name: "Temperature Monitor Workflow",
-            description: "Monitors temperature and triggers alerts if it exceeds a safe threshold.",
-            logger: CustomLogger.shared
+        // Workflow initialization using convenience API
+        var workflow = AuroraCore.workflow(
+            "Temperature Monitor Workflow",
+            description: "Monitors temperature and triggers alerts if it exceeds a safe threshold."
         ) {
             // Step 1: Read the current temperature.
-            Workflow.Task(name: "ReadTemperature", description: "Simulate reading temperature") { _ in
+            AuroraCore.task("ReadTemperature", description: "Simulate reading temperature") { _ in
                 let temperature = self.getCurrentTemperature()
                 history.addTemperature(temperature)
                 print("Current temperature: \(temperature)")
@@ -136,7 +135,7 @@ struct TemperatureMonitorWorkflow {
             self.makePeriodicTrigger(counter: counter, history: history)
 
             // Step 4: Final task to analyze temperature history.
-            Workflow.Task(name: "AnalyzeTempHistory", description: "Analyze temperature history") { _ in
+            AuroraCore.task("AnalyzeTempHistory", description: "Analyze temperature history") { _ in
                 let readings = history.history
                 guard !readings.isEmpty else {
                     return ["analysis": "No temperature data available."]
