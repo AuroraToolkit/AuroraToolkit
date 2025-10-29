@@ -97,7 +97,7 @@ public class OpenAIService: LLMServiceProtocol {
         let messagesPayload = prepareOpenAIMessagesPayload(from: request, serviceSystemPrompt: systemPrompt)
 
         let body: [String: Any] = [
-            "model": request.model ?? "gpt-4o",
+            "model": request.model ?? "gpt-4o-mini",
             "messages": messagesPayload,
             "max_tokens": request.maxTokens,
             "temperature": request.temperature,
@@ -163,7 +163,7 @@ public class OpenAIService: LLMServiceProtocol {
         let messagesPayload = prepareOpenAIMessagesPayload(from: request, serviceSystemPrompt: systemPrompt)
 
         let body: [String: Any] = [
-            "model": request.model ?? "gpt-4o",
+            "model": request.model ?? "gpt-4o-mini",
             "messages": messagesPayload,
             "max_tokens": request.maxTokens,
             "temperature": request.temperature,
@@ -191,7 +191,7 @@ public class OpenAIService: LLMServiceProtocol {
         return try await withCheckedThrowingContinuation { continuation in
             let streamingDelegate = StreamingDelegate(
                 vendor: vendor,
-                model: request.model ?? "gpt-4o",
+                model: request.model ?? "gpt-4o-mini",
                 logger: logger,
                 onPartialResponse: onPartialResponse ?? { _ in },
                 continuation: continuation

@@ -429,7 +429,9 @@ public struct Workflow {
         case .sequential:
             for task in group.tasks {
                 let taskOutputs = try await executeTask(task, workflowOutputs: workflowOutputs)
-                groupOutputs.merge(taskOutputs.mapKeys { "\(task.name).\($0)" }) { _, new in new }
+                for (key, value) in taskOutputs {
+                    groupOutputs["\(task.name).\(key)"] = value
+                }
             }
         case .parallel:
             try await withThrowingTaskGroup(of: Void.self) { taskGroup in
@@ -437,7 +439,9 @@ public struct Workflow {
                     taskGroup.addTask {
                         let taskOutputs = try await self.executeTask(task, workflowOutputs: workflowOutputs)
                         queue.sync { // Ensure thread safety when updating groupOutputs
-                            groupOutputs.merge(taskOutputs.mapKeys { "\(task.name).\($0)" }) { _, new in new }
+                            for (key, value) in taskOutputs {
+                                groupOutputs["\(task.name).\(key)"] = value
+                            }
                         }
                     }
                 }

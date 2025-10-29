@@ -105,7 +105,7 @@ public class GoogleService: LLMServiceProtocol {
             throw LLMServiceError.missingAPIKey
         }
 
-        let modelName = request.model ?? "gemini-2.0-flash" // Use request model or default
+        let modelName = request.model ?? "gemini-2.5-flash-lite" // Use request model or default
 
         let googleRequest: GoogleGenerateContentRequest
         do {
@@ -187,7 +187,7 @@ public class GoogleService: LLMServiceProtocol {
             throw LLMServiceError.missingAPIKey
         }
 
-        let modelName = request.model ?? "gemini-2.0-flash"
+        let modelName = request.model ?? "gemini-2.5-flash-lite"
 
         let googleRequest: GoogleGenerateContentRequest
         do {

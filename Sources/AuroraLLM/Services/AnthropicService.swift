@@ -107,11 +107,10 @@ public class AnthropicService: LLMServiceProtocol {
 
         // Construct the body with a top-level system parameter
         var body: [String: Any] = [
-            "model": request.model ?? "claude-3-5-sonnet-20240620",
+            "model": request.model ?? "claude-haiku-4-5",
             "messages": userMessages,
             "max_tokens": request.maxTokens,
             "temperature": request.temperature,
-            "top_p": request.options?.topP ?? 1.0,
         ]
 
         // Add the system message if available
@@ -167,11 +166,10 @@ public class AnthropicService: LLMServiceProtocol {
 
         // Construct the body with a top-level system parameter
         var body: [String: Any] = [
-            "model": request.model ?? "claude-3-5-sonnet-20240620",
+            "model": request.model ?? "claude-haiku-4-5",
             "messages": userMessages,
             "max_tokens": request.maxTokens,
             "temperature": request.temperature,
-            "top_p": request.options?.topP ?? 1.0,
             "stream": true,
         ]
 
@@ -204,7 +202,7 @@ public class AnthropicService: LLMServiceProtocol {
         return try await withCheckedThrowingContinuation { continuation in
             let streamingDelegate = StreamingDelegate(
                 vendor: vendor,
-                model: request.model ?? "claude-3-5-sonnet-20240620",
+                model: request.model ?? "claude-haiku-4-5",
                 logger: logger,
                 onPartialResponse: onPartialResponse ?? { _ in },
                 continuation: continuation

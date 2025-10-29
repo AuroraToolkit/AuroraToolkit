@@ -11,35 +11,41 @@ import Foundation
 struct LLMConfigurationExample {
     func execute() async {
         print("🔧 LLM Configuration Example")
-        print("============================")
-        
-        let message = "What is the capital of France?"
-        
+        print("===21=========================")
+
         // Test 1: Try using convenience API without configuration (will use Foundation Model if available)
         print("\n1. Testing convenience API without explicit configuration...")
         print("   (Will use Foundation Model if available, otherwise will show error)")
-        await testConvenienceAPI(message: message)
-        
+        await testConvenienceAPI(country: "Spain")
+
         // Test 2: Configure Anthropic as default and test
         print("\n2. Configuring Anthropic as default service...")
         LLM.configure(with: LLM.anthropic)
-        await testConvenienceAPI(message: message)
-        
+        await testConvenienceAPI(country: "France")
+
         // Test 3: Configure OpenAI as default and test
         print("\n3. Configuring OpenAI as default service...")
         LLM.configure(with: LLM.openai)
-        await testConvenienceAPI(message: message)
-        
-        // Test 4: Configure Ollama as default and test
-        print("\n4. Configuring Ollama as default service...")
+        await testConvenienceAPI(country: "Switzerland")
+
+        // Test 4: Configure Google as default and test
+        print("\n4. Configuring Google as default service...")
+        LLM.configure(with: LLM.google)
+        await testConvenienceAPI(country: "Germany")
+
+        // Test 5: Configure Ollama as default and test
+        print("\n5. Configuring Ollama as default service...")
         LLM.configure(with: LLM.ollama)
-        await testConvenienceAPI(message: message)
-        
+        await testConvenienceAPI(country: "Italy")
+
         print("\n✅ Configuration example completed!")
     }
     
-    private func testConvenienceAPI(message: String) async {
+    private func testConvenienceAPI(country: String) async {
+        let message = "What is the capital of \(country)?"
+
         do {
+            print("   Prompt: \(message)")
             let response = try await LLM.send(message, maxTokens: 50)
             print("   Response: \(response)")
         } catch {

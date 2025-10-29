@@ -71,6 +71,11 @@ public struct LLM {
         return OpenAIService.default
     }
     
+    /// Pre-configured Google service for simple usage
+    public static var google: GoogleService {
+        return GoogleService.default
+    }
+    
     /// Pre-configured Ollama service for simple usage
     public static var ollama: OllamaService {
         return OllamaService.default
@@ -150,7 +155,9 @@ public struct LLM {
 extension AnthropicService {
     /// Default Anthropic service instance
     public static var `default`: AnthropicService {
-        return AnthropicService(name: "DefaultAnthropic", apiKey: SecureStorage.getAPIKey(for: "Anthropic"))
+        // Prioritize environment variable for examples, fall back to SecureStorage
+        let apiKey = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"] ?? SecureStorage.getAPIKey(for: "Anthropic")
+        return AnthropicService(name: "DefaultAnthropic", apiKey: apiKey)
     }
     
     /// Send a simple message and get a response
@@ -182,7 +189,43 @@ extension AnthropicService {
 extension OpenAIService {
     /// Default OpenAI service instance
     public static var `default`: OpenAIService {
-        return OpenAIService(name: "DefaultOpenAI", apiKey: SecureStorage.getAPIKey(for: "OpenAI"))
+        // Prioritize environment variable for examples, fall back to SecureStorage
+        let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? SecureStorage.getAPIKey(for: "OpenAI")
+        return OpenAIService(name: "DefaultOpenAI", apiKey: apiKey)
+    }
+    
+    /// Send a simple message and get a response
+    /// - Parameters:
+    ///   - message: The message to send
+    ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
+    /// - Returns: The response text
+    /// - Throws: An error if the request fails
+    public func send(_ message: String, maxTokens: Int = 1024) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens)
+        let response = try await sendRequest(request)
+        return response.text
+    }
+    
+    /// Send a message with streaming response
+    /// - Parameters:
+    ///   - message: The message to send
+    ///   - onPartialResponse: Closure called with each partial response
+    ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
+    /// - Returns: The complete response text
+    /// - Throws: An error if the request fails
+    public func stream(_ message: String, onPartialResponse: @escaping (String) -> Void, maxTokens: Int = 1024) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, stream: true)
+        let response = try await sendStreamingRequest(request, onPartialResponse: onPartialResponse)
+        return response.text
+    }
+}
+
+extension GoogleService {
+    /// Default Google service instance
+    public static var `default`: GoogleService {
+        // Prioritize environment variable for examples, fall back to SecureStorage
+        let apiKey = ProcessInfo.processInfo.environment["GOOGLE_API_KEY"] ?? SecureStorage.getAPIKey(for: "Google")
+        return GoogleService(name: "DefaultGoogle", apiKey: apiKey)
     }
     
     /// Send a simple message and get a response
