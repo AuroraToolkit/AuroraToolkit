@@ -40,6 +40,9 @@ public class OpenAIService: LLMServiceProtocol {
     /// The default system prompt for this service, used to set the behavior or persona of the model.
     public var systemPrompt: String?
 
+    /// The API key for authenticating requests, stored in memory to avoid keychain access during requests
+    private let apiKey: String?
+
     /// The URL session used to send basic requests.
     var urlSession: URLSession
 
@@ -66,8 +69,9 @@ public class OpenAIService: LLMServiceProtocol {
         self.systemPrompt = systemPrompt
         self.urlSession = urlSession
         self.logger = logger
-
-        if let apiKey {
+        // Store API key in memory and optionally save to keychain for persistence
+        self.apiKey = apiKey ?? SecureStorage.getAPIKey(for: name)
+        if let apiKey = self.apiKey {
             try? SecureStorage.saveAPIKey(apiKey, for: name)
         }
     }
@@ -130,8 +134,8 @@ public class OpenAIService: LLMServiceProtocol {
 
         let transport = resolveTransport(for: request.model, options: request.options)
 
-        // Minimize the risk of API key exposure
-        guard let apiKey = SecureStorage.getAPIKey(for: name) else {
+        // Use in-memory API key to avoid blocking keychain access
+        guard let apiKey = apiKey else {
             throw LLMServiceError.missingAPIKey
         }
 
@@ -279,8 +283,8 @@ public class OpenAIService: LLMServiceProtocol {
 
         logger?.debug("OpenAIService [sendStreamingRequest] Transport=\(transport == .responses ? "responses" : "legacyChat"). Keys: \(body.keys).", category: "OpenAIService")
 
-        // Minimize the risk of API key exposure
-        guard let apiKey = SecureStorage.getAPIKey(for: name) else {
+        // Use in-memory API key to avoid blocking keychain access
+        guard let apiKey = apiKey else {
             throw LLMServiceError.missingAPIKey
         }
         urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")

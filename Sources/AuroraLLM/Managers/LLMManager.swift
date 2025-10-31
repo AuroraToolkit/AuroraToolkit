@@ -466,13 +466,20 @@ public class LLMManager {
     ) -> LLMServiceProtocol? {
         logger?.debug("Selecting service based on multiple routing strategies: \(routings)", category: "LLMManager")
 
-        // If no routing criteria are specified, go directly to fallback service
+        // If no routing criteria are specified, try active service first, then fallback
         if routings.isEmpty {
+            // First, try the active service if it exists (check case-insensitive)
+            if let activeServiceName = activeServiceName,
+               let activeService = services[activeServiceName.lowercased()]?.service {
+                logger?.debug("No routing criteria specified, using active service: \(activeService.name)", category: "LLMManager")
+                return activeService
+            }
+            // Then try fallback service
             if let fallbackService {
                 logger?.debug("No routing criteria specified, using fallback service: \(fallbackService.name)", category: "LLMManager")
                 return fallbackService
             } else {
-                logger?.debug("No routing criteria specified and no fallback service available.", category: "LLMManager")
+                logger?.debug("No routing criteria specified and no active/fallback service available.", category: "LLMManager")
                 return nil
             }
         }
@@ -484,7 +491,7 @@ public class LLMManager {
 
         // Step 1: Try the active service if it meets the criteria
         if let activeServiceName = activeServiceName,
-           let activeService = services[activeServiceName]?.service,
+           let activeService = services[activeServiceName.lowercased()]?.service,
            serviceMeetsCriteria(activeService, routings: routings, for: request, trimming: trimming)
         {
             logger?.debug("Routing to active service: \(activeService.name)", category: "LLMManager")

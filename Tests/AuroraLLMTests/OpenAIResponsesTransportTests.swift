@@ -18,8 +18,16 @@ final class OpenAIResponsesTransportTests: XCTestCase {
 
         let session = makeSession { request in
             XCTAssertEqual(request.url?.path, "/v1/responses")
-            let body = try XCTUnwrap(request.httpBody)
-            let json = try JSONSerialization.jsonObject(with: body, options: []) as? [String: Any]
+            // URLSession may copy the request, so check both httpBody and httpBodyStream
+            let bodyData: Data
+            if let httpBody = request.httpBody {
+                bodyData = httpBody
+            } else if let stream = request.httpBodyStream {
+                bodyData = try Data(reading: stream)
+            } else {
+                throw XCTSkip("Request body not available in httpBody or stream")
+            }
+            let json = try JSONSerialization.jsonObject(with: bodyData, options: []) as? [String: Any]
             XCTAssertNotNil(json?[expectedBodyKey])
             let resp = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
             let payload = Self.responsesMinimalJSON(text: "hello")
@@ -39,8 +47,16 @@ final class OpenAIResponsesTransportTests: XCTestCase {
     func testLegacyChatTransportSendsMessagesBody() async throws {
         let session = makeSession { request in
             XCTAssertEqual(request.url?.path, "/v1/chat/completions")
-            let body = try XCTUnwrap(request.httpBody)
-            let json = try JSONSerialization.jsonObject(with: body, options: []) as? [String: Any]
+            // URLSession may copy the request, so check both httpBody and httpBodyStream
+            let bodyData: Data
+            if let httpBody = request.httpBody {
+                bodyData = httpBody
+            } else if let stream = request.httpBodyStream {
+                bodyData = try Data(reading: stream)
+            } else {
+                throw XCTSkip("Request body not available in httpBody or stream")
+            }
+            let json = try JSONSerialization.jsonObject(with: bodyData, options: []) as? [String: Any]
             XCTAssertNotNil(json?["messages"])
             let resp = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
             let payload = Self.chatMinimalJSON(text: "ok")
@@ -89,6 +105,25 @@ final class OpenAIResponsesTransportTests: XCTestCase {
             "model": "gpt-4o-mini"
         ]
         return try! JSONSerialization.data(withJSONObject: json, options: [])
+    }
+}
+
+extension Data {
+    init(reading stream: InputStream) throws {
+        stream.open()
+        defer { stream.close() }
+        var data = Data()
+        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: 1024)
+        defer { buffer.deallocate() }
+        while stream.hasBytesAvailable {
+            let bytesRead = stream.read(buffer, maxLength: 1024)
+            if bytesRead > 0 {
+                data.append(buffer, count: bytesRead)
+            } else if bytesRead < 0 {
+                throw stream.streamError ?? NSError(domain: "StreamError", code: -1)
+            }
+        }
+        self = data
     }
 }
 

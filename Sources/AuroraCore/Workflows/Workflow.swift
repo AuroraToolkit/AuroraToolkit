@@ -314,6 +314,11 @@ public struct Workflow {
 
     private mutating func executeSubflowComponent(_ subflow: inout Subflow) async throws {
         await subflow.workflow.start()
+        // Check if subflow failed and propagate the error
+        let subflowState = await subflow.workflow.state
+        if subflowState == .failed, let error = subflow.workflow.detailsHolder.details?.error {
+            throw error
+        }
         for (key, value) in subflow.workflow.outputs {
             outputs[key] = value
         }

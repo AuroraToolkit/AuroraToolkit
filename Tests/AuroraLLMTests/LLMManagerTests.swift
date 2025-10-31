@@ -694,7 +694,8 @@ final class LLMManagerTests: XCTestCase {
             expectedResult: .success(MockLLMResponse(text: "Sports Response"))
         )
         manager.registerService(sportsService)
-
+        manager.setActiveService(byName: "SportsService")
+        
         let fallbackService = MockLLMService(
             name: "FallbackService",
             expectedResult: .success(MockLLMResponse(text: "Fallback Response"))

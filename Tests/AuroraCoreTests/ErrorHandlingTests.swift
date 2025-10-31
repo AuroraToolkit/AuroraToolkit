@@ -193,8 +193,8 @@ final class ErrorHandlingTests: XCTestCase {
         
         await workflow.start()
         let state = await workflow.state
-        // Subflow errors do not bubble to the parent; parent completes while subflow records failure.
-        XCTAssertEqual(state, .completed)
+        // Parallel task group errors propagate to parent and fail the workflow
+        XCTAssertEqual(state, .failed)
     }
     
     func testWorkflowErrorPropagationNested() async {

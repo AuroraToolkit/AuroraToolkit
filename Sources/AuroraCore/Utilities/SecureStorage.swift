@@ -24,7 +24,7 @@ public class SecureStorage {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: serviceName + "_apiKey",
             kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
         ]
         // Remove any existing key for the service before saving the new one
         SecItemDelete(query as CFDictionary)
@@ -82,7 +82,7 @@ public class SecureStorage {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: serviceName + "_baseURL",
             kSecValueData as String: data,
-            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlocked,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
         ]
         // Remove any existing base URL for the service before saving the new one
         SecItemDelete(query as CFDictionary)
