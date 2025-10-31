@@ -222,6 +222,31 @@ Some test and example files use OpenAI or Anthropic services and need API keys t
 
 With this setup, you can run the tests on multiple LLMs and ensure your sensitive keys are not inadvertently shared.
 
+## OpenAI transport selection (Responses vs legacy chat)
+
+OpenAI now supports a unified Responses API in addition to the legacy Chat Completions API. Aurora lets you choose the transport per request while defaulting intelligently based on model.
+
+- Request option: `LLMRequestOptions.transport` supports `auto` (default), `responses`, `legacyChat`.
+- Environment override: `AURORA_OPENAI_TRANSPORT=auto|responses|legacyChat` (aliases `chat`, `chatCompletions`, and `legacy_chat` map to `legacyChat`).
+- Model-aware defaults: `gpt-5-*` and `o3-*` resolve to Responses; `gpt-4o*` resolves to legacyChat.
+
+Example:
+
+```swift
+let options = LLMRequestOptions(transport: .responses)
+let request = LLMRequest(
+    messages: [LLMMessage(role: .user, content: "Say hello")],
+    model: "gpt-5-nano",
+    options: options
+)
+let response = try await LLM.openAI.send(request)
+print(response.text)
+```
+
+Notes:
+- For Responses, Aurora maps messages to an array format (`input` array) and uses the `instructions` parameter for system prompts, aligned with the Responses API specification.
+- Streaming is supported for both transports and normalized to the same callback surface.
+
 ## Documentation
 
 AuroraToolkit uses Swift-DocC for comprehensive, interactive documentation. The documentation is organized by module and includes API references, tutorials, and practical examples.

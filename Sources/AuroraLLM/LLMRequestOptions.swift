@@ -9,6 +9,14 @@ import Foundation
 /// `LLMRequestOptions` provides a way to configure additional options for LLM requests in a structured manner.
 /// This struct encapsulates less common parameters that can be used to further customize the behavior of the language model.
 public struct LLMRequestOptions {
+    public enum Transport: String {
+        case auto
+        case responses
+        case legacyChat
+    }
+
+    /// Preferred transport for provider-specific request routing. Providers may ignore this.
+    public var transport: Transport?
     /// Nucleus sampling parameter that limits sampling to the top percentile of tokens. Lower values narrow the scope of the sampling to the most likely tokens.
     public var topP: Double?
 
@@ -52,7 +60,8 @@ public struct LLMRequestOptions {
         logitBias: [String: Double]? = nil,
         user: String? = nil,
         suffix: String? = nil,
-        preferredDomains: [String]? = nil
+        preferredDomains: [String]? = nil,
+        transport: Transport? = .auto
     ) {
         self.topP = topP
         self.frequencyPenalty = frequencyPenalty
@@ -62,5 +71,6 @@ public struct LLMRequestOptions {
         self.user = user
         self.suffix = suffix
         self.preferredDomains = preferredDomains
+        self.transport = transport
     }
 }

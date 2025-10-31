@@ -28,6 +28,10 @@ struct LLMConfigurationExample {
         LLM.configure(with: LLM.openai)
         await testConvenienceAPI(country: "Switzerland")
 
+        // Test 3b: Explicit OpenAI Responses API using gpt-5-nano
+        print("\n3b. Configuring OpenAI Responses (gpt-5-nano)...")
+        await testOpenAIResponses(country: "Portugal")
+
         // Test 4: Configure Google as default and test
         print("\n4. Configuring Google as default service...")
         LLM.configure(with: LLM.google)
@@ -43,12 +47,16 @@ struct LLMConfigurationExample {
     
     private func testConvenienceAPI(country: String) async {
         let message = "What is the capital of \(country)?"
+        let start = CFAbsoluteTimeGetCurrent()
+        var duration: CFAbsoluteTime = 0
 
         do {
             print("   Prompt: \(message)")
-            let response = try await LLM.send(message, maxTokens: 50)
+            let response = try await LLM.send(message, maxTokens: 1000)
+            duration = CFAbsoluteTimeGetCurrent() - start
             print("   Response: \(response)")
         } catch {
+            duration = CFAbsoluteTimeGetCurrent() - start
             print("   Error: \(error)")
             
             if let llmError = error as? LLMServiceError {
@@ -63,5 +71,30 @@ struct LLMConfigurationExample {
                 }
             }
         }
+        print("   Request took: \(String(format: "%.3f", duration))s")
+    }
+
+    private func testOpenAIResponses(country: String) async {
+        let message = "What is the capital of \(country)?"
+        let start = CFAbsoluteTimeGetCurrent()
+        var duration: CFAbsoluteTime = 0
+
+        do {
+            print("   Prompt: \(message)")
+            let request = LLMRequest(
+                messages: [LLMMessage(role: .user, content: message)],
+                temperature: 0.2,
+                maxTokens: 1000,
+                model: "gpt-5-nano",
+                options: LLMRequestOptions(transport: .responses)
+            )
+            let response = try await LLM.openai.sendRequest(request)
+            duration = CFAbsoluteTimeGetCurrent() - start
+            print("   Response (Responses API): \(response.text)")
+        } catch {
+            duration = CFAbsoluteTimeGetCurrent() - start
+            print("   Error (Responses API): \(error)")
+        }
+        print("   Request took: \(String(format: "%.3f", duration))s")
     }
 }

@@ -72,6 +72,51 @@ public class OpenAIService: LLMServiceProtocol {
         }
     }
 
+    // MARK: - Transport Resolution
+
+    private enum Transport {
+        case responses
+        case legacyChat
+    }
+
+    private func resolveTransport(for model: String?, options: LLMRequestOptions?) -> Transport {
+        // 1) Explicit option
+        if let explicit = options?.transport {
+            switch explicit {
+            case .responses: return .responses
+            case .legacyChat: return .legacyChat
+            case .auto: break
+            }
+        }
+
+        // 2) Env override
+        if let env = ProcessInfo.processInfo.environment["AURORA_OPENAI_TRANSPORT"]?.lowercased() {
+            if env == "responses" { return .responses }
+            if env == "chat" || env == "chatcompletions" || env == "legacychat" || env == "legacy_chat" { return .legacyChat }
+        }
+
+        // 3) Model capability map (default)
+        if let model = model?.lowercased() {
+            if model.hasPrefix("gpt-5") || model.hasPrefix("o3") {
+                return .responses
+            }
+        }
+        return .legacyChat
+    }
+
+    /// Prepares input for Responses API as an array of message objects
+    /// Returns tuple: (instructions: String?, input: [[String: String]])
+    private func prepareResponsesInput(from request: LLMRequest) -> (instructions: String?, input: [[String: String]]) {
+        // Extract system prompt as instructions parameter
+        let effectiveSystem = resolveSystemPrompt(from: request, serviceSystemPrompt: systemPrompt)
+        
+        // Convert non-system messages to array format (matching Chat Completions style)
+        let nonSystem = request.messages.filter { $0.role != .system }
+        let inputArray = nonSystem.map { ["role": $0.role.rawValue, "content": $0.content] }
+        
+        return (instructions: effectiveSystem, input: inputArray)
+    }
+
     // MARK: - Non-streaming Request
 
     /// Sends a request to the OpenAI API asynchronously without streaming.
@@ -83,30 +128,57 @@ public class OpenAIService: LLMServiceProtocol {
     public func sendRequest(_ request: LLMRequest) async throws -> LLMResponseProtocol {
         try validateStreamingConfig(request, expectStreaming: false)
 
-        // Setup URL and URLRequest
+        let transport = resolveTransport(for: request.model, options: request.options)
+
+        // Minimize the risk of API key exposure
+        guard let apiKey = SecureStorage.getAPIKey(for: name) else {
+            throw LLMServiceError.missingAPIKey
+        }
+
         guard var components = URLComponents(string: baseURL) else {
             throw LLMServiceError.invalidURL
         }
 
-        components.path = "/v1/chat/completions"
-        guard let url = components.url else {
-            throw LLMServiceError.invalidURL
+        var body: [String: Any] = [:]
+
+        switch transport {
+        case .legacyChat:
+            components.path = "/v1/chat/completions"
+            // Use helper function for consistent system prompt handling
+            let messagesPayload = prepareOpenAIMessagesPayload(from: request, serviceSystemPrompt: systemPrompt)
+            body = [
+                "model": request.model ?? "gpt-4o-mini",
+                "messages": messagesPayload,
+                "max_tokens": request.maxTokens,
+                "temperature": request.temperature,
+                "top_p": request.options?.topP ?? 1.0,
+                "frequency_penalty": request.options?.frequencyPenalty ?? 0.0,
+                "presence_penalty": request.options?.presencePenalty ?? 0.0,
+                "stop": request.options?.stopSequences ?? [],
+                "stream": false,
+            ]
+        case .responses:
+            components.path = "/v1/responses"
+            let (instructions, inputArray) = prepareResponsesInput(from: request)
+            let model = (request.model ?? "gpt-5-nano").lowercased()
+            body = [
+                "model": request.model ?? "gpt-5-nano",
+                "input": inputArray,
+                "max_output_tokens": request.maxTokens,
+            ]
+            // Use instructions parameter for system prompts (per Responses API spec)
+            if let instructions = instructions, !instructions.isEmpty {
+                body["instructions"] = instructions
+            }
+            // Add reasoning settings for GPT-5 family (required parameter)
+            if model.hasPrefix("gpt-5") {
+                body["reasoning"] = ["effort": "low"]
+            }
+            // Note: Temperature is not supported by gpt-5 models in Responses API
+            // and we exclude it to minimize unnecessary parameters
         }
 
-        // Use helper function for consistent system prompt handling
-        let messagesPayload = prepareOpenAIMessagesPayload(from: request, serviceSystemPrompt: systemPrompt)
-
-        let body: [String: Any] = [
-            "model": request.model ?? "gpt-4o-mini",
-            "messages": messagesPayload,
-            "max_tokens": request.maxTokens,
-            "temperature": request.temperature,
-            "top_p": request.options?.topP ?? 1.0,
-            "frequency_penalty": request.options?.frequencyPenalty ?? 0.0,
-            "presence_penalty": request.options?.presencePenalty ?? 0.0,
-            "stop": request.options?.stopSequences ?? [],
-            "stream": false,
-        ]
+        guard let url = components.url else { throw LLMServiceError.invalidURL }
 
         let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
 
@@ -114,27 +186,27 @@ public class OpenAIService: LLMServiceProtocol {
         urlRequest.httpMethod = "POST"
         urlRequest.httpBody = jsonData
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        logger?.debug("OpenAIService [sendRequest] Sending request with keys: \(body.keys)", category: "OpenAIService")
-
-        // Minimize the risk of API key exposure
-        guard let apiKey = SecureStorage.getAPIKey(for: name) else {
-            throw LLMServiceError.missingAPIKey
-        }
         urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
 
-        // Non-streaming response handling
+        logger?.debug("OpenAIService [sendRequest] Transport=\(transport == .responses ? "responses" : "legacyChat"). Keys: \(body.keys)", category: "OpenAIService")
+
         let (data, response) = try await urlSession.data(for: urlRequest)
 
         guard let httpResponse = response as? HTTPURLResponse, (200 ... 299).contains(httpResponse.statusCode) else {
-            throw LLMServiceError.invalidResponse(statusCode: (response as? HTTPURLResponse)?.statusCode ?? -1)
+            let statusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+            let errorBody = String(data: data, encoding: .utf8) ?? "Non-UTF8 error body"
+            logger?.error("OpenAIService [sendRequest] Error response (\(statusCode)): \(errorBody)", category: "OpenAIService")
+            throw LLMServiceError.invalidResponse(statusCode: statusCode)
         }
 
-        logger?.debug("OpenAIService [sendRequest] Response received from OpenAI.", category: "OpenAIService")
-
-        let decodedResponse = try JSONDecoder().decode(OpenAILLMResponse.self, from: data)
-        let finalResponse = decodedResponse.changingVendor(to: vendor)
-        return finalResponse
+        switch transport {
+        case .legacyChat:
+            let decodedResponse = try JSONDecoder().decode(OpenAILLMResponse.self, from: data)
+            return decodedResponse.changingVendor(to: vendor)
+        case .responses:
+            let decoded = try JSONDecoder().decode(OpenAIResponsesResponse.self, from: data)
+            return decoded.changingVendor(to: vendor)
+        }
     }
 
     // MARK: - Streaming Request
@@ -150,37 +222,62 @@ public class OpenAIService: LLMServiceProtocol {
     public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol {
         try validateStreamingConfig(request, expectStreaming: true)
 
+        let transport = resolveTransport(for: request.model, options: request.options)
+
         // URL and request setup
         guard var components = URLComponents(string: baseURL) else {
             throw LLMServiceError.invalidURL
         }
-        components.path = "/v1/chat/completions"
-        guard let url = components.url else {
-            throw LLMServiceError.invalidURL
+
+        var body: [String: Any] = [:]
+
+        switch transport {
+        case .legacyChat:
+            components.path = "/v1/chat/completions"
+            let messagesPayload = prepareOpenAIMessagesPayload(from: request, serviceSystemPrompt: systemPrompt)
+            body = [
+                "model": request.model ?? "gpt-4o-mini",
+                "messages": messagesPayload,
+                "max_tokens": request.maxTokens,
+                "temperature": request.temperature,
+                "top_p": request.options?.topP ?? 1.0,
+                "frequency_penalty": request.options?.frequencyPenalty ?? 0.0,
+                "presence_penalty": request.options?.presencePenalty ?? 0.0,
+                "stop": request.options?.stopSequences ?? [],
+                "stream": true,
+            ]
+        case .responses:
+            components.path = "/v1/responses"
+            let (instructions, inputArray) = prepareResponsesInput(from: request)
+            let model = (request.model ?? "gpt-5-nano").lowercased()
+            body = [
+                "model": request.model ?? "gpt-5-nano",
+                "input": inputArray,
+                "max_output_tokens": request.maxTokens,
+                "stream": true,
+            ]
+            // Use instructions parameter for system prompts (per Responses API spec)
+            if let instructions = instructions, !instructions.isEmpty {
+                body["instructions"] = instructions
+            }
+            // Add reasoning settings for GPT-5 family (required parameter)
+            if model.hasPrefix("gpt-5") {
+                body["reasoning"] = ["effort": "low"]
+            }
+            // Note: Temperature is not supported by gpt-5 models in Responses API
+            // and we exclude it to minimize unnecessary parameters
         }
 
-        // Use helper function for consistent system prompt handling
-        let messagesPayload = prepareOpenAIMessagesPayload(from: request, serviceSystemPrompt: systemPrompt)
-
-        let body: [String: Any] = [
-            "model": request.model ?? "gpt-4o-mini",
-            "messages": messagesPayload,
-            "max_tokens": request.maxTokens,
-            "temperature": request.temperature,
-            "top_p": request.options?.topP ?? 1.0,
-            "frequency_penalty": request.options?.frequencyPenalty ?? 0.0,
-            "presence_penalty": request.options?.presencePenalty ?? 0.0,
-            "stop": request.options?.stopSequences ?? [],
-            "stream": true,
-        ]
+        guard let url = components.url else { throw LLMServiceError.invalidURL }
 
         let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
         var urlRequest = URLRequest(url: url)
         urlRequest.httpMethod = "POST"
         urlRequest.httpBody = jsonData
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        if transport == .responses { urlRequest.setValue("text/event-stream", forHTTPHeaderField: "Accept") }
 
-        logger?.debug("OpenAIService [sendStreamingRequest] Sending streaming request with keys: \(body.keys).", category: "OpenAIService")
+        logger?.debug("OpenAIService [sendStreamingRequest] Transport=\(transport == .responses ? "responses" : "legacyChat"). Keys: \(body.keys).", category: "OpenAIService")
 
         // Minimize the risk of API key exposure
         guard let apiKey = SecureStorage.getAPIKey(for: name) else {
@@ -189,16 +286,30 @@ public class OpenAIService: LLMServiceProtocol {
         urlRequest.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
 
         return try await withCheckedThrowingContinuation { continuation in
-            let streamingDelegate = StreamingDelegate(
-                vendor: vendor,
-                model: request.model ?? "gpt-4o-mini",
-                logger: logger,
-                onPartialResponse: onPartialResponse ?? { _ in },
-                continuation: continuation
-            )
-            let session = URLSession(configuration: .default, delegate: streamingDelegate, delegateQueue: nil)
-            let task = session.dataTask(with: urlRequest)
-            task.resume()
+            switch transport {
+            case .legacyChat:
+                let streamingDelegate = StreamingDelegate(
+                    vendor: vendor,
+                    model: request.model ?? "gpt-4o-mini",
+                    logger: logger,
+                    onPartialResponse: onPartialResponse ?? { _ in },
+                    continuation: continuation
+                )
+                let session = URLSession(configuration: .default, delegate: streamingDelegate, delegateQueue: nil)
+                let task = session.dataTask(with: urlRequest)
+                task.resume()
+            case .responses:
+                let streamingDelegate = ResponsesStreamingDelegate(
+                    vendor: vendor,
+                    model: request.model ?? "gpt-5-nano",
+                    logger: logger,
+                    onPartialResponse: onPartialResponse ?? { _ in },
+                    continuation: continuation
+                )
+                let session = URLSession(configuration: .default, delegate: streamingDelegate, delegateQueue: nil)
+                let task = session.dataTask(with: urlRequest)
+                task.resume()
+            }
         }
     }
 
@@ -274,4 +385,99 @@ public class OpenAIService: LLMServiceProtocol {
             }
         }
     }
+
+    class ResponsesStreamingDelegate: NSObject, URLSessionDataDelegate {
+        private let vendor: String
+        private let model: String
+        private let onPartialResponse: (String) -> Void
+        private let continuation: CheckedContinuation<LLMResponseProtocol, Error>
+        private var accumulatedContent = ""
+        private var buffer = Data()
+        private let logger: CustomLogger?
+
+        struct AnyEvent: Decodable {
+            let type: String?
+            let delta: String?
+        }
+
+        init(vendor: String,
+             model: String,
+             logger: CustomLogger? = nil,
+             onPartialResponse: @escaping (String) -> Void,
+             continuation: CheckedContinuation<LLMResponseProtocol, Error>)
+        {
+            self.vendor = vendor
+            self.model = model
+            self.logger = logger
+            self.onPartialResponse = onPartialResponse
+            self.continuation = continuation
+        }
+
+        func urlSession(_: URLSession, dataTask _: URLSessionDataTask, didReceive data: Data) {
+            guard let responseText = String(data: data, encoding: .utf8) else { return }
+
+            logger?.debug("Responses streaming chunk received.", category: "OpenAIService.ResponsesStreamingDelegate")
+
+            for line in responseText.split(separator: "\n") {
+                if line == "data: [DONE]" { finalizeAndReturn(); return }
+                if line.hasPrefix("data:") {
+                    let jsonString = line.replacingOccurrences(of: "data: ", with: "")
+                    if let jsonData = jsonString.data(using: .utf8) {
+                        if let event = try? JSONDecoder().decode(AnyEvent.self, from: jsonData) {
+                            if let t = event.type, t.contains("response.output_text.delta"), let d = event.delta, !d.isEmpty {
+                                accumulatedContent += d
+                                onPartialResponse(d)
+                            } else if let t = event.type, t == "response.completed" {
+                                finalizeAndReturn(); return
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private func finalizeAndReturn() {
+            let usage = OpenAILLMResponse.Usage(promptTokens: 0, completionTokens: 0, totalTokens: 0)
+            let finalResponse = OpenAILLMResponse(
+                choices: [OpenAILLMResponse.Choice(
+                    delta: nil,
+                    message: OpenAILLMResponse.Choice.Message(role: "assistant", content: accumulatedContent),
+                    finishReason: "stop"
+                )],
+                usage: usage,
+                vendor: vendor,
+                model: model
+            )
+            continuation.resume(returning: finalResponse)
+        }
+
+        func urlSession(_: URLSession, task _: URLSessionTask, didCompleteWithError error: Error?) {
+            if let error = error { continuation.resume(throwing: error) }
+        }
+    }
+}
+
+// MARK: - Responses API Models (minimal)
+
+fileprivate struct OpenAIResponsesResponse: Codable, LLMResponseProtocol {
+    struct OutputItem: Codable {
+        struct ContentPart: Codable {
+            let type: String?
+            let text: String?
+        }
+        let content: [ContentPart]?
+    }
+
+    let id: String?
+    var vendor: String?
+    let model: String?
+    let output: [OutputItem]?
+
+    var text: String {
+        let parts = output?.flatMap { $0.content ?? [] } ?? []
+        let texts = parts.compactMap { $0.text }
+        return texts.joined()
+    }
+
+    var tokenUsage: LLMTokenUsage? { nil }
 }
