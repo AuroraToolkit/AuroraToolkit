@@ -65,11 +65,9 @@ public struct MultiModelConversationExample {
     private func initializeAvailableServices() async -> [LLMServiceProtocol] {
         var services: [LLMServiceProtocol] = []
 
-        // Set up API keys with fallback logic
-        // 1. Try SecureStorage first, 2. Fall back to environment variable, 3. Use nil as last resort
-        let anthropicKey = SecureStorage.getAPIKey(for: "Anthropic") ?? ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
-        let openAIKey = SecureStorage.getAPIKey(for: "OpenAI") ?? ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
-        let googleKey = SecureStorage.getAPIKey(for: "Google") ?? ProcessInfo.processInfo.environment["GOOGLE_API_KEY"]
+        let anthropicKey = APIKeyLoader.get("ANTHROPIC_API_KEY", forService: "Anthropic")
+        let openAIKey = APIKeyLoader.get("OPENAI_API_KEY", forService: "OpenAI")
+        let googleKey = APIKeyLoader.get("GOOGLE_API_KEY", forService: "Google")
 
         // Try to initialize Anthropic service
         if let anthropicKey = anthropicKey {

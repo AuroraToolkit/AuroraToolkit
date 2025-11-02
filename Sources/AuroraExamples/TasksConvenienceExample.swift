@@ -21,10 +21,10 @@ struct TasksConvenienceExample {
         print("--- Running TasksConvenienceExample ---")
         
         // Configure default LLM service
-        let anthropicKey = SecureStorage.getAPIKey(for: "Anthropic") ?? ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
+        let anthropicKey = APIKeyLoader.get("ANTHROPIC_API_KEY", forService: "Anthropic")
         
         if anthropicKey == nil {
-            print("⚠️  No Anthropic API key found in SecureStorage or environment variables.")
+            print("⚠️  No Anthropic API key found in .env, environment variables, or SecureStorage.")
             print("   The example will continue but API calls may fail.")
             print("   To fix: Set ANTHROPIC_API_KEY environment variable or use SecureStorage.saveAPIKey()")
         }

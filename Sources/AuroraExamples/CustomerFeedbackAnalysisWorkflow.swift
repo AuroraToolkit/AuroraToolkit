@@ -24,12 +24,10 @@ struct CustomerFeedbackAnalysisWorkflow {
     }
 
     private func setupLLMService() -> OpenAIService? {
-        // Set up the required API key with fallback logic
-        // 1. Try SecureStorage first, 2. Fall back to environment variable, 3. Use nil as last resort
-        let openAIKey = SecureStorage.getAPIKey(for: "OpenAI") ?? ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
+        let openAIKey = APIKeyLoader.get("OPENAI_API_KEY", forService: "OpenAI")
         
         if openAIKey == nil {
-            print("⚠️  No OpenAI API key found in SecureStorage or environment variables.")
+            print("⚠️  No OpenAI API key found in .env, environment variables, or SecureStorage.")
             print("   The example will continue but API calls may fail.")
             print("   To fix: Set OPENAI_API_KEY environment variable or use SecureStorage.saveAPIKey()")
         }

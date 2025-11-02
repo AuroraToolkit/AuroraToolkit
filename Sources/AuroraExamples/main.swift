@@ -8,17 +8,18 @@ import Foundation
 
 /// These examples use a mix of Anthropic, OpenAI, Google, and Ollama models.
 ///
-/// To run these examples, you must have the following environment variables set:
-///    - OPENAI_API_KEY: Your OpenAI API key
-///    - ANTHROPIC_API_KEY: Your Anthropic API key
-///    - GOOGLE_API_KEY: Your Google API key
+/// To run these examples, you must have API keys set. Keys can be provided via:
+///    1. .env file (recommended) - Place a .env file in the project root with:
+///       OPENAI_API_KEY=your-openai-api-key
+///       ANTHROPIC_API_KEY=your-anthropic-api-key
+///       GOOGLE_API_KEY=your-google-api-key
+///    2. Environment variables - Set via shell or Xcode scheme:
+///       export OPENAI_API_KEY="your-openai-api-key"
+///       export ANTHROPIC_API_KEY="your-anthropic-api-key"
+///       export GOOGLE_API_KEY="your-google-api-key"
+///    3. SecureStorage (Keychain) - For persistent storage
 ///
-///    You can set these environment variables in the `Examples` scheme or by using the following commands:
-///    ```
-///    export OPENAI_API_KEY="your-openai-api-key"
-///    export ANTHROPIC_API_KEY="your-anthropic-api-key"
-///    export GOOGLE_API_KEY="your-google-api-key"
-///    ```
+///    The examples will automatically load from .env file if present.
 ///
 ///    Additionally, you must have the Ollama service running locally on port 11434.
 ///
@@ -34,6 +35,9 @@ import Foundation
 ///    ```
 ///    swift run AuroraExamples
 ///    ```
+
+// Load .env file if present (loads automatically when APIKeyLoader.get() is called)
+APIKeyLoader.load()
 
 // Uncomment the following line to disable debug logs
 // CustomLogger.shared.toggleDebugLogs(false)

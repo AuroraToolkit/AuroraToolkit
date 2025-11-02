@@ -14,11 +14,9 @@ import Foundation
 
 struct TVScriptWorkflowExample {
     func execute() async {
-        // Set up the required API keys with fallback logic
-        // 1. Try SecureStorage first, 2. Fall back to environment variable, 3. Use nil as last resort
-        let anthropicAIKey = SecureStorage.getAPIKey(for: "Anthropic") ?? ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
-        let openAIKey = SecureStorage.getAPIKey(for: "OpenAI") ?? ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
-        let googleKey = SecureStorage.getAPIKey(for: "Google") ?? ProcessInfo.processInfo.environment["GOOGLE_API_KEY"]
+        let anthropicAIKey = APIKeyLoader.get("ANTHROPIC_API_KEY", forService: "Anthropic")
+        let openAIKey = APIKeyLoader.get("OPENAI_API_KEY", forService: "OpenAI")
+        let googleKey = APIKeyLoader.get("GOOGLE_API_KEY", forService: "Google")
         
         // Check which keys are missing and provide helpful warnings
         var missingKeys: [String] = []

@@ -22,9 +22,7 @@ struct ConvenienceAPIExample {
         print("\n--- Traditional LLMManager Setup (Before) ---")
         let manager = LLMManager()
         
-        // Set up the required API key with fallback logic
-        // 1. Try SecureStorage first, 2. Fall back to environment variable, 3. Use nil as last resort
-        let anthropicApiKey = SecureStorage.getAPIKey(for: "Anthropic") ?? ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
+        let anthropicApiKey = APIKeyLoader.get("ANTHROPIC_API_KEY", forService: "Anthropic")
         
         if let apiKey = anthropicApiKey {
             manager.registerService(AnthropicService(name: "DefaultAnthropic", apiKey: apiKey))
