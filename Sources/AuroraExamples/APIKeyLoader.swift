@@ -6,6 +6,7 @@
 
 import Foundation
 import AuroraCore
+import AuroraLLM
 
 /// Simple loader for API keys (examples only)
 /// Checks in order: .env file -> ProcessInfo environment -> SecureStorage

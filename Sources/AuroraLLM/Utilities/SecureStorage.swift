@@ -7,6 +7,7 @@
 
 import Foundation
 import Security
+import AuroraCore
 
 /// `SecureStorage` is responsible for securely saving, retrieving, and deleting API keys and base URLs using the Keychain on Apple devices.
 /// This is useful for storing sensitive information like API keys and custom base URLs in a secure and persistent manner.
@@ -137,3 +138,4 @@ public class SecureStorage {
         deleteBaseURL(for: serviceName)
     }
 }
+
