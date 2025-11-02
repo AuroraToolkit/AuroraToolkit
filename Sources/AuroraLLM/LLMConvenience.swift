@@ -43,7 +43,7 @@ public struct LLM {
     /// Get the default service for convenience operations
     /// - Returns: The configured service first, then Foundation Model if available
     /// - Throws: `LLMServiceError.noDefaultServiceConfigured` if no service is available
-    private static func getDefaultService() throws -> LLMServiceProtocol {
+    public static func getDefaultService() throws -> LLMServiceProtocol {
         if let defaultService = _defaultService {
             return defaultService
         }
@@ -61,17 +61,17 @@ public struct LLM {
     
     // MARK: - Service Access
     
-    /// Pre-configured Anthropic service for simple usage
+    /// Pre-configured Anthropic service for simple usage (uses ProcessInfo environment for API key)
     public static var anthropic: AnthropicService {
         return AnthropicService.default
     }
     
-    /// Pre-configured OpenAI service for simple usage
+    /// Pre-configured OpenAI service for simple usage (uses ProcessInfo environment for API key)
     public static var openai: OpenAIService {
         return OpenAIService.default
     }
     
-    /// Pre-configured Google service for simple usage
+    /// Pre-configured Google service for simple usage (uses ProcessInfo environment for API key)
     public static var google: GoogleService {
         return GoogleService.default
     }
@@ -153,11 +153,28 @@ public struct LLM {
 // MARK: - Service Extensions
 
 extension AnthropicService {
-    /// Default Anthropic service instance
+    /// Default Anthropic service instance (uses ProcessInfo environment for API key)
     public static var `default`: AnthropicService {
-        // Prioritize environment variable for examples, fall back to SecureStorage
-        let apiKey = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"] ?? SecureStorage.getAPIKey(for: "Anthropic")
+        let apiKey = ProcessInfo.processInfo.environment["ANTHROPIC_API_KEY"]
         return AnthropicService(name: "DefaultAnthropic", apiKey: apiKey)
+    }
+    
+    /// Create a new AnthropicService instance with an explicit API key
+    /// - Parameter key: The API key to use
+    /// - Returns: A new AnthropicService instance with the provided key
+    public func apiKey(_ key: String) -> AnthropicService {
+        return AnthropicService(
+            name: self.name,
+            apiKey: key,
+            defaultModel: self.defaultModel,
+            contextWindowSize: self.contextWindowSize,
+            maxOutputTokens: self.maxOutputTokens,
+            inputTokenPolicy: self.inputTokenPolicy,
+            outputTokenPolicy: self.outputTokenPolicy,
+            systemPrompt: self.systemPrompt,
+            urlSession: self.urlSession,
+            logger: self.logger
+        )
     }
     
     /// Send a simple message and get a response
@@ -187,11 +204,29 @@ extension AnthropicService {
 }
 
 extension OpenAIService {
-    /// Default OpenAI service instance
+    /// Default OpenAI service instance (uses ProcessInfo environment for API key)
     public static var `default`: OpenAIService {
-        // Prioritize environment variable for examples, fall back to SecureStorage
-        let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? SecureStorage.getAPIKey(for: "OpenAI")
+        let apiKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"]
         return OpenAIService(name: "DefaultOpenAI", apiKey: apiKey)
+    }
+    
+    /// Create a new OpenAIService instance with an explicit API key
+    /// - Parameter key: The API key to use
+    /// - Returns: A new OpenAIService instance with the provided key
+    public func apiKey(_ key: String) -> OpenAIService {
+        return OpenAIService(
+            name: self.name,
+            baseURL: self.baseURL,
+            apiKey: key,
+            defaultModel: self.defaultModel,
+            contextWindowSize: self.contextWindowSize,
+            maxOutputTokens: self.maxOutputTokens,
+            inputTokenPolicy: self.inputTokenPolicy,
+            outputTokenPolicy: self.outputTokenPolicy,
+            systemPrompt: self.systemPrompt,
+            urlSession: self.urlSession,
+            logger: self.logger
+        )
     }
     
     /// Send a simple message and get a response
@@ -221,11 +256,28 @@ extension OpenAIService {
 }
 
 extension GoogleService {
-    /// Default Google service instance
+    /// Default Google service instance (uses ProcessInfo environment for API key)
     public static var `default`: GoogleService {
-        // Prioritize environment variable for examples, fall back to SecureStorage
-        let apiKey = ProcessInfo.processInfo.environment["GOOGLE_API_KEY"] ?? SecureStorage.getAPIKey(for: "Google")
+        let apiKey = ProcessInfo.processInfo.environment["GOOGLE_API_KEY"]
         return GoogleService(name: "DefaultGoogle", apiKey: apiKey)
+    }
+    
+    /// Create a new GoogleService instance with an explicit API key
+    /// - Parameter key: The API key to use
+    /// - Returns: A new GoogleService instance with the provided key
+    public func apiKey(_ key: String) -> GoogleService {
+        return GoogleService(
+            name: self.name,
+            apiKey: key,
+            defaultModel: self.defaultModel,
+            contextWindowSize: self.contextWindowSize,
+            maxOutputTokens: self.maxOutputTokens,
+            inputTokenPolicy: self.inputTokenPolicy,
+            outputTokenPolicy: self.outputTokenPolicy,
+            systemPrompt: self.systemPrompt,
+            urlSession: self.urlSession,
+            logger: self.logger
+        )
     }
     
     /// Send a simple message and get a response

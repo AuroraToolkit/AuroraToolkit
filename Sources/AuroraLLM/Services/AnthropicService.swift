@@ -14,7 +14,7 @@ import os.log
 /// detailed error handling using `LLMServiceError`.
 public class AnthropicService: LLMServiceProtocol {
     /// A logger for recording information and errors within the `AnthropicService`.
-    private let logger: CustomLogger?
+    public let logger: CustomLogger?
 
     /// The name of the service vendor, required by the protocol.
     public let vendor = "Anthropic"
@@ -23,7 +23,7 @@ public class AnthropicService: LLMServiceProtocol {
     public var name: String
 
     /// The base URL for the Anthropic API.
-    private let baseURL: String
+    public var baseURL: String
 
     /// The maximum context window size (total tokens, input + output) supported by the service, defaults to 200k.
     public var contextWindowSize: Int
@@ -39,9 +39,15 @@ public class AnthropicService: LLMServiceProtocol {
 
     /// The default system prompt for this service, used to set the behavior or persona of the model.
     public var systemPrompt: String?
+    
+    /// The default model to use when no model is specified in the request. Defaults to "claude-haiku-4-5".
+    public var defaultModel: String
 
     /// The URL session used to send basic requests.
     var urlSession: URLSession
+
+    /// The API key for authenticating requests
+    private let apiKey: String?
 
     /// Initializes a new `AnthropicService` instance with the given API key and token limit.
     ///
@@ -49,6 +55,7 @@ public class AnthropicService: LLMServiceProtocol {
     ///    -  name: The name of the service instance (default is `"Anthropic"`).
     ///    - baseURL: The base URL for the Anthropic API. Defaults to "https://api.anthropic.com".
     ///    - apiKey: The API key used for authenticating requests to the Anthropic API.
+    ///    - defaultModel: The default model to use when no model is specified. Defaults to "claude-haiku-4-5".
     ///    - contextWindowSize: The size of the context window used by the service. Defaults to 200k.
     ///    - maxOutputTokens: The maximum number of tokens allowed for output in a single request. Defaults to 4096.
     ///    - inputTokenPolicy: The policy to handle input tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
@@ -56,9 +63,11 @@ public class AnthropicService: LLMServiceProtocol {
     ///    - systemPrompt: The default system prompt for this service, used to set the behavior or persona of the model.
     ///    - urlSession: The `URLSession` instance used for network requests. Defaults to a `.default` configuration.
     ///    - logger: An optional logger for recording information and errors within the service.
-    public init(name: String = "Anthropic", baseURL: String = "https://api.anthropic.com", apiKey: String?, contextWindowSize: Int = 200_000, maxOutputTokens: Int = 4096, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, urlSession: URLSession = URLSession(configuration: .default), logger: CustomLogger? = nil) {
+    public init(name: String = "Anthropic", baseURL: String = "https://api.anthropic.com", apiKey: String?, defaultModel: String = "claude-haiku-4-5", contextWindowSize: Int = 200_000, maxOutputTokens: Int = 4096, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, urlSession: URLSession = URLSession(configuration: .default), logger: CustomLogger? = nil) {
         self.name = name
         self.baseURL = baseURL
+        self.apiKey = apiKey
+        self.defaultModel = defaultModel
         self.contextWindowSize = contextWindowSize
         self.maxOutputTokens = maxOutputTokens
         self.inputTokenPolicy = inputTokenPolicy
@@ -66,10 +75,6 @@ public class AnthropicService: LLMServiceProtocol {
         self.systemPrompt = systemPrompt
         self.urlSession = urlSession
         self.logger = logger
-
-        if let apiKey {
-            try? SecureStorage.saveAPIKey(apiKey, for: name)
-        }
     }
 
     actor StreamingState {
@@ -107,7 +112,7 @@ public class AnthropicService: LLMServiceProtocol {
 
         // Construct the body with a top-level system parameter
         var body: [String: Any] = [
-            "model": request.model ?? "claude-haiku-4-5",
+            "model": request.model ?? defaultModel,
             "messages": userMessages,
             "max_tokens": request.maxTokens,
             "temperature": request.temperature,
@@ -132,8 +137,7 @@ public class AnthropicService: LLMServiceProtocol {
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         urlRequest.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version") // Required Anthropic version header
 
-        // Minimize the risk of API key exposure
-        guard let apiKey = SecureStorage.getAPIKey(for: name) else {
+        guard let apiKey = apiKey else {
             throw LLMServiceError.missingAPIKey
         }
         urlRequest.setValue(apiKey, forHTTPHeaderField: "x-api-key")
@@ -166,7 +170,7 @@ public class AnthropicService: LLMServiceProtocol {
 
         // Construct the body with a top-level system parameter
         var body: [String: Any] = [
-            "model": request.model ?? "claude-haiku-4-5",
+            "model": request.model ?? defaultModel,
             "messages": userMessages,
             "max_tokens": request.maxTokens,
             "temperature": request.temperature,
@@ -193,8 +197,7 @@ public class AnthropicService: LLMServiceProtocol {
 
         logger?.debug("AnthropicService [sendStreamingRequest] Sending streaming request with keys: \(body.keys)", category: "AnthropicService")
 
-        // Minimize the risk of API key exposure
-        guard let apiKey = SecureStorage.getAPIKey(for: name) else {
+        guard let apiKey = apiKey else {
             throw LLMServiceError.missingAPIKey
         }
         urlRequest.setValue(apiKey, forHTTPHeaderField: "x-api-key")
@@ -202,7 +205,7 @@ public class AnthropicService: LLMServiceProtocol {
         return try await withCheckedThrowingContinuation { continuation in
             let streamingDelegate = StreamingDelegate(
                 vendor: vendor,
-                model: request.model ?? "claude-haiku-4-5",
+                model: request.model ?? defaultModel,
                 logger: logger,
                 onPartialResponse: onPartialResponse ?? { _ in },
                 continuation: continuation

@@ -72,6 +72,10 @@ public protocol LLMServiceProtocol {
 
     /// The default system prompt for this service, used to set the behavior or persona of the model.
     var systemPrompt: String? { get set }
+    
+    /// The default model to use when no model is specified in the request.
+    /// Each service defines its own default (e.g., "claude-haiku-4-5" for Anthropic, "gpt-4o-mini" for OpenAI).
+    var defaultModel: String { get set }
 
     /// Sends a request to the LLM service asynchronously and returns the response.
     ///

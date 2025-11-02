@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - OpenAI Responses API now uses `instructions` parameter for system prompts and array format for `input`.
 - Removed unsupported `top_p` parameter from Anthropic requests.
 - Keychain access control updated to minimize biometric prompts (`kSecAttrAccessibleWhenUnlockedThisDeviceOnly`).
+- Reordered service initializer parameters: `defaultModel` now follows `apiKey`, and `logger` is the last parameter for consistency across all LLM services (Anthropic, OpenAI, Google, Ollama, FoundationModel).
 
 ### Fixed
 - Anthropic 400 errors caused by unsupported `top_p` parameter.

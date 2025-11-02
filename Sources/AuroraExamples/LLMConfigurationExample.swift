@@ -20,21 +20,25 @@ struct LLMConfigurationExample {
 
         // Test 2: Configure Anthropic as default and test
         print("\n2. Configuring Anthropic as default service...")
-        LLM.configure(with: LLM.anthropic)
+        let anthropicKey = APIKeyLoader.get("ANTHROPIC_API_KEY", forService: "Anthropic")
+        LLM.configure(with: anthropicKey != nil ? LLM.anthropic.apiKey(anthropicKey!) : LLM.anthropic)
         await testConvenienceAPI(country: "France")
 
         // Test 3: Configure OpenAI as default and test
         print("\n3. Configuring OpenAI as default service...")
-        LLM.configure(with: LLM.openai)
+        let openAIKey = APIKeyLoader.get("OPENAI_API_KEY", forService: "OpenAI")
+        LLM.configure(with: openAIKey != nil ? LLM.openai.apiKey(openAIKey!) : LLM.openai)
         await testConvenienceAPI(country: "Switzerland")
 
         // Test 3b: Explicit OpenAI Responses API using gpt-5-nano
         print("\n3b. Configuring OpenAI Responses (gpt-5-nano)...")
+        LLM.configure(with: openAIKey != nil ? LLM.openai.apiKey(openAIKey!) : LLM.openai)
         await testOpenAIResponses(country: "Portugal")
 
         // Test 4: Configure Google as default and test
         print("\n4. Configuring Google as default service...")
-        LLM.configure(with: LLM.google)
+        let googleKey = APIKeyLoader.get("GOOGLE_API_KEY", forService: "Google")
+        LLM.configure(with: googleKey != nil ? LLM.google.apiKey(googleKey!) : LLM.google)
         await testConvenienceAPI(country: "Germany")
 
         // Test 5: Configure Ollama as default and test
@@ -88,7 +92,9 @@ struct LLMConfigurationExample {
                 model: "gpt-5-nano",
                 options: LLMRequestOptions(transport: .responses)
             )
-            let response = try await LLM.openai.sendRequest(request)
+            // Use the configured default service (OpenAI was configured in Test 3)
+            let service = try LLM.getDefaultService()
+            let response = try await service.sendRequest(request)
             duration = CFAbsoluteTimeGetCurrent() - start
             print("   Response (Responses API): \(response.text)")
         } catch {

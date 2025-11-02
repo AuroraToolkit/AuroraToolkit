@@ -13,20 +13,52 @@ enum APIKeyLoader {
     private static var envVars: [String: String] = [:]
     private static var hasLoaded = false
     
-    /// Loads .env file if present in project root (or working directory)
+    /// Loads .env file from examples directory or project root
     static func load() {
         guard !hasLoaded else { return }
         hasLoaded = true
         
         let fileManager = FileManager.default
-        var currentDir = fileManager.currentDirectoryPath
         
-        // Search up to 5 directories for .env file
-        for _ in 0..<5 {
-            let envPath = (currentDir as NSString).appendingPathComponent(".env")
+        // 1. Check relative to source file location (for development)
+        if let sourceDir = getSourceDirectory() {
+            let envPath = (sourceDir as NSString).appendingPathComponent(".env")
             if fileManager.fileExists(atPath: envPath) {
                 loadFromFile(path: envPath)
                 return
+            }
+        }
+        
+        // 2. Check relative to executable (for CLI runs)
+        if let executablePath = Bundle.main.executablePath {
+            let executableDir = (executablePath as NSString).deletingLastPathComponent
+            let envPath = (executableDir as NSString).appendingPathComponent(".env")
+            if fileManager.fileExists(atPath: envPath) {
+                loadFromFile(path: envPath)
+                return
+            }
+        }
+        
+        // 3. Check current working directory
+        let currentDirEnv = (fileManager.currentDirectoryPath as NSString).appendingPathComponent(".env")
+        if fileManager.fileExists(atPath: currentDirEnv) {
+            loadFromFile(path: currentDirEnv)
+            return
+        }
+        
+        // 4. Find project root by looking for Package.swift, then check Sources/AuroraExamples/.env
+        var currentDir = fileManager.currentDirectoryPath
+        for _ in 0..<10 {
+            let packagePath = (currentDir as NSString).appendingPathComponent("Package.swift")
+            if fileManager.fileExists(atPath: packagePath) {
+                var examplesEnvPath = (currentDir as NSString).appendingPathComponent("Sources")
+                examplesEnvPath = (examplesEnvPath as NSString).appendingPathComponent("AuroraExamples")
+                examplesEnvPath = (examplesEnvPath as NSString).appendingPathComponent(".env")
+                if fileManager.fileExists(atPath: examplesEnvPath) {
+                    loadFromFile(path: examplesEnvPath)
+                    return
+                }
+                break
             }
             let parentDir = (currentDir as NSString).deletingLastPathComponent
             if parentDir == currentDir || parentDir == "/" {
@@ -34,6 +66,15 @@ enum APIKeyLoader {
             }
             currentDir = parentDir
         }
+    }
+    
+    /// Gets the directory containing this source file (for development)
+    private static func getSourceDirectory() -> String? {
+        // This file is in Sources/AuroraExamples, so find that directory
+        // #file returns the path to this source file at compile time
+        let filePath = #file
+        let fileURL = URL(fileURLWithPath: filePath)
+        return fileURL.deletingLastPathComponent().path
     }
     
     private static func loadFromFile(path: String) {
@@ -53,6 +94,8 @@ enum APIKeyLoader {
             
             if !key.isEmpty {
                 envVars[key] = value
+                // Inject into ProcessInfo so convenience APIs can access it
+                setenv(key, value, 1)
             }
         }
     }

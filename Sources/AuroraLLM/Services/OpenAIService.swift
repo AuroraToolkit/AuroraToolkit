@@ -14,7 +14,7 @@ import os.log
 /// enhanced error handling using `LLMServiceError`.
 public class OpenAIService: LLMServiceProtocol {
     /// A logger for recording information and errors within the `AnthropicService`.
-    private let logger: CustomLogger?
+    public let logger: CustomLogger?
 
     /// The name of the service vendor, required by the protocol.
     public let vendor = "OpenAI"
@@ -39,8 +39,11 @@ public class OpenAIService: LLMServiceProtocol {
 
     /// The default system prompt for this service, used to set the behavior or persona of the model.
     public var systemPrompt: String?
+    
+    /// The default model to use when no model is specified in the request. Defaults to "gpt-4o-mini".
+    public var defaultModel: String
 
-    /// The API key for authenticating requests, stored in memory to avoid keychain access during requests
+    /// The API key for authenticating requests
     private let apiKey: String?
 
     /// The URL session used to send basic requests.
@@ -50,8 +53,9 @@ public class OpenAIService: LLMServiceProtocol {
     ///
     /// - Parameters:
     ///    - name: The name of the service instance (default is `"OpenAI"`).
-    ///    - apiKey: The API key used for authenticating requests to the OpenAI API.
     ///    - baseURL: The base URL for the OpenAI API. Defaults to "https://api.openai.com".
+    ///    - apiKey: The API key used for authenticating requests to the OpenAI API.
+    ///    - defaultModel: The default model to use when no model is specified. Defaults to "gpt-4o-mini".
     ///    - contextWindowSize: The size of the context window used by the service. Defaults to 128k.
     ///    - maxOutputTokens: The maximum number of tokens allowed in a request. Defaults to 16k.
     ///    - inputTokenPolicy: The policy to handle input tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
@@ -59,9 +63,11 @@ public class OpenAIService: LLMServiceProtocol {
     ///    - systemPrompt: The default system prompt for this service, used to set the behavior or persona of the model.
     ///    - urlSession: The `URLSession` instance used for network requests. Defaults to a `.default` configuration.
     ///    - logger: An optional `CustomLogger` instance for logging. Defaults to `nil`.
-    public init(name: String = "OpenAI", baseURL: String = "https://api.openai.com", apiKey: String?, contextWindowSize: Int = 128_000, maxOutputTokens: Int = 16384, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, urlSession: URLSession = URLSession(configuration: .default), logger: CustomLogger? = nil) {
+    public init(name: String = "OpenAI", baseURL: String = "https://api.openai.com", apiKey: String?, defaultModel: String = "gpt-4o-mini", contextWindowSize: Int = 128_000, maxOutputTokens: Int = 16384, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, urlSession: URLSession = URLSession(configuration: .default), logger: CustomLogger? = nil) {
         self.name = name
         self.baseURL = baseURL
+        self.apiKey = apiKey
+        self.defaultModel = defaultModel
         self.contextWindowSize = contextWindowSize
         self.maxOutputTokens = maxOutputTokens
         self.inputTokenPolicy = inputTokenPolicy
@@ -69,11 +75,6 @@ public class OpenAIService: LLMServiceProtocol {
         self.systemPrompt = systemPrompt
         self.urlSession = urlSession
         self.logger = logger
-        // Store API key in memory and optionally save to keychain for persistence
-        self.apiKey = apiKey ?? SecureStorage.getAPIKey(for: name)
-        if let apiKey = self.apiKey {
-            try? SecureStorage.saveAPIKey(apiKey, for: name)
-        }
     }
 
     // MARK: - Transport Resolution
@@ -151,7 +152,7 @@ public class OpenAIService: LLMServiceProtocol {
             // Use helper function for consistent system prompt handling
             let messagesPayload = prepareOpenAIMessagesPayload(from: request, serviceSystemPrompt: systemPrompt)
             body = [
-                "model": request.model ?? "gpt-4o-mini",
+                "model": request.model ?? defaultModel,
                 "messages": messagesPayload,
                 "max_tokens": request.maxTokens,
                 "temperature": request.temperature,
@@ -164,9 +165,9 @@ public class OpenAIService: LLMServiceProtocol {
         case .responses:
             components.path = "/v1/responses"
             let (instructions, inputArray) = prepareResponsesInput(from: request)
-            let model = (request.model ?? "gpt-5-nano").lowercased()
+            let model = (request.model ?? defaultModel).lowercased()
             body = [
-                "model": request.model ?? "gpt-5-nano",
+                "model": request.model ?? defaultModel,
                 "input": inputArray,
                 "max_output_tokens": request.maxTokens,
             ]
@@ -240,7 +241,7 @@ public class OpenAIService: LLMServiceProtocol {
             components.path = "/v1/chat/completions"
             let messagesPayload = prepareOpenAIMessagesPayload(from: request, serviceSystemPrompt: systemPrompt)
             body = [
-                "model": request.model ?? "gpt-4o-mini",
+                "model": request.model ?? defaultModel,
                 "messages": messagesPayload,
                 "max_tokens": request.maxTokens,
                 "temperature": request.temperature,
@@ -253,9 +254,9 @@ public class OpenAIService: LLMServiceProtocol {
         case .responses:
             components.path = "/v1/responses"
             let (instructions, inputArray) = prepareResponsesInput(from: request)
-            let model = (request.model ?? "gpt-5-nano").lowercased()
+            let model = (request.model ?? defaultModel).lowercased()
             body = [
-                "model": request.model ?? "gpt-5-nano",
+                "model": request.model ?? defaultModel,
                 "input": inputArray,
                 "max_output_tokens": request.maxTokens,
                 "stream": true,
@@ -294,7 +295,7 @@ public class OpenAIService: LLMServiceProtocol {
             case .legacyChat:
                 let streamingDelegate = StreamingDelegate(
                     vendor: vendor,
-                    model: request.model ?? "gpt-4o-mini",
+                    model: request.model ?? defaultModel,
                     logger: logger,
                     onPartialResponse: onPartialResponse ?? { _ in },
                     continuation: continuation
@@ -305,7 +306,7 @@ public class OpenAIService: LLMServiceProtocol {
             case .responses:
                 let streamingDelegate = ResponsesStreamingDelegate(
                     vendor: vendor,
-                    model: request.model ?? "gpt-5-nano",
+                    model: request.model ?? defaultModel,
                     logger: logger,
                     onPartialResponse: onPartialResponse ?? { _ in },
                     continuation: continuation

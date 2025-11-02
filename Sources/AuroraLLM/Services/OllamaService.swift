@@ -80,15 +80,15 @@ public class OllamaService: LLMServiceProtocol {
 
     /// The default system prompt for this service, used to set the behavior or persona of the model.
     public var systemPrompt: String?
+    
+    /// The default model to use when no model is specified in the request. Defaults to "gemma3".
+    public var defaultModel: String
 
     /// The URL session used to send basic requests.
     var urlSession: URLSession
 
     // The URL session configuration used for network requests.
     private let sessionConfiguration: URLSessionConfiguration
-
-    // The default model for both sendRequest* methods, defaults to `gemma3`.
-    private let defaultModel = "gemma3"
 
     /// Initializes a new `OllamaService` instance.
     ///
@@ -100,6 +100,7 @@ public class OllamaService: LLMServiceProtocol {
     ///    - maxOutputTokens: The maximum number of tokens allowed for output in a single request. Defaults to 4096.
     ///    - inputTokenPolicy: The policy to handle input tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
     ///    - outputTokenPolicy: The policy to handle output tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
+    ///    - defaultModel: The default model to use when no model is specified. Defaults to "gemma3".
     ///    - systemPrompt: The default system prompt for this service, used to set the behavior or persona of the model.
     ///    - urlSession: The `URLSession` instance used for network requests. If `nil`, creates a session with extended timeouts (5 min request, 15 min total) suitable for large model loading. For faster models or custom timeout requirements, provide your own configured session.
     ///    - logger: An optional logger for recording information and errors. Defaults to `nil`.
@@ -109,6 +110,7 @@ public class OllamaService: LLMServiceProtocol {
         vendor: String = "Ollama",
         name: String = "Ollama",
         baseURL: String = "http://localhost:11434",
+        defaultModel: String = "gemma3",
         contextWindowSize: Int = 4096,
         maxOutputTokens: Int = 4096,
         inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
@@ -125,6 +127,7 @@ public class OllamaService: LLMServiceProtocol {
         self.inputTokenPolicy = inputTokenPolicy
         self.outputTokenPolicy = outputTokenPolicy
         self.systemPrompt = systemPrompt
+        self.defaultModel = defaultModel
 
         // Create configuration optimized for local LLM model loading times
         if let urlSession = urlSession {

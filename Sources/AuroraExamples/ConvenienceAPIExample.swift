@@ -49,7 +49,9 @@ struct ConvenienceAPIExample {
             let prompt = "What is the capital of Germany?"
             print("\nSending simple request to Anthropic via LLM.send:")
             print("Prompt: \"\(prompt)\"")
-            let responseText = try await LLM.send(prompt, to: LLM.anthropic)
+            let anthropicKey = APIKeyLoader.get("ANTHROPIC_API_KEY", forService: "Anthropic")
+            let anthropicService = anthropicKey != nil ? LLM.anthropic.apiKey(anthropicKey!) : LLM.anthropic
+            let responseText = try await LLM.send(prompt, to: anthropicService)
             print("LLM.anthropic.send Response: \(responseText)")
         } catch {
             print("LLM.anthropic.send Failed: \(error.localizedDescription)")
@@ -60,7 +62,9 @@ struct ConvenienceAPIExample {
             let prompt = "What is the capital of Spain?"
             print("\nSending simple request to OpenAI via LLM.send:")
             print("Prompt: \"\(prompt)\"")
-            let responseText = try await LLM.send(prompt, to: LLM.openai)
+            let openAIKey = APIKeyLoader.get("OPENAI_API_KEY", forService: "OpenAI")
+            let openAIService = openAIKey != nil ? LLM.openai.apiKey(openAIKey!) : LLM.openai
+            let responseText = try await LLM.send(prompt, to: openAIService)
             print("LLM.openai.send Response: \(responseText)")
         } catch {
             print("LLM.openai.send Failed: \(error.localizedDescription)")
@@ -72,7 +76,9 @@ struct ConvenienceAPIExample {
             print("\nSending streaming request to Anthropic via LLM.stream:")
             print("Prompt: \"\(prompt)\"")
             print("Streaming Anthropic Response:")
-            _ = try await LLM.stream(prompt, to: LLM.anthropic) { partialResponse in
+            let anthropicKey = APIKeyLoader.get("ANTHROPIC_API_KEY", forService: "Anthropic")
+            let anthropicService = anthropicKey != nil ? LLM.anthropic.apiKey(anthropicKey!) : LLM.anthropic
+            _ = try await LLM.stream(prompt, to: anthropicService) { partialResponse in
                 print(partialResponse, terminator: "")
             }
             print("\n(Streaming complete)")
@@ -86,7 +92,9 @@ struct ConvenienceAPIExample {
             print("\nSending streaming request to OpenAI via LLM.stream:")
             print("Prompt: \"\(prompt)\"")
             print("Streaming OpenAI Response:")
-            _ = try await LLM.stream(prompt, to: LLM.openai) { partialResponse in
+            let openAIKey = APIKeyLoader.get("OPENAI_API_KEY", forService: "OpenAI")
+            let openAIService = openAIKey != nil ? LLM.openai.apiKey(openAIKey!) : LLM.openai
+            _ = try await LLM.stream(prompt, to: openAIService) { partialResponse in
                 print(partialResponse, terminator: "")
             }
             print("\n(Streaming complete)")

@@ -14,7 +14,7 @@ import os.log
 /// and provides error handling using `LLMServiceError`.
 public class GoogleService: LLMServiceProtocol {
     /// A logger for recording information and errors within the `GoogleService`.
-    private let logger: CustomLogger?
+    public let logger: CustomLogger?
 
     /// The name of the service vendor, required by the protocol.
     public let vendor = "Google"
@@ -39,18 +39,23 @@ public class GoogleService: LLMServiceProtocol {
 
     /// The default system prompt for this service instance, used to set the behavior or persona of the model if not overridden in the request.
     public var systemPrompt: String?
+    
+    /// The default model to use when no model is specified in the request. Defaults to "gemini-2.5-flash-lite".
+    public var defaultModel: String
 
     /// The URL session used to send network requests.
     var urlSession: URLSession
 
-    // API key is retrieved from SecureStorage when needed
+    /// The API key for authenticating requests
+    private let apiKey: String?
 
     /// Initializes a new `GoogleService` instance with the given configuration.
     ///
     /// - Parameters:
     ///    - name: The name for this specific service instance (default is `"Google"`). Used for retrieving credentials.
     ///    - baseURL: The base URL for the Google Generative AI API. Defaults to `"https://generativelanguage.googleapis.com"`.
-    ///    - apiKey: The API key used for authenticating requests. This key will be stored securely using `SecureStorage`.
+    ///    - apiKey: The API key used for authenticating requests.
+    ///    - defaultModel: The default model to use when no model is specified. Defaults to "gemini-2.5-flash-lite".
     ///    - contextWindowSize: The context window size supported by the model being used. Defaults to `1,048,576` (e.g., Gemini 1.5 Pro).
     ///    - maxOutputTokens: The maximum number of tokens the model can generate in a single response. Defaults to `8192` (e.g., Gemini 1.5 Pro).
     ///    - inputTokenPolicy: The policy for handling requests exceeding the input token limit. Defaults to `.adjustToServiceLimits`.
@@ -62,6 +67,7 @@ public class GoogleService: LLMServiceProtocol {
         name: String = "Google",
         baseURL: String = "https://generativelanguage.googleapis.com",
         apiKey: String?, // API Key provided on initialization
+        defaultModel: String = "gemini-2.5-flash-lite",
         contextWindowSize: Int = 1_048_576, // Example: Gemini 1.5 Pro context window
         maxOutputTokens: Int = 8192, // Example: Gemini 1.5 Pro max output tokens
         inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
@@ -72,6 +78,8 @@ public class GoogleService: LLMServiceProtocol {
     ) {
         self.name = name
         self.baseURL = baseURL
+        self.apiKey = apiKey
+        self.defaultModel = defaultModel
         self.contextWindowSize = contextWindowSize
         self.maxOutputTokens = maxOutputTokens // Store the service's max output capability
         self.inputTokenPolicy = inputTokenPolicy
@@ -79,14 +87,6 @@ public class GoogleService: LLMServiceProtocol {
         self.systemPrompt = systemPrompt
         self.urlSession = urlSession
         self.logger = logger
-
-        // Save the API key securely, associated with this service's name
-        if let apiKey = apiKey {
-            try? SecureStorage.saveAPIKey(apiKey, for: self.name) // Use the instance name
-        } else {
-            // Use .info instead of .warning
-            logger?.info("GoogleService initialized without an API key for instance '\(name)'. Key must exist in SecureStorage.", category: "GoogleService")
-        }
     }
 
     // MARK: - LLMServiceProtocol Methods
@@ -99,13 +99,12 @@ public class GoogleService: LLMServiceProtocol {
     public func sendRequest(_ request: LLMRequest) async throws -> LLMResponseProtocol {
         try validateStreamingConfig(request, expectStreaming: false)
 
-        // Retrieve API Key securely before making the request
-        guard let apiKey = SecureStorage.getAPIKey(for: name) else { // Use instance name
+        guard let apiKey = apiKey else {
             logger?.error("GoogleService [sendRequest] Missing API Key for service name: \(name)", category: "GoogleService")
             throw LLMServiceError.missingAPIKey
         }
 
-        let modelName = request.model ?? "gemini-2.5-flash-lite" // Use request model or default
+        let modelName = request.model ?? defaultModel
 
         let googleRequest: GoogleGenerateContentRequest
         do {
@@ -182,7 +181,7 @@ public class GoogleService: LLMServiceProtocol {
             throw LLMServiceError.custom(message: "Streaming flag must be true in sendStreamingRequest().")
         }
 
-        guard let apiKey = SecureStorage.getAPIKey(for: name) else { // Use instance name
+        guard let apiKey = apiKey else {
             logger?.error("GoogleService [sendStreamingRequest] Missing API Key for service name: \(name)", category: "GoogleService")
             throw LLMServiceError.missingAPIKey
         }

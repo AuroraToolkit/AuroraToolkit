@@ -47,6 +47,9 @@ public class FoundationModelService: LLMServiceProtocol {
 
     /// The default system prompt for this service, used to set the behavior or persona of the model.
     public var systemPrompt: String?
+    
+    /// The default model to use when no model is specified in the request. Defaults to "foundation-model".
+    public var defaultModel: String
 
     /// The Foundation Models session used to interact with the on-device model.
     private var session: LanguageModelSession?
@@ -57,6 +60,7 @@ public class FoundationModelService: LLMServiceProtocol {
     ///   - name: The name of the service instance (default is "FoundationModel").
     ///   - contextWindowSize: The maximum context window size (default is 4096, the Foundation Models limit).
     ///   - maxOutputTokens: The maximum output tokens (default is 2048, leaving room for input).
+    ///   - defaultModel: The default model to use when no model is specified. Defaults to "foundation-model".
     ///   - inputTokenPolicy: Policy for handling input token limits (default is .adjustToServiceLimits).
     ///   - outputTokenPolicy: Policy for handling output token limits (default is .adjustToServiceLimits).
     ///   - systemPrompt: Optional default system prompt.
@@ -65,6 +69,7 @@ public class FoundationModelService: LLMServiceProtocol {
     /// - Throws: `LLMServiceError.serviceUnavailable` if Foundation Models framework is not available or Apple Intelligence is not enabled.
     public init(
         name: String = "FoundationModel",
+        defaultModel: String = "foundation-model",
         contextWindowSize: Int = 4096, // Foundation Models documented limit
         maxOutputTokens: Int = 2048,   // Leave room for input tokens
         inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
@@ -74,6 +79,7 @@ public class FoundationModelService: LLMServiceProtocol {
     ) throws {
         self.name = name
         self.logger = logger
+        self.defaultModel = defaultModel
 
         // Validate and warn about token limits
         if contextWindowSize > 4096 {
@@ -304,6 +310,7 @@ extension FoundationModelService {
     /// - Returns: A FoundationModelService instance if available, nil otherwise.
     public static func createIfAvailable(
         name: String = "FoundationModel",
+        defaultModel: String = "foundation-model",
         contextWindowSize: Int = 4096,
         maxOutputTokens: Int = 2048,
         inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
@@ -316,6 +323,7 @@ extension FoundationModelService {
         do {
             return try FoundationModelService(
                 name: name,
+                defaultModel: defaultModel,
                 contextWindowSize: contextWindowSize,
                 maxOutputTokens: maxOutputTokens,
                 inputTokenPolicy: inputTokenPolicy,
