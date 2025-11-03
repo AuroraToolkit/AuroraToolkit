@@ -87,7 +87,7 @@ A separate package showcasing real-world implementations of workflows, LLM integ
 To integrate AuroraToolkit into your project using Swift Package Manager, add the following line to your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/AuroraToolkit/AuroraCore.git", from: "0.9.2")
+.package(url: "https://github.com/AuroraToolkit/AuroraToolkit.git", from: "0.9.4")
 ```
 
 Then add the desired modules as dependencies to your target. For example:

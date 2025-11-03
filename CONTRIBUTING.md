@@ -1,6 +1,6 @@
-# Contributing to AuroraCore
+# Contributing to AuroraToolkit
 
-Thank you for considering contributing to AuroraCore! We welcome contributions from the community. Please follow these guidelines to help us maintain a high-quality project.
+Thank you for considering contributing to AuroraToolkit! We welcome contributions from the community. Please follow these guidelines to help us maintain a high-quality project.
 
 ## How to Contribute
 
@@ -8,7 +8,7 @@ Thank you for considering contributing to AuroraCore! We welcome contributions f
 
 2. **Clone Your Fork**: Clone your forked repository to your local machine:
    ```bash
-   git clone https://github.com/your-username/AuroraCore.git
+   git clone https://github.com/your-username/AuroraToolkit.git
    ```
 
 3. **Create a Branch**: Create a new branch for your feature or bug fix:
