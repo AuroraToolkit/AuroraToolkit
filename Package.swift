@@ -100,6 +100,12 @@ let package = Package(
             name: "AuroraTaskLibraryTests",
             dependencies: ["AuroraTaskLibrary"],
             path: "Tests/AuroraTaskLibraryTests"
+        ),
+        // Integration tests
+        .testTarget(
+            name: "IntegrationTests",
+            dependencies: ["AuroraCore", "AuroraLLM", "AuroraML", "AuroraTaskLibrary"],
+            path: "Tests/IntegrationTests"
         )
     ]
 )
