@@ -13,13 +13,15 @@ class MockLLMDomainRouter: LLMDomainRouterProtocol {
     let name: String
     var service: LLMServiceProtocol
     var supportedDomains: [String]
+    let fallbackDomain: String?
     private let expectedDomain: String?
     private let shouldThrowError: Bool
 
-    init(name: String, service: LLMServiceProtocol, supportedDomains: [String] = [], expectedDomain: String? = nil, shouldThrowError: Bool = false) {
+    init(name: String, service: LLMServiceProtocol, supportedDomains: [String] = [], fallbackDomain: String? = nil, expectedDomain: String? = nil, shouldThrowError: Bool = false) {
         self.name = name
         self.service = service
         self.supportedDomains = supportedDomains
+        self.fallbackDomain = fallbackDomain
         self.expectedDomain = expectedDomain
         self.shouldThrowError = shouldThrowError
     }

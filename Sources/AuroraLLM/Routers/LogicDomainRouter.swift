@@ -82,7 +82,7 @@ public enum EvaluationStrategy {
 ///                domain: "private",
 ///                priority: 100)
 ///     ],
-///     defaultDomain: "general",
+///     fallbackDomain: "general",
 ///     evaluationStrategy: .highestPriority
 /// )
 /// llmManager.registerDomainRouter(router)
@@ -92,7 +92,7 @@ public final class LogicDomainRouter: LLMDomainRouterProtocol {
     public let supportedDomains: [String]
 
     private let rules: [LogicRule]
-    private let defaultDomain: String?
+    public let fallbackDomain: String?
     private let strategy: EvaluationStrategy
     private let logger: CustomLogger?
 
@@ -100,20 +100,36 @@ public final class LogicDomainRouter: LLMDomainRouterProtocol {
     ///    - name: Identifier used in logs.
     ///    - supportedDomains: Valid domain list.
     ///    - rules: Ordered array of `LogicRule`s.
-    ///    - defaultDomain: Optional catch-all when nothing matches.
+    ///    - fallbackDomain: Optional catch-all when nothing matches. This domain is intentionally independent
+    ///      of `supportedDomains` - it represents a domain the router cannot classify. If set to a value in
+    ///      `supportedDomains`, a warning will be logged.
     ///    - evaluationStrategy: See `EvaluationStrategy`.
     ///    - logger: Optional custom logger.
     public init(name: String,
                 supportedDomains: [String],
                 rules: [LogicRule],
-                defaultDomain: String? = nil,
+                fallbackDomain: String? = nil,
                 evaluationStrategy: EvaluationStrategy = .firstMatch,
                 logger: CustomLogger? = nil)
     {
         self.name = name
         self.supportedDomains = supportedDomains.map { $0.lowercased() }
         self.rules = rules
-        self.defaultDomain = defaultDomain?.lowercased()
+        
+        // Normalize fallbackDomain and warn if it's in supportedDomains (may indicate config issue)
+        if let domain = fallbackDomain {
+            let normalized = domain.lowercased()
+            if self.supportedDomains.contains(normalized) {
+                logger?.info(
+                    "[\(name)] fallbackDomain '\(domain)' is in supportedDomains. This may indicate a configuration issue - the router should be able to classify this domain.",
+                    category: "LogicDomainRouter"
+                )
+            }
+            self.fallbackDomain = normalized
+        } else {
+            self.fallbackDomain = nil
+        }
+        
         strategy = evaluationStrategy
         self.logger = logger
     }
@@ -147,9 +163,9 @@ public final class LogicDomainRouter: LLMDomainRouterProtocol {
             return result
         }
 
-        logger?.debug("[\(name)] no rule matched → \(defaultDomain ?? "nil")",
+        logger?.debug("[\(name)] no rule matched → \(fallbackDomain ?? "nil")",
                       category: "LogicDomainRouter")
-        return defaultDomain
+        return fallbackDomain
     }
 
     // MARK: - Strategy Handlers

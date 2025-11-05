@@ -88,7 +88,9 @@ public struct DualDomainRouter: LLMDomainRouterProtocol {
     ///    - secondary: The contrastive router used to provide a second opinion or trigger conflict resolution logic.
     ///    - supportedDomains: A list of valid domains this router recognizes.
     ///    - confidenceThreshold: An optional confidence threshold for favoring the more confident prediction between the two routers.
-    ///    - fallbackDomain: An optional fallback domain if both routers are uncertain.
+    ///    - fallbackDomain: An optional fallback domain if both routers are uncertain. This domain is
+    ///      intentionally independent of `supportedDomains` - it represents a domain the router cannot
+    ///      classify. If set to a value in `supportedDomains`, a warning will be logged.
     ///    - fallbackConfidenceThreshold: An optional confidence threshold under which both predictions are considered uncertain.
     ///    - allowSyntheticFallbacks: If true, fallback predictions will be synthesized instead of returning nil.
     ///    - logger: A custom logger for logging domain predictions and conflicts.
@@ -112,7 +114,21 @@ public struct DualDomainRouter: LLMDomainRouterProtocol {
         self.secondary = secondary
         self.supportedDomains = supportedDomains.map { $0.lowercased() }
         self.confidenceThreshold = confidenceThreshold
-        self.fallbackDomain = fallbackDomain?.lowercased()
+        
+        // Normalize fallbackDomain and warn if it's in supportedDomains (may indicate config issue)
+        if let domain = fallbackDomain {
+            let normalized = domain.lowercased()
+            if self.supportedDomains.contains(normalized) {
+                logger?.info(
+                    "[\(name)] fallbackDomain '\(domain)' is in supportedDomains. This may indicate a configuration issue - the router should be able to classify this domain.",
+                    category: "DualDomainRouter"
+                )
+            }
+            self.fallbackDomain = normalized
+        } else {
+            self.fallbackDomain = nil
+        }
+        
         self.fallbackConfidenceThreshold = fallbackConfidenceThreshold
         self.allowSyntheticFallbacks = allowSyntheticFallbacks
         self.logger = logger

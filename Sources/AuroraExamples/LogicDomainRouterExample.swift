@@ -41,7 +41,7 @@ struct LogicDomainRouterExample {
                    domain: "private",
                    priority: 100),
         ],
-        defaultDomain: "public",
+        fallbackDomain: "public",
         evaluationStrategy: .highestPriority
     )
 
@@ -52,7 +52,7 @@ struct LogicDomainRouterExample {
             .tokens(name: "Cheap for short (<40 tokens)",
                     domain: "economy") { $0 < 40 },
         ],
-        defaultDomain: "premium",
+        fallbackDomain: "premium",
         evaluationStrategy: .firstMatch
     )
 
@@ -64,7 +64,7 @@ struct LogicDomainRouterExample {
                    pattern: #"\?$"#,
                    domain: "fastQA"),
         ],
-        defaultDomain: "default"
+        fallbackDomain: "default"
     )
 
     let langRouter = LogicDomainRouter(
@@ -75,14 +75,14 @@ struct LogicDomainRouterExample {
                    pattern: #"(?i)[^\p{ASCII}\P{L}]"#, // any Unicode letter outside ASCII range
                    domain: "foreign"),
         ],
-        defaultDomain: "english"
+        fallbackDomain: "english"
     )
 
     let abRouterRandom = LogicDomainRouter(
         name: "A/B Experiment",
         supportedDomains: ["baseline", "experiment"],
         rules: [.regex(name: "Match all", pattern: #".+"#, domain: "baseline")],
-        defaultDomain: "baseline",
+        fallbackDomain: "baseline",
         evaluationStrategy: .probabilisticWeights(
             selector: { _ in [("baseline", 0.7), ("experiment", 0.3)] },
             rng: SystemRandomNumberGenerator()
@@ -93,7 +93,7 @@ struct LogicDomainRouterExample {
         name: "A/B Experiment",
         supportedDomains: ["baseline", "experiment"],
         rules: [.regex(name: "Match all", pattern: #".+"#, domain: "baseline")],
-        defaultDomain: "baseline",
+        fallbackDomain: "baseline",
         evaluationStrategy: .probabilisticWeights(
             selector: { _ in [("baseline", 0.7), ("experiment", 0.3)] },
             rng: SeededGenerator(seed: 123_456_789)
@@ -164,7 +164,7 @@ struct LogicDomainRouterExample {
                        domain: "offPeak",
                        clock: routerClock),
             ],
-            defaultDomain: "daytime"
+            fallbackDomain: "daytime"
         )
 
         let latencyPrompts = basePrompts + [

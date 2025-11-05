@@ -10,13 +10,14 @@ import os.log
 
 /// The `LLMDomainRouter` class is responsible for determining the domain of a request using an LLM service.
 ///
-/// The router uses the service to process the request and identify the domain. If the domain is not in the list of supported domains, a fallback ("unresolved") is returned.
+/// The router uses the service to process the request and identify the domain. If the domain is not in the list of supported domains, the `fallbackDomain` is returned (if set), otherwise `nil`.
 ///
-/// - Note: The router is initialized with a list of supported domains and a system prompt that guides the LLM in determining the domain. The LLM is instructed to return "unresolved" if the domain is not supported, which will return "unresolved" if included in the supported domains, or `nil` if not.
+/// - Note: The router is initialized with a list of supported domains and a system prompt that guides the LLM in determining the domain. The LLM is instructed to return "unresolved" if the domain is not supported, which will return "unresolved" if included in the supported domains, or the `fallbackDomain` if not.
 public class LLMDomainRouter: LLMDomainRouterProtocol {
     public let name: String
     public var service: LLMServiceProtocol
     public let supportedDomains: [String]
+    public let fallbackDomain: String?
     private let logger: CustomLogger?
     private let defaultInstructions = """
     Evaluate the following request and determine the domain it belongs to. Domains we support are: %@.
@@ -32,6 +33,9 @@ public class LLMDomainRouter: LLMDomainRouterProtocol {
     ///    - name: The name of the domain router.
     ///    - service: The `LLMServiceProtocol` used to determine the domain.
     ///    - supportedDomains: A list of domains that the router supports.
+    ///    - fallbackDomain: Optional catch-all domain when the LLM returns a domain not in supportedDomains.
+    ///      This domain is intentionally independent of `supportedDomains` - it represents a domain the router
+    ///      cannot classify. If set to a value in `supportedDomains`, a warning will be logged.
     ///    - instructions: Instructions to include in the system prompt. If not provided, a default set of instructions is used.
     ///    - logger: An optional logger for debugging and error reporting.
     ///
@@ -40,12 +44,28 @@ public class LLMDomainRouter: LLMDomainRouterProtocol {
         name: String,
         service: LLMServiceProtocol,
         supportedDomains: [String],
+        fallbackDomain: String? = nil,
         instructions: String? = nil,
         logger: CustomLogger? = nil
     ) {
         self.name = name
         self.service = service
         self.supportedDomains = supportedDomains.map { $0.lowercased() }
+        
+        // Normalize fallbackDomain and warn if it's in supportedDomains (may indicate config issue)
+        if let domain = fallbackDomain {
+            let normalized = domain.lowercased()
+            if self.supportedDomains.contains(normalized) {
+                logger?.info(
+                    "[\(name)] fallbackDomain '\(domain)' is in supportedDomains. This may indicate a configuration issue - the router should be able to classify this domain.",
+                    category: "LLMDomainRouter"
+                )
+            }
+            self.fallbackDomain = normalized
+        } else {
+            self.fallbackDomain = nil
+        }
+        
         self.logger = logger
         configureSystemPrompt(instructions ?? defaultInstructions)
     }
@@ -72,7 +92,7 @@ public class LLMDomainRouter: LLMDomainRouterProtocol {
     ///
     /// - Discussion:
     ///    The method uses the associated `LLMServiceProtocol` to process the request and identify the domain.
-    ///    If the domain is not in the list of supported domains, a fallback ("general") is returned.
+    ///    If the domain is not in the list of supported domains, the `fallbackDomain` is returned (if set), otherwise `nil`.
     public func determineDomain(for request: LLMRequest) async throws -> String? {
         // Prepend the system prompt if defined for the service
         var routedRequest = request
@@ -100,8 +120,8 @@ public class LLMDomainRouter: LLMDomainRouterProtocol {
             if supportedDomains.contains(domain) {
                 return domain
             } else {
-                logger?.debug("Domain '\(domain)' not in supported domains. Returning 'nil'.", category: "LLMDomainRouter")
-                return nil
+                logger?.debug("Domain '\(domain)' not in supported domains. Returning fallbackDomain.", category: "LLMDomainRouter")
+                return fallbackDomain
             }
         } catch {
             logger?.error("Failed to determine domain: \(error.localizedDescription)", category: "LLMDomainRouter")

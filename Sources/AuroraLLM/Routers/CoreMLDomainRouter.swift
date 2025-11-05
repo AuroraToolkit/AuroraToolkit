@@ -21,6 +21,9 @@ public class CoreMLDomainRouter: ConfidentDomainRouter {
     /// The list of valid domains this router recognizes.
     public let supportedDomains: [String]
 
+    /// Optional fallback domain returned when prediction fails or is not in supportedDomains.
+    public let fallbackDomain: String?
+
     /// The Core ML–powered natural language classification model.
     private let model: NLModel
 
@@ -34,11 +37,14 @@ public class CoreMLDomainRouter: ConfidentDomainRouter {
         - name: A human-readable identifier for this router.
         - modelURL: The file URL to the compiled `.mlmodelc` Core ML classifier.
         - supportedDomains: A list of supported domain strings. The model must return one of these values to be considered valid.
+        - fallbackDomain: Optional catch-all domain when prediction fails or is not in supportedDomains.
+          This domain is intentionally independent of `supportedDomains` - it represents a domain the router
+          cannot classify. If set to a value in `supportedDomains`, a warning will be logged.
         - logger: An optional logger instance for logging messages.
 
      - Returns: An instance of `CoreMLDomainRouter` or `nil` if model loading fails.
      */
-    public init?(name: String, modelURL: URL, supportedDomains: [String], logger: CustomLogger? = nil) {
+    public init?(name: String, modelURL: URL, supportedDomains: [String], fallbackDomain: String? = nil, logger: CustomLogger? = nil) {
         guard let nlModel = try? NLModel(contentsOf: modelURL) else {
             logger?.error("Failed to load Core ML model at \(modelURL)", category: "CoreMLDomainRouter")
             return nil
@@ -47,6 +53,21 @@ public class CoreMLDomainRouter: ConfidentDomainRouter {
         self.name = name
         model = nlModel
         self.supportedDomains = supportedDomains.map { $0.lowercased() }
+        
+        // Normalize fallbackDomain and warn if it's in supportedDomains (may indicate config issue)
+        if let domain = fallbackDomain {
+            let normalized = domain.lowercased()
+            if self.supportedDomains.contains(normalized) {
+                logger?.info(
+                    "[\(name)] fallbackDomain '\(domain)' is in supportedDomains. This may indicate a configuration issue - the router should be able to classify this domain.",
+                    category: "CoreMLDomainRouter"
+                )
+            }
+            self.fallbackDomain = normalized
+        } else {
+            self.fallbackDomain = nil
+        }
+        
         self.logger = logger
     }
 
@@ -66,21 +87,21 @@ public class CoreMLDomainRouter: ConfidentDomainRouter {
 
         // Run prediction using the loaded NLModel
         guard let prediction = model.predictedLabel(for: prompt)?.lowercased() else {
-            logger?.debug("Model failed to predict. Returning 'nil'", category: "CoreMLDomainRouter")
-            return nil
+            logger?.debug("Model failed to predict. Returning fallbackDomain.", category: "CoreMLDomainRouter")
+            return fallbackDomain
         }
 
         if prediction.isEmpty {
             logger?.error("Model returned an empty string as prediction for prompt: \(prompt)", category: "CoreMLDomainRouter")
-            return nil
+            return fallbackDomain
         }
 
-        // Return predicted domain if it's supported, otherwise `nil`
+        // Return predicted domain if it's supported, otherwise fallbackDomain
         if supportedDomains.contains(prediction) {
             return prediction
         } else {
-            logger?.debug("Unsupported domain '\(prediction)' returned. Returning 'nil'", category: "CoreMLDomainRouter")
-            return nil
+            logger?.debug("Unsupported domain '\(prediction)' returned. Returning fallbackDomain.", category: "CoreMLDomainRouter")
+            return fallbackDomain
         }
     }
 

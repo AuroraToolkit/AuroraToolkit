@@ -54,7 +54,7 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["sports", "finance", "general"],
             rules: [makeSportsRule(), makeFinanceRule()],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .firstMatch
         )
 
@@ -68,7 +68,7 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["sports", "finance", "private", "general"],
             rules: [makeSportsRule(), makeFinanceRule(), makePIIRule()],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .highestPriority
         )
 
@@ -89,7 +89,7 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["sports", "finance", "private", "general"],
             rules: [makeSportsRule(), makeFinanceRule(), makePIIRule()],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .topKThenResolve(k: 3, resolver: resolver)
         )
 
@@ -107,7 +107,7 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["sports", "finance", "private", "general"],
             rules: [makeSportsRule(), makeFinanceRule(), makePIIRule()],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .probabilisticWeights(selector: selector)
         )
 
@@ -134,7 +134,7 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["sports", "finance", "general"],
             rules: [makeSportsRule(), makeFinanceRule()],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .custom(customResolver)
         )
 
@@ -143,22 +143,21 @@ final class LogicDomainRouterTests: XCTestCase {
         XCTAssertEqual(result, "finance")
     }
 
-    // MARK: - Default Domain Fallback Tests (These will demonstrate the bug!)
+    // MARK: - Default Domain Fallback Tests
 
     func testDefaultDomainFallback_FirstMatch() async throws {
         let router = LogicDomainRouter(
             name: "TestRouter",
             supportedDomains: ["sports", "finance", "general"],
             rules: [makeSportsRule(), makeFinanceRule()],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .firstMatch
         )
 
         let unmatchedRequest = makeSampleRequest(content: "What's the weather like today?")
         let result = try await router.determineDomain(for: unmatchedRequest)
 
-        // BUG: This currently returns nil instead of "general"
-        XCTAssertEqual(result, "general", "Should return defaultDomain when no rules match")
+        XCTAssertEqual(result, "general", "Should return fallbackDomain when no rules match")
     }
 
     func testDefaultDomainFallback_HighestPriority() async throws {
@@ -166,15 +165,14 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["sports", "finance", "general"],
             rules: [makeSportsRule(), makeFinanceRule()],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .highestPriority
         )
 
         let unmatchedRequest = makeSampleRequest(content: "What's the weather like today?")
         let result = try await router.determineDomain(for: unmatchedRequest)
 
-        // BUG: This currently returns nil instead of "general" 
-        XCTAssertEqual(result, "general", "Should return defaultDomain when no rules match")
+        XCTAssertEqual(result, "general", "Should return fallbackDomain when no rules match")
     }
 
     func testDefaultDomainFallback_TopKThenResolve() async throws {
@@ -186,15 +184,14 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["sports", "finance", "general"],
             rules: [makeSportsRule(), makeFinanceRule()],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .topKThenResolve(k: 2, resolver: resolver)
         )
 
         let unmatchedRequest = makeSampleRequest(content: "What's the weather like today?")
         let result = try await router.determineDomain(for: unmatchedRequest)
 
-        // BUG: This currently returns nil instead of "general"
-        XCTAssertEqual(result, "general", "Should return defaultDomain when no rules match")
+        XCTAssertEqual(result, "general", "Should return fallbackDomain when no rules match")
     }
 
     func testDefaultDomainFallback_ProbabilisticWeights() async throws {
@@ -206,15 +203,14 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["sports", "finance", "general"],
             rules: [makeSportsRule(), makeFinanceRule()],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .probabilisticWeights(selector: selector)
         )
 
         let unmatchedRequest = makeSampleRequest(content: "What's the weather like today?")
         let result = try await router.determineDomain(for: unmatchedRequest)
 
-        // BUG: This currently returns nil instead of "general"
-        XCTAssertEqual(result, "general", "Should return defaultDomain when no rules match")
+        XCTAssertEqual(result, "general", "Should return fallbackDomain when no rules match")
     }
 
     func testDefaultDomainFallback_Custom() async throws {
@@ -226,30 +222,63 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["sports", "finance", "general"],
             rules: [makeSportsRule(), makeFinanceRule()],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .custom(customResolver)
         )
 
         let unmatchedRequest = makeSampleRequest(content: "What's the weather like today?")
         let result = try await router.determineDomain(for: unmatchedRequest)
 
-        // BUG: This currently returns nil instead of "general"
-        XCTAssertEqual(result, "general", "Should return defaultDomain when no rules match")
+        XCTAssertEqual(result, "general", "Should return fallbackDomain when no rules match")
     }
 
-    func testNilDefaultDomain() async throws {
+    func testFallbackDomainNotInSupportedDomains() async throws {
+        // Create a router with a fallbackDomain that's not in supportedDomains (valid - fallback is independent)
         let router = LogicDomainRouter(
             name: "TestRouter",
             supportedDomains: ["sports", "finance"],
             rules: [makeSportsRule(), makeFinanceRule()],
-            defaultDomain: nil,
+            fallbackDomain: "general", // Not in supportedDomains, but that's OK - it's independent
             evaluationStrategy: .firstMatch
         )
 
         let unmatchedRequest = makeSampleRequest(content: "What's the weather like today?")
         let result = try await router.determineDomain(for: unmatchedRequest)
 
-        XCTAssertNil(result, "Should return nil when no rules match and no defaultDomain is set")
+        // Should return the fallbackDomain even though it's not in supportedDomains
+        XCTAssertEqual(result, "general", "Should return fallbackDomain even when not in supportedDomains")
+    }
+    
+    func testFallbackDomainInSupportedDomains() async throws {
+        // Create a router with a fallbackDomain that IS in supportedDomains (should log warning but still work)
+        let router = LogicDomainRouter(
+            name: "TestRouter",
+            supportedDomains: ["sports", "finance", "general"],
+            rules: [makeSportsRule(), makeFinanceRule()],
+            fallbackDomain: "general", // In supportedDomains - may indicate config issue
+            evaluationStrategy: .firstMatch
+        )
+
+        let unmatchedRequest = makeSampleRequest(content: "What's the weather like today?")
+        let result = try await router.determineDomain(for: unmatchedRequest)
+
+        // Should still return the fallbackDomain (warning logged but not blocking)
+        XCTAssertEqual(result, "general", "Should return fallbackDomain even when in supportedDomains")
+    }
+
+    func testNilFallbackDomain() async throws {
+        let router = LogicDomainRouter(
+            name: "TestRouter",
+            supportedDomains: ["sports", "finance"],
+            rules: [makeSportsRule(), makeFinanceRule()],
+            fallbackDomain: nil,
+            evaluationStrategy: .firstMatch
+        )
+
+        let unmatchedRequest = makeSampleRequest(content: "What's the weather like today?")
+        let result = try await router.determineDomain(for: unmatchedRequest)
+
+        XCTAssertNil(result, "Should return nil when no rules match and no fallbackDomain is set")
     }
 
     // MARK: - Rule Builder Tests
@@ -266,7 +295,7 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["testing", "general"],
             rules: [rule],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .firstMatch
         )
 
@@ -292,7 +321,7 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["detailed", "general"],
             rules: [rule],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .firstMatch
         )
 
@@ -325,7 +354,7 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["business", "general"],
             rules: [rule],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .firstMatch
         )
 
@@ -341,7 +370,7 @@ final class LogicDomainRouterTests: XCTestCase {
             name: "TestRouter",
             supportedDomains: ["general"],
             rules: [],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .firstMatch
         )
 
@@ -357,7 +386,7 @@ final class LogicDomainRouterTests: XCTestCase {
             rules: [
                 LogicRule(name: "Mixed Case", domain: "SPORTS", priority: 1) { _ in true }
             ],
-            defaultDomain: "GENERAL",
+            fallbackDomain: "GENERAL",
             evaluationStrategy: .firstMatch
         )
 

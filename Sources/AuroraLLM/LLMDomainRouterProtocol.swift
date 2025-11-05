@@ -15,6 +15,14 @@ public protocol LLMDomainRouterProtocol {
     /// A list of domains that the router supports.
     var supportedDomains: [String] { get }
 
+    /// Optional fallback domain returned when no domain can be determined or when the determined domain is not in supportedDomains.
+    ///
+    /// - Note: The `fallbackDomain` is intentionally independent of `supportedDomains`. It represents a domain
+    ///   that the router cannot classify, pointing to an external fallback service. If `fallbackDomain` is set
+    ///   to a value that exists in `supportedDomains`, it suggests the router should be able to classify it,
+    ///   which may indicate a configuration issue.
+    var fallbackDomain: String? { get }
+
     /// Determines the domain for a given request using the associated LLM service.
     ///
     /// - Parameters:

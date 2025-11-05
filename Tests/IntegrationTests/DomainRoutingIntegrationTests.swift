@@ -141,7 +141,7 @@ final class DomainRoutingIntegrationTests: XCTestCase {
             name: "LogicRouter",
             supportedDomains: supportedDomains,
             rules: rules,
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .firstMatch,
             logger: nil
         )
@@ -197,7 +197,7 @@ final class DomainRoutingIntegrationTests: XCTestCase {
                     }
                 )
             ],
-            defaultDomain: "general",
+            fallbackDomain: "general",
             evaluationStrategy: .firstMatch,
             logger: nil
         )
