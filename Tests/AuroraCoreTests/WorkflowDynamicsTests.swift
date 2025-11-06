@@ -117,7 +117,7 @@ final class WorkflowDynamicsTests: XCTestCase {
     }
 }
 
-public class ContinuousTrigger: WorkflowComponent, TriggerComponent {
+public class ContinuousTrigger: WorkflowComponentProtocol, TriggerComponent {
     /// The maximum number of times the trigger should fire.
     private let count: Int
     /// The delay between trigger firings.
@@ -162,7 +162,7 @@ public class ContinuousTrigger: WorkflowComponent, TriggerComponent {
         self.delay = delay
     }
 
-    /// Conforms to WorkflowComponent.
+    /// Conforms to `WorkflowComponentProtocol`.
     public func toComponent() -> Workflow.Component {
         return .trigger(trigger)
     }

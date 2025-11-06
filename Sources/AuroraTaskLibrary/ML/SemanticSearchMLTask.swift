@@ -11,7 +11,7 @@ import Foundation
 
 /// `SemanticSearchMLTask` wraps any `MLServiceProtocol` that performs
 /// semantic search (emitting `[[String: Any]]` under the `"results"` key)
-/// into a `WorkflowComponent`.
+/// into a `WorkflowComponentProtocol`.
 ///
 /// - **Inputs**
 ///    - `query`: `String` to search for.
@@ -43,7 +43,7 @@ import Foundation
 /// let hits = outputs["results"] as? [[String: Any]]
 /// print(hits)
 /// ```
-public class SemanticSearchMLTask: WorkflowComponent {
+public class SemanticSearchMLTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.

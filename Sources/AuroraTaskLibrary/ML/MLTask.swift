@@ -9,7 +9,7 @@ import AuroraCore
 import AuroraML
 import Foundation
 
-public class MLTask: WorkflowComponent {
+public class MLTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.

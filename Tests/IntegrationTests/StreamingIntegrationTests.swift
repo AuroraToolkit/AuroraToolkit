@@ -156,11 +156,6 @@ final class StreamingIntegrationTests: XCTestCase {
     /// Tests error handling in streaming requests.
     func testStreamingErrorHandling() async throws {
         // Create a mock service that fails during streaming
-        let failingResponse = IntegrationMockLLMResponse(
-            text: "",
-            model: "mock-model",
-            tokenUsage: nil
-        )
         let failingService = IntegrationMockLLMService(
             name: "FailingStreamingService",
             vendor: "Mock",

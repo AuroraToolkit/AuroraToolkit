@@ -38,7 +38,7 @@ import Foundation
 ///   "Cluster 2": ["AI is transforming software development."]
 /// }
 /// ```
-public class ClusterStringsLLMTask: WorkflowComponent {
+public class ClusterStringsLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.

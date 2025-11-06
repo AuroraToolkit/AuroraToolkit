@@ -41,7 +41,7 @@ import Foundation
 ///    "This is an example sentence.": "Ceci est une phrase d'exemple."
 /// }
 /// ```
-public class TranslateStringsLLMTask: WorkflowComponent {
+public class TranslateStringsLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.

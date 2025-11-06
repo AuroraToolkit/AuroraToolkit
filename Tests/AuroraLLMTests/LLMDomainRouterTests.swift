@@ -240,7 +240,7 @@ final class LLMDomainRouterTests: XCTestCase {
     
     func testSystemPromptConfigured() {
         let service = makeMockService(returningDomain: "sports")
-        let router = LLMDomainRouter(
+        _ = LLMDomainRouter(
             name: "TestRouter",
             service: service,
             supportedDomains: ["sports", "finance"],
@@ -255,7 +255,7 @@ final class LLMDomainRouterTests: XCTestCase {
     func testCustomInstructions() {
         let service = makeMockService(returningDomain: "sports")
         let customInstructions = "Custom instructions: %@"
-        let router = LLMDomainRouter(
+        _ = LLMDomainRouter(
             name: "TestRouter",
             service: service,
             supportedDomains: ["sports", "finance"],

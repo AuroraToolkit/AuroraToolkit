@@ -395,32 +395,28 @@ final class ErrorHandlingTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Should handle different recovery strategies")
         
         Task {
-            do {
-                // Simulate different types of recoverable errors
-                let recoverableErrors = [
-                    NSError(domain: "AuroraTaskLibrary", code: 2018, userInfo: [
-                        NSLocalizedDescriptionKey: "Temporary network error",
-                        "recoveryStrategy": "retry"
-                    ]),
-                    NSError(domain: "AuroraTaskLibrary", code: 2019, userInfo: [
-                        NSLocalizedDescriptionKey: "Rate limit exceeded",
-                        "recoveryStrategy": "backoff"
-                    ]),
-                    NSError(domain: "AuroraTaskLibrary", code: 2020, userInfo: [
-                        NSLocalizedDescriptionKey: "Resource temporarily unavailable",
-                        "recoveryStrategy": "wait"
-                    ])
-                ]
-                
-                for error in recoverableErrors {
-                    XCTAssertNotNil(error.localizedDescription)
-                    XCTAssertNotNil(error.userInfo["recoveryStrategy"])
-                }
-                
-                expectation.fulfill()
-            } catch {
-                XCTFail("Should not have thrown an error")
+            // Simulate different types of recoverable errors
+            let recoverableErrors = [
+                NSError(domain: "AuroraTaskLibrary", code: 2018, userInfo: [
+                    NSLocalizedDescriptionKey: "Temporary network error",
+                    "recoveryStrategy": "retry"
+                ]),
+                NSError(domain: "AuroraTaskLibrary", code: 2019, userInfo: [
+                    NSLocalizedDescriptionKey: "Rate limit exceeded",
+                    "recoveryStrategy": "backoff"
+                ]),
+                NSError(domain: "AuroraTaskLibrary", code: 2020, userInfo: [
+                    NSLocalizedDescriptionKey: "Resource temporarily unavailable",
+                    "recoveryStrategy": "wait"
+                ])
+            ]
+            
+            for error in recoverableErrors {
+                XCTAssertNotNil(error.localizedDescription)
+                XCTAssertNotNil(error.userInfo["recoveryStrategy"])
             }
+            
+            expectation.fulfill()
         }
         
         wait(for: [expectation], timeout: 5.0)

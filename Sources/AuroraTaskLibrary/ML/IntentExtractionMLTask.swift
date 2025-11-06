@@ -10,7 +10,7 @@ import AuroraML
 import Foundation
 import NaturalLanguage
 
-/// `IntentExtractionMLTask` wraps any `MLServiceProtocol` that extracts user intents (and optional parameters) from text into a WorkflowComponent.
+/// `IntentExtractionMLTask` wraps any `MLServiceProtocol` that extracts user intents (and optional parameters) from text into a `WorkflowComponentProtocol`.
 ///
 /// - **Inputs**
 ///    - `strings`: `[String]` of texts to extract intents from.
@@ -43,7 +43,7 @@ import NaturalLanguage
 /// let extracted = outputs["intents"] as! [[String: Any]]
 /// print(extracted)
 /// ```
-public class IntentExtractionMLTask: WorkflowComponent {
+public class IntentExtractionMLTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.

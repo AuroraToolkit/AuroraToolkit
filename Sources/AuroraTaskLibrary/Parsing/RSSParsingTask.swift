@@ -17,7 +17,7 @@ import os.log
 ///    - `articles`: An array of `RSSArticle` objects containing the article details.
 ///
 /// This task can be integrated into a workflow where article links need to be extracted from an RSS feed.
-public class RSSParsingTask: WorkflowComponent {
+public class RSSParsingTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.

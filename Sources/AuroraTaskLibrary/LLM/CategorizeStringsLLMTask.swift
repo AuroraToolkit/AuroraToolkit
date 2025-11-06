@@ -44,7 +44,7 @@ import Foundation
 ///
 /// ### Notes
 /// The task leverages a language model to handle flexible and nuanced categorization needs. When predefined categories are not supplied, the model dynamically determines suitable groupings, making it highly adaptable for unstructured or semi-structured data scenarios.
-public class CategorizeStringsLLMTask: WorkflowComponent {
+public class CategorizeStringsLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
 

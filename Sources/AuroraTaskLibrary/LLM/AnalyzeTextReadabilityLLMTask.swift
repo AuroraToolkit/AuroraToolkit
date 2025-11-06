@@ -24,7 +24,7 @@ import Foundation
 /// - Assess the complexity of text content for target audiences.
 /// - Pre-process content to ensure it meets accessibility standards.
 /// - Compare readability metrics across different content pieces.
-public class AnalyzeTextReadabilityLLMTask: WorkflowComponent {
+public class AnalyzeTextReadabilityLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.

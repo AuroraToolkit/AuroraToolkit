@@ -16,7 +16,7 @@ import Foundation
 ///    - `context`: The loaded context object.
 ///
 /// This task can be integrated into a workflow where context data needs to be retrieved from disk.
-public class LoadContextTask: WorkflowComponent {
+public class LoadContextTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
 

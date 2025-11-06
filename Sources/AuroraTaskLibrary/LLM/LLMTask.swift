@@ -19,7 +19,7 @@ import Foundation
 /// This task is designed to be part of a workflow where the result from an LLM is used in further tasks.
 ///
 /// - Note: This class works with any service that conforms to `LLMServiceProtocol`.
-public class LLMTask: WorkflowComponent {
+public class LLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.

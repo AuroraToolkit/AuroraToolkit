@@ -15,7 +15,7 @@ import Foundation
 ///
 /// This task can be used in workflows requiring access to multiple stored contexts. If a list of specific filenames is provided, only those contexts will be fetched.
 /// Otherwise, all contexts will be retrieved.
-public struct FetchContextsTask: WorkflowComponent {
+public struct FetchContextsTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
 

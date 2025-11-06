@@ -247,4 +247,4 @@ AuroraTaskLibrary follows a modular architecture where tasks are organized by fu
 
 **Utility Tasks** provide common data manipulation and processing operations.
 
-All tasks implement the `WorkflowComponent` protocol, ensuring consistent behavior, error handling, and integration patterns across the entire library. This design enables easy composition of complex workflows while maintaining type safety and clear data flow between components.
+All tasks implement `WorkflowComponentProtocol`, ensuring consistent behavior, error handling, and integration patterns across the entire library. This design enables easy composition of complex workflows while maintaining type safety and clear data flow between components.

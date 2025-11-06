@@ -17,7 +17,7 @@ import os.log
 ///    - `parsedJSON`: The root `JSONElement` containing the parsed details.
 ///
 /// This task is general-purpose and can handle any JSON structure.
-public class JSONParsingTask: WorkflowComponent {
+public class JSONParsingTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.

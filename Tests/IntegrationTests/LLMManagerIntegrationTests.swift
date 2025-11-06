@@ -32,7 +32,6 @@ final class LLMManagerIntegrationTests: XCTestCase {
     func testMultipleServiceRegistration() throws {
         let manager = LLMManager()
         let service1 = try IntegrationTestHelpers.getLLMService()
-        let service2 = try IntegrationTestHelpers.getLLMService()
         
         // Services are registered by name, so we need to ensure different names
         // Since we can't mutate the service name easily, we'll test with the same service

@@ -9,7 +9,7 @@ import AuroraCore
 import AuroraML
 import Foundation
 
-/// `EmbeddingMLTask` wraps  wraps any `MLServiceProtocol` that produces embeddings into a `WorkflowComponent`.
+/// `EmbeddingMLTask` wraps  wraps any `MLServiceProtocol` that produces embeddings into a `WorkflowComponentProtocol`.
 ///
 /// - **Inputs**
 ///    - `strings`: `[String]` of texts to embed.
@@ -36,7 +36,7 @@ import Foundation
 /// let vectors = outputs["embeddings"] as! [[Double]]
 /// // vectors[0].count == sentenceEmbedder.dimension
 ///
-public class EmbeddingMLTask: WorkflowComponent {
+public class EmbeddingMLTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.

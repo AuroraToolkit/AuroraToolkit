@@ -20,7 +20,7 @@ import Foundation
 ///    - `summaries`:  The list of summarized strings.
 ///
 /// This task can be integrated in a workflow where context items need to be summarized.
-public class SummarizeStringsLLMTask: WorkflowComponent {
+public class SummarizeStringsLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.

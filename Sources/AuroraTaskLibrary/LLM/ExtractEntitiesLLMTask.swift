@@ -41,7 +41,7 @@ import Foundation
 ///     }
 /// }
 /// ```
-public class ExtractEntitiesLLMTask: WorkflowComponent {
+public class ExtractEntitiesLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
 

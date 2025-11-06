@@ -79,7 +79,7 @@ public struct DualDomainRouter: LLMDomainRouterProtocol {
     private let logger: CustomLogger?
 
     /// A logger for capturing conflicts between primary and secondary predictions in DualDomainRouter.
-    private let conflictLogger: ConflictLoggingStrategy?
+    private let conflictLogger: ConflictLoggingStrategyProtocol?
     /// Initializes a new `DualDomainRouter`.
     ///
     /// - Parameters:
@@ -106,7 +106,7 @@ public struct DualDomainRouter: LLMDomainRouterProtocol {
         fallbackConfidenceThreshold: Double? = nil,
         allowSyntheticFallbacks: Bool = false,
         logger: CustomLogger? = nil,
-        conflictLogger: ConflictLoggingStrategy? = nil,
+        conflictLogger: ConflictLoggingStrategyProtocol? = nil,
         resolveConflict: @escaping (_ primary: DualDomainPrediction?, _ secondary: DualDomainPrediction?) -> String?
     ) {
         self.name = name
@@ -254,13 +254,13 @@ public struct DualDomainRouter: LLMDomainRouterProtocol {
 // MARK: - Conflict Logging
 
 /// This protocol defines a method for logging conflicts between primary and secondary predictions.
-public protocol ConflictLoggingStrategy {
+public protocol ConflictLoggingStrategyProtocol {
     /// Logs a conflict with the provided details.
     func logConflict(prompt: String, primary: String, primaryConfidence: Double, secondary: String, secondaryConfidence: Double)
 }
 
 /// A file-based conflict logger that appends conflict details to a CSV file.
-public final class FileConflictLogger: ConflictLoggingStrategy {
+public final class FileConflictLogger: ConflictLoggingStrategyProtocol {
     private var fileHandle: FileHandle?
     private let dateFormatter: DateFormatter
     private let logger: CustomLogger?
@@ -330,7 +330,7 @@ public final class FileConflictLogger: ConflictLoggingStrategy {
 }
 
 /// A console-based conflict logger that prints conflict details to the console.
-public final class ConsoleConflictLogger: ConflictLoggingStrategy {
+public final class ConsoleConflictLogger: ConflictLoggingStrategyProtocol {
     private let logger: CustomLogger?
 
     /// Public initializer that sets up console logging.

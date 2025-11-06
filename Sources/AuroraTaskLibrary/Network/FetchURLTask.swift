@@ -16,7 +16,7 @@ import Foundation
 ///
 /// This task wraps `Workflow.Task` and can be used in workflows where external data needs to be retrieved, such as downloading files,
 /// fetching JSON, or reading RSS feeds.
-public struct FetchURLTask: WorkflowComponent {
+public struct FetchURLTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
 

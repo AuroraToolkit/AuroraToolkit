@@ -45,7 +45,7 @@ import Foundation
 ///   ]
 /// }
 /// ```
-public class AnalyzeSentimentLLMTask: WorkflowComponent {
+public class AnalyzeSentimentLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.

@@ -9,7 +9,7 @@ import AuroraCore
 import AuroraML
 import Foundation
 
-/// `TaggingMLTask` wraps any `MLServiceProtocol` (e.g. `TaggingService`) into a WorkflowComponent.
+/// `TaggingMLTask` wraps any `MLServiceProtocol` (e.g. `TaggingService`) into a `WorkflowComponentProtocol`.
 ///
 /// - **Inputs**
 ///    - `strings`: `[String]` of texts to tag.
@@ -57,7 +57,7 @@ import Foundation
 /// - The output `tags` will be an an array (per input) of `Tag` objects.
 /// - The order of tags corresponds to the order of tokens in the input strings.
 /// - The task is designed to be used within a workflow, and it will throw an error if the input strings are empty or if the `tags` output is missing from the ML response.
-public class TaggingMLTask: WorkflowComponent {
+public class TaggingMLTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.

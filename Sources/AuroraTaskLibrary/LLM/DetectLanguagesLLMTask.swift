@@ -38,7 +38,7 @@ import Foundation
 ///     }
 /// }
 /// ```
-public class DetectLanguagesLLMTask: WorkflowComponent {
+public class DetectLanguagesLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.

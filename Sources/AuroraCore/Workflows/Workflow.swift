@@ -607,7 +607,7 @@ public struct Workflow {
     ///
     /// Tasks define specific actions or operations within a workflow. Each task may include inputs
     /// and provide outputs after execution. Tasks can execute asynchronously using the `execute` method.
-    public struct Task: WorkflowComponent {
+    public struct Task: WorkflowComponentProtocol {
         /// A unique identifier for the task.
         public let id: UUID
 
@@ -687,7 +687,7 @@ public struct Workflow {
     ///
     /// Task groups can specify whether their tasks execute sequentially or in parallel.
     /// Groups provide logical grouping and execution flexibility for tasks within a workflow.
-    public struct TaskGroup: WorkflowComponent {
+    public struct TaskGroup: WorkflowComponentProtocol {
         /// A unique identifier for the task group.
         public let id: UUID
 
@@ -753,7 +753,7 @@ public struct Workflow {
     /// Represents a nested workflow within the main workflow.
     ///
     /// Subflows allow workflows to be composed of other workflows, enabling modular design and reusability.
-    public struct Subflow: WorkflowComponent {
+    public struct Subflow: WorkflowComponentProtocol {
         /// A wrapped workflow.
         var workflow: Workflow
 
@@ -777,7 +777,7 @@ public struct Workflow {
     /// Represents a conditional logic component that can evaluate conditions and produce new components.
     ///
     /// Logic components allow workflows to make decisions based on dynamic conditions and insert new components as needed.
-    public struct Logic: WorkflowComponent, LogicComponent {
+    public struct Logic: WorkflowComponentProtocol, LogicComponent {
         /// A unique identifier for the logic component.
         public let id: UUID
 
@@ -843,7 +843,7 @@ public struct Workflow {
     /// Represents a trigger component that can wait for a condition and produce new components.
     ///
     /// Trigger components allow workflows to wait for specific conditions (e.g., time-based or event-based) and insert new components as needed.
-    public struct Trigger: WorkflowComponent, TriggerComponent {
+    public struct Trigger: WorkflowComponentProtocol, TriggerComponent {
         /// A unique identifier for the trigger component.
         public let id: UUID
 

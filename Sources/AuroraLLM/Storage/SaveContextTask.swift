@@ -19,7 +19,7 @@ import Foundation
 /// This task can be integrated in a workflow where context data needs to be saved to disk.
 ///
 /// - Note: The task ensures that a dedicated `contexts/` directory exists in the documents folder.
-public class SaveContextTask: WorkflowComponent {
+public class SaveContextTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
 

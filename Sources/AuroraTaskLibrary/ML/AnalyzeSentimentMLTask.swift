@@ -45,7 +45,7 @@ import Foundation
 /// //   "I hate that.":  ["sentiment":"negative", "confidence":75]
 /// // ]
 ///
-public class AnalyzeSentimentMLTask: WorkflowComponent {
+public class AnalyzeSentimentMLTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.

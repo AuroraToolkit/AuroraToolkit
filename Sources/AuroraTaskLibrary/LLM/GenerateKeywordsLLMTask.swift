@@ -25,7 +25,7 @@ import Foundation
 /// - Summarize the main topics or themes of articles, blogs, or reports.
 /// - Organize keywords into logical categories for better interpretation.
 /// - Extract key terms from user feedback or reviews for data analysis.
-public class GenerateKeywordsLLMTask: WorkflowComponent {
+public class GenerateKeywordsLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.

@@ -24,7 +24,7 @@ import Foundation
 /// - Generate multilingual headlines for articles, blog posts, or content summaries.
 /// - Suggest titles for user-generated content or creative works in different locales.
 /// - Simplify and condense complex information into concise titles.
-public class GenerateTitlesLLMTask: WorkflowComponent {
+public class GenerateTitlesLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.

@@ -42,7 +42,7 @@ import Foundation
 ///     }
 /// }
 /// ```
-public class ExtractRelationsLLMTask: WorkflowComponent {
+public class ExtractRelationsLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Logger for debugging and monitoring.

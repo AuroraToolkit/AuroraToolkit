@@ -10,7 +10,7 @@ import AuroraML
 import Foundation
 
 /// `ClassificationMLTask` wraps any `MLServiceProtocol` (e.g. `ClassificationService`)
-/// into a `WorkflowComponent`.
+/// into a `WorkflowComponentProtocol`.
 ///
 /// - **Inputs**
 ///    - `strings`: `[String]` — an array of texts to classify.
@@ -41,7 +41,7 @@ import Foundation
 /// let tags = outputs["tags"] as? [Tag]
 /// print(tags)
 /// ```
-public class ClassificationMLTask: WorkflowComponent {
+public class ClassificationMLTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.

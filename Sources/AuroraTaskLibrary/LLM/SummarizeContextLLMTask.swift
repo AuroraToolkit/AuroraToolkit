@@ -19,7 +19,7 @@ import Foundation
 ///    - `summarizedContext`: The context containing the summarized content.
 ///
 /// This task can be integrated in a workflow where context items need to be summarized.
-public class SummarizeContextLLMTask: WorkflowComponent {
+public class SummarizeContextLLMTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// Optional logger for logging events and errors.

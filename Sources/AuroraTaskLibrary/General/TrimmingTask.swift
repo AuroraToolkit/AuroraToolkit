@@ -19,7 +19,7 @@ import Foundation
 /// - `trimmedStrings`: An array of trimmed strings.
 ///
 /// This task can be integrated in a workflow where string trimming is required to fit within a token limit.
-public class TrimmingTask: WorkflowComponent {
+public class TrimmingTask: WorkflowComponentProtocol {
     /// The wrapped task.
     private let task: Workflow.Task
     /// An optional logger for logging task execution details.
