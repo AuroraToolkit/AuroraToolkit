@@ -63,8 +63,8 @@ struct StreamingRequestExample {
         print("Message content: \(message)")
         
         do {
-            // The convenience API will automatically use Foundation Model if available,
-            // or the configured default service if Foundation Model is not available
+            // The convenience API will automatically use Apple Foundation Model if available,
+            // or the configured default service if Apple Foundation Model is not available
             let anthropicKey = APIKeyLoader.get("ANTHROPIC_API_KEY", forService: "Anthropic")
             LLM.configure(with: anthropicKey != nil ? LLM.anthropic.apiKey(anthropicKey!) : LLM.anthropic)
             let response = try await LLM.stream(message) { partialText in
@@ -74,7 +74,7 @@ struct StreamingRequestExample {
         } catch {
             print("Error: \(error)")
             
-            // If Foundation Model is not available and no service is configured,
+            // If Apple Foundation Model is not available and no service is configured,
             // show how to configure a default service
             if let llmError = error as? LLMServiceError, 
                case .noDefaultServiceConfigured = llmError {

@@ -155,9 +155,9 @@ For on-device AI processing using Apple's Foundation Models, you can use the Fou
 ```swift
 import AuroraLLM
 
-// Check if Foundation Models is available on this device
+// Check if Apple Foundation Models is available on this device
 guard FoundationModelService.isAvailable() else {
-    print("Foundation Models not available (requires iOS 26+ and Apple Intelligence)")
+    print("Apple Foundation Models not available (requires iOS 26+ and Apple Intelligence)")
     return
 }
 
@@ -178,7 +178,7 @@ if let service = FoundationModelService.createIfAvailable() {
         print("On-device response: \(response.text)")
     }
 } else {
-    print("Foundation Models not available (Apple Intelligence may not be enabled)")
+    print("Apple Foundation Models not available (Apple Intelligence may not be enabled)")
 }
 ```
 

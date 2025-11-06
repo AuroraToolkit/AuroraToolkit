@@ -45,7 +45,7 @@ public class LLMServiceFactory {
 
         case "Apple":
             // Create an Apple Foundation Model service if available
-            // Foundation Models requires iOS 26+/macOS 26+ and Apple Intelligence to be enabled
+            // Apple Foundation Models requires iOS 26+/macOS 26+ and Apple Intelligence to be enabled
             // No API key needed as it uses on-device models
             if #available(iOS 26, macOS 26, visionOS 26, *) {
                 return FoundationModelService.createIfAvailable(name: "FoundationModel" + UUID().uuidString)

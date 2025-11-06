@@ -9,10 +9,10 @@ import AuroraLLM
 import AuroraCore
 import Foundation
 
-/// Example demonstrating Apple Foundation Models integration for on-device AI processing.
+/// Example demonstrating Apple Apple Foundation Models integration for on-device AI processing.
 /// 
 /// This example shows how to:
-/// - Check Foundation Models availability
+/// - Check Apple Foundation Models availability
 /// - Create and configure a FoundationModelService
 /// - Send requests using on-device AI
 /// - Handle platform compatibility gracefully
@@ -24,25 +24,25 @@ public struct FoundationModelExample {
         if #available(iOS 26, macOS 26, visionOS 26, *) {
             await executeFoundationModelExample()
         } else {
-            print("Foundation Models requires iOS 26+/macOS 26+ or later")
+            print("Apple Foundation Models requires iOS 26+/macOS 26+ or later")
             print("   Current platform not supported")
         }
     }
 
     @available(iOS 26, macOS 26, visionOS 26, *)
     private func executeFoundationModelExample() async {
-        // Check if Foundation Models is available on this device
+        // Check if Apple Foundation Models is available on this device
         guard FoundationModelService.isAvailable() else {
-            print("Foundation Models not available")
+            print("Apple Foundation Models not available")
             print("   Requires iOS 26+/macOS 26+ with Apple Intelligence enabled")
             print("   Supported hardware: iPhone 15 Pro or later")
             return
         }
 
-        print("Foundation Models are available")
+        print("Apple Foundation Models are available")
 
         do {
-            // Create Foundation Model service (no API key required)
+            // Create Apple Foundation Model service (no API key required)
             let service = try FoundationModelService(
                 name: "On-Device AI",
                 contextWindowSize: 4096,    // Apple's documented limit
@@ -50,7 +50,7 @@ public struct FoundationModelExample {
                 systemPrompt: "You are a helpful assistant running on-device."
             )
 
-            print("Created Foundation Model service: \(service.vendor) - \(service.name)")
+            print("Created Apple Foundation Model service: \(service.vendor) - \(service.name)")
             print("   Context window: \(service.contextWindowSize) tokens")
             print("   Max output: \(service.maxOutputTokens) tokens")
 

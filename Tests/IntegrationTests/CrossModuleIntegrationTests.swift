@@ -18,7 +18,7 @@ final class CrossModuleIntegrationTests: XCTestCase {
     
     /// Tests a workflow that uses both AuroraCore workflows and AuroraLLM services.
     func testWorkflowWithLLMIntegration() async throws {
-        // Get LLM service (Foundation Model if available, mock otherwise)
+        // Get LLM service (Apple Foundation Model if available, mock otherwise)
         let service = try IntegrationTestHelpers.getLLMService()
         
         // Create a workflow that uses LLM
@@ -60,7 +60,7 @@ final class CrossModuleIntegrationTests: XCTestCase {
         
         XCTAssertEqual(sentiments.count, texts.count, "Should get sentiment for each text")
         
-        // Verify responses (exact content depends on Foundation Model vs mock)
+        // Verify responses (exact content depends on Apple Foundation Model vs mock)
         for sentiment in sentiments {
             XCTAssertFalse(sentiment.isEmpty, "Sentiment should not be empty")
         }
@@ -106,9 +106,9 @@ final class CrossModuleIntegrationTests: XCTestCase {
         XCTAssertNotNil(keywords, "Should have keyword results")
     }
     
-    // MARK: - Foundation Model Availability Check
+    // MARK: - Apple Foundation Model Availability Check
     
-    /// Verifies that Foundation Model availability is correctly detected.
+    /// Verifies that Apple Foundation Model availability is correctly detected.
     func testFoundationModelAvailability() {
         let isAvailable = IntegrationTestHelpers.isFoundationModelAvailable()
         

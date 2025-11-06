@@ -39,7 +39,7 @@ swift test --filter IntegrationTests -v
 - `testWorkflowWithLLMIntegration` - Tests workflow with LLM service integration
 - `testLLMTaskWithRealService` - Tests TaskLibrary LLM tasks with real service
 - `testWorkflowWithMultipleLLMTasks` - Tests workflow chaining multiple LLM operations
-- `testFoundationModelAvailability` - Verifies Foundation Model detection
+- `testFoundationModelAvailability` - Verifies Apple Foundation Model detection
 
 ### MLAndLLMIntegrationTests
 
@@ -97,7 +97,7 @@ swift test --filter IntegrationTests -v
 
 ## Test Strategy
 
-### Foundation Model (Preferred)
+### Apple Foundation Model (Preferred)
 
 Integration tests use **Apple Foundation Model** when available:
 - ✅ Local execution (no API costs)
@@ -107,7 +107,7 @@ Integration tests use **Apple Foundation Model** when available:
 
 ### Mock Fallback
 
-When Foundation Model is unavailable (CI/CD, older systems):
+When Apple Foundation Model is unavailable (CI/CD, older systems):
 - ✅ Automatically falls back to mock service
 - ✅ Tests run without external dependencies
 - ✅ Verifies workflow structure and data flow

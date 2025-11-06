@@ -12,7 +12,7 @@ import Foundation
 /// Example demonstrating dynamic multi-model conversations with various interaction scenarios.
 /// 
 /// This example shows how to:
-/// - Initialize multiple AI services (Anthropic, OpenAI, Google, Ollama, Foundation Models)
+/// - Initialize multiple AI services (Anthropic, OpenAI, Google, Ollama, Apple Foundation Models)
 /// - Set up flexible conversations between 1-N models with different scenarios
 /// - Manage turn-based dialogue with configurable personalities
 /// - Support different interaction types (rap battles, teaching, word games, etc.)
@@ -101,7 +101,7 @@ public struct MultiModelConversationExample {
         services.append(ollamaService)
         print("✓ Ollama service initialized")
 
-        // Try to initialize Foundation Model service (iOS 26+/macOS 26+)
+        // Try to initialize Apple Foundation Model service (iOS 26+/macOS 26+)
         if #available(iOS 26, macOS 26, visionOS 26, *) {
             do {
                 let foundationService = try FoundationModelService(
@@ -112,12 +112,12 @@ public struct MultiModelConversationExample {
                 )
                 if FoundationModelService.isAvailable() {
                     services.append(foundationService)
-                    print("✓ Foundation Model service initialized")
+                    print("✓ Apple Foundation Model service initialized")
                 } else {
-                    print("⚠ Foundation Model service not available on this device")
+                    print("⚠ Apple Foundation Model service not available on this device")
                 }
             } catch {
-                print("⚠ Foundation Model service initialization failed: \(error)")
+                print("⚠ Apple Foundation Model service initialization failed: \(error)")
             }
         }
 

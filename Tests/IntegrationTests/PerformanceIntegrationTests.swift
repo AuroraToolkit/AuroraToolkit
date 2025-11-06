@@ -27,10 +27,10 @@ final class PerformanceIntegrationTests: XCTestCase {
         XCTAssertFalse(response.text.isEmpty, "Should get a response")
         
         // Performance assertions
-        // Foundation Model typically responds in < 2 seconds
+        // Apple Foundation Model typically responds in < 2 seconds
         // Mock should be nearly instant
         if IntegrationTestHelpers.isFoundationModelAvailable() {
-            XCTAssertLessThan(duration, 5.0, "Foundation Model should respond within 5 seconds")
+            XCTAssertLessThan(duration, 5.0, "Apple Foundation Model should respond within 5 seconds")
         } else {
             XCTAssertLessThan(duration, 0.1, "Mock service should respond nearly instantly")
         }
@@ -76,7 +76,7 @@ final class PerformanceIntegrationTests: XCTestCase {
         
         // Performance expectations
         if IntegrationTestHelpers.isFoundationModelAvailable() {
-            XCTAssertLessThan(duration, 10.0, "Workflow with Foundation Model should complete in < 10 seconds")
+            XCTAssertLessThan(duration, 10.0, "Workflow with Apple Foundation Model should complete in < 10 seconds")
         } else {
             XCTAssertLessThan(duration, 1.0, "Workflow with mock should complete quickly")
         }
@@ -105,7 +105,7 @@ final class PerformanceIntegrationTests: XCTestCase {
         
         // Performance expectations
         if IntegrationTestHelpers.isFoundationModelAvailable() {
-            XCTAssertLessThan(duration, 15.0, "3 Foundation Model calls should complete in < 15 seconds")
+            XCTAssertLessThan(duration, 15.0, "3 Apple Foundation Model calls should complete in < 15 seconds")
         } else {
             XCTAssertLessThan(duration, 0.5, "3 mock calls should complete quickly")
         }

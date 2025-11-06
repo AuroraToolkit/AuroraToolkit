@@ -12,13 +12,13 @@ import Foundation
 import FoundationModels
 #endif
 
-/// `FoundationModelService` implements the `LLMServiceProtocol` to interact with Apple's on-device Foundation Models.
+/// `FoundationModelService` implements the `LLMServiceProtocol` to interact with Apple's on-device Apple Foundation Models.
 /// It leverages Apple's FoundationModels framework available in iOS 26+, macOS 26+, iPadOS 26+, and visionOS 26+.
 ///
 /// This service requires Apple Intelligence to be enabled on the user's device and is only available on supported hardware.
 /// For phones, iPhone 15 Pro or later is required. No API key is needed as it uses on-device models.
 ///
-/// **Important**: Foundation Models supports up to 4,096 tokens total (input + output). Exceeding this limit
+/// **Important**: Apple Foundation Models supports up to 4,096 tokens total (input + output). Exceeding this limit
 /// will result in a `GenerationError.exceededContextWindow` error.
 @available(iOS 26, macOS 26, visionOS 26, *)
 public class FoundationModelService: LLMServiceProtocol {
@@ -31,7 +31,7 @@ public class FoundationModelService: LLMServiceProtocol {
     /// The name of the service instance, which can be customized during initialization
     public var name: String
 
-    /// The maximum context window size (total tokens, input + output) supported by Foundation Models.
+    /// The maximum context window size (total tokens, input + output) supported by Apple Foundation Models.
     /// According to Apple's documentation, this is 4,096 tokens.
     public var contextWindowSize: Int
 
@@ -51,14 +51,14 @@ public class FoundationModelService: LLMServiceProtocol {
     /// The default model to use when no model is specified in the request. Defaults to "foundation-model".
     public var defaultModel: String
 
-    /// The Foundation Models session used to interact with the on-device model.
+    /// The Apple Foundation Models session used to interact with the on-device model.
     private var session: LanguageModelSession?
 
     /// Initializes a new `FoundationModelService` instance.
     ///
     /// - Parameters:
     ///   - name: The name of the service instance (default is "FoundationModel").
-    ///   - contextWindowSize: The maximum context window size (default is 4096, the Foundation Models limit).
+    ///   - contextWindowSize: The maximum context window size (default is 4096, the Apple Foundation Models limit).
     ///   - maxOutputTokens: The maximum output tokens (default is 2048, leaving room for input).
     ///   - defaultModel: The default model to use when no model is specified. Defaults to "foundation-model".
     ///   - inputTokenPolicy: Policy for handling input token limits (default is .adjustToServiceLimits).
@@ -66,11 +66,11 @@ public class FoundationModelService: LLMServiceProtocol {
     ///   - systemPrompt: Optional default system prompt.
     ///   - logger: Optional custom logger for service events.
     ///
-    /// - Throws: `LLMServiceError.serviceUnavailable` if Foundation Models framework is not available or Apple Intelligence is not enabled.
+    /// - Throws: `LLMServiceError.serviceUnavailable` if Apple Foundation Models framework is not available or Apple Intelligence is not enabled.
     public init(
         name: String = "FoundationModel",
         defaultModel: String = "foundation-model",
-        contextWindowSize: Int = 4096, // Foundation Models documented limit
+        contextWindowSize: Int = 4096, // Apple Foundation Models documented limit
         maxOutputTokens: Int = 2048,   // Leave room for input tokens
         inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
         outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
@@ -83,7 +83,7 @@ public class FoundationModelService: LLMServiceProtocol {
 
         // Validate and warn about token limits
         if contextWindowSize > 4096 {
-            logger?.debug("[\(name)] Context window size \(contextWindowSize) exceeds Foundation Models limit of 4,096 tokens. This may cause GenerationError.exceededContextWindow", category: "FoundationModelService")
+            logger?.debug("[\(name)] Context window size \(contextWindowSize) exceeds Apple Foundation Models limit of 4,096 tokens. This may cause GenerationError.exceededContextWindow", category: "FoundationModelService")
         }
 
         if maxOutputTokens > contextWindowSize {
@@ -91,7 +91,7 @@ public class FoundationModelService: LLMServiceProtocol {
         }
 
         if maxOutputTokens > 4096 {
-            logger?.debug("[\(name)] Max output tokens \(maxOutputTokens) exceeds Foundation Models limit of 4,096 tokens. This may cause GenerationError.exceededContextWindow", category: "FoundationModelService")
+            logger?.debug("[\(name)] Max output tokens \(maxOutputTokens) exceeds Apple Foundation Models limit of 4,096 tokens. This may cause GenerationError.exceededContextWindow", category: "FoundationModelService")
         }
 
         self.contextWindowSize = contextWindowSize
@@ -100,23 +100,23 @@ public class FoundationModelService: LLMServiceProtocol {
         self.outputTokenPolicy = outputTokenPolicy
         self.systemPrompt = systemPrompt
 
-        // Initialize the Foundation Models session
+        // Initialize the Apple Foundation Models session
         self.session = LanguageModelSession()
         logger?.debug("[\(name)] FoundationModelService initialized successfully", category: "FoundationModelService")
     }
 
-    /// Sends a request to the Foundation Models service asynchronously and returns the response.
+    /// Sends a request to the Apple Foundation Models service asynchronously and returns the response.
     ///
     /// - Parameter request: The `LLMRequest` object containing the prompt and configuration for the LLM.
-    /// - Returns: An `LLMResponseProtocol` containing the text generated by the Foundation Model.
+    /// - Returns: An `LLMResponseProtocol` containing the text generated by the Apple Foundation Model.
     /// - Throws: An error if the request fails, including `GenerationError.exceededContextWindow` for token limit violations.
     public func sendRequest(_ request: LLMRequest) async throws -> LLMResponseProtocol {
         guard let session = session else {
-            logger?.error("[\(name)] Foundation Models session not initialized", category: "FoundationModelService")
-            throw LLMServiceError.serviceUnavailable(message: "Foundation Models session not initialized")
+            logger?.error("[\(name)] Apple Foundation Models session not initialized", category: "FoundationModelService")
+            throw LLMServiceError.serviceUnavailable(message: "Apple Foundation Models session not initialized")
         }
 
-        logger?.debug("[\(name)] Sending request to Foundation Model", category: "FoundationModelService")
+        logger?.debug("[\(name)] Sending request to Apple Foundation Model", category: "FoundationModelService")
 
         // Apply token policies to the request
         let adjustedRequest = request
@@ -127,14 +127,14 @@ public class FoundationModelService: LLMServiceProtocol {
         // Check token count before sending (warn if close to limit)
         let estimatedTokens = estimateTokenCount(prompt)
         if estimatedTokens > 3500 { // Warn when getting close to 4096 limit
-            logger?.debug("[\(name)] Request uses ~\(estimatedTokens) tokens, approaching Foundation Models limit of 4,096", category: "FoundationModelService")
+            logger?.debug("[\(name)] Request uses ~\(estimatedTokens) tokens, approaching Apple Foundation Models limit of 4,096", category: "FoundationModelService")
         }
 
         do {
-            // Send request to Foundation Model
+            // Send request to Apple Foundation Model
             let response = try await session.respond(to: prompt)
 
-            logger?.debug("[\(name)] Received response from Foundation Model", category: "FoundationModelService")
+            logger?.debug("[\(name)] Received response from Apple Foundation Model", category: "FoundationModelService")
 
             // Extract the text content from the response
             let responseText = response.content
@@ -150,36 +150,36 @@ public class FoundationModelService: LLMServiceProtocol {
                 )
             )
         } catch {
-            // Handle specific Foundation Models errors if available
+            // Handle specific Apple Foundation Models errors if available
             if let generationError = error as? LanguageModelSession.GenerationError {
-                logger?.error("[\(name)] Foundation Model generation error: \(generationError)", category: "FoundationModelService")
+                logger?.error("[\(name)] Apple Foundation Model generation error: \(generationError)", category: "FoundationModelService")
                 // Check if it's a context window error by examining the error description
                 if generationError.localizedDescription.contains("context") || generationError.localizedDescription.contains("token") {
-                    throw LLMServiceError.requestFailed(message: "Request exceeded Foundation Models context window limit of 4,096 tokens")
+                    throw LLMServiceError.requestFailed(message: "Request exceeded Apple Foundation Models context window limit of 4,096 tokens")
                 } else {
-                    throw LLMServiceError.requestFailed(message: "Foundation Model generation error: \(generationError.localizedDescription)")
+                    throw LLMServiceError.requestFailed(message: "Apple Foundation Model generation error: \(generationError.localizedDescription)")
                 }
             }
 
-            logger?.error("[\(name)] Foundation Model request failed: \(error)", category: "FoundationModelService")
-            throw LLMServiceError.requestFailed(message: "Foundation Model request failed: \(error.localizedDescription)")
+            logger?.error("[\(name)] Apple Foundation Model request failed: \(error)", category: "FoundationModelService")
+            throw LLMServiceError.requestFailed(message: "Apple Foundation Model request failed: \(error.localizedDescription)")
         }
     }
 
-    /// Sends a request to the Foundation Models service asynchronously with support for streaming.
+    /// Sends a request to the Apple Foundation Models service asynchronously with support for streaming.
     ///
     /// - Parameters:
     ///   - request: The `LLMRequest` object containing the prompt and configuration for the LLM.
     ///   - onPartialResponse: A closure that handles partial responses during streaming.
-    /// - Returns: An `LLMResponseProtocol` containing the final text generated by the Foundation Model.
+    /// - Returns: An `LLMResponseProtocol` containing the final text generated by the Apple Foundation Model.
     /// - Throws: An error if the request fails, including `GenerationError.exceededContextWindow` for token limit violations.
     public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol {
         guard let session = session else {
-            logger?.error("[\(name)] Foundation Models session not initialized", category: "FoundationModelService")
-            throw LLMServiceError.serviceUnavailable(message: "Foundation Models session not initialized")
+            logger?.error("[\(name)] Apple Foundation Models session not initialized", category: "FoundationModelService")
+            throw LLMServiceError.serviceUnavailable(message: "Apple Foundation Models session not initialized")
         }
 
-        logger?.debug("[\(name)] Sending streaming request to Foundation Model", category: "FoundationModelService")
+        logger?.debug("[\(name)] Sending streaming request to Apple Foundation Model", category: "FoundationModelService")
 
         // Apply token policies to the request
         let adjustedRequest = request
@@ -190,20 +190,20 @@ public class FoundationModelService: LLMServiceProtocol {
         // Check token count before sending
         let estimatedTokens = estimateTokenCount(prompt)
         if estimatedTokens > 3500 {
-            logger?.debug("[\(name)] Streaming request uses ~\(estimatedTokens) tokens, approaching Foundation Models limit of 4,096", category: "FoundationModelService")
+            logger?.debug("[\(name)] Streaming request uses ~\(estimatedTokens) tokens, approaching Apple Foundation Models limit of 4,096", category: "FoundationModelService")
         }
 
         var fullResponse = ""
 
         do {
-            // Note: Foundation Models streaming API may vary - this is a conceptual implementation
+            // Note: Apple Foundation Models streaming API may vary - this is a conceptual implementation
             // Check if streaming is supported and implement accordingly
             let response = try await session.respond(to: prompt)
             let responseText = response.content
             fullResponse = responseText
             onPartialResponse?(responseText) // For now, call with full response
 
-            logger?.debug("[\(name)] Completed streaming response from Foundation Model", category: "FoundationModelService")
+            logger?.debug("[\(name)] Completed streaming response from Apple Foundation Model", category: "FoundationModelService")
 
             return FoundationModelResponse(
                 text: fullResponse,
@@ -215,25 +215,25 @@ public class FoundationModelService: LLMServiceProtocol {
                 )
             )
         } catch {
-            // Handle specific Foundation Models errors if available
+            // Handle specific Apple Foundation Models errors if available
             if let generationError = error as? LanguageModelSession.GenerationError {
-                logger?.error("[\(name)] Foundation Model streaming generation error: \(generationError)", category: "FoundationModelService")
+                logger?.error("[\(name)] Apple Foundation Model streaming generation error: \(generationError)", category: "FoundationModelService")
                 // Check if it's a context window error by examining the error description
                 if generationError.localizedDescription.contains("context") || generationError.localizedDescription.contains("token") {
-                    throw LLMServiceError.requestFailed(message: "Streaming request exceeded Foundation Models context window limit of 4,096 tokens")
+                    throw LLMServiceError.requestFailed(message: "Streaming request exceeded Apple Foundation Models context window limit of 4,096 tokens")
                 } else {
-                    throw LLMServiceError.requestFailed(message: "Foundation Model streaming generation error: \(generationError.localizedDescription)")
+                    throw LLMServiceError.requestFailed(message: "Apple Foundation Model streaming generation error: \(generationError.localizedDescription)")
                 }
             }
 
-            logger?.error("[\(name)] Foundation Model streaming request failed: \(error)", category: "FoundationModelService")
-            throw LLMServiceError.requestFailed(message: "Foundation Model streaming request failed: \(error.localizedDescription)")
+            logger?.error("[\(name)] Apple Foundation Model streaming request failed: \(error)", category: "FoundationModelService")
+            throw LLMServiceError.requestFailed(message: "Apple Foundation Model streaming request failed: \(error.localizedDescription)")
         }
     }
 
     // MARK: - Private Helper Methods
 
-    /// Checks if Foundation Models is available at runtime (Apple Intelligence enabled, etc.).
+    /// Checks if Apple Foundation Models is available at runtime (Apple Intelligence enabled, etc.).
     private static func isFoundationModelsRuntimeAvailable() -> Bool {
         // Use Apple's documented method to check availability
         return SystemLanguageModel.default.isAvailable
@@ -277,7 +277,7 @@ public class FoundationModelService: LLMServiceProtocol {
 
 // MARK: - FoundationModelResponse
 
-/// Response implementation for Foundation Model service.
+/// Response implementation for Apple Foundation Model service.
 @available(iOS 26, macOS 26, visionOS 26, *)
 public struct FoundationModelResponse: LLMResponseProtocol {
     public let text: String
@@ -297,14 +297,14 @@ public struct FoundationModelResponse: LLMResponseProtocol {
 
 @available(iOS 26, macOS 26, visionOS 26, *)
 extension FoundationModelService {
-    /// Checks if Foundation Models service is available on the current platform and device.
+    /// Checks if Apple Foundation Models service is available on the current platform and device.
     ///
-    /// - Returns: `true` if Foundation Models is available, `false` otherwise.
+    /// - Returns: `true` if Apple Foundation Models is available, `false` otherwise.
     public static func isAvailable() -> Bool {
         return isFoundationModelsRuntimeAvailable()
     }
 
-    /// Creates a Foundation Model service if available, otherwise returns nil.
+    /// Creates an Apple Foundation Model service if available, otherwise returns nil.
     ///
     /// - Parameters: Same as the main initializer
     /// - Returns: A FoundationModelService instance if available, nil otherwise.

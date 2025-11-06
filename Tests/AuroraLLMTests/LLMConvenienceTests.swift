@@ -51,7 +51,7 @@ final class LLMConvenienceTests: XCTestCase {
     func testFoundationModelServiceConvenienceMethods() {
         let service = LLM.foundation
         
-        // Foundation Model service may be nil if not available
+        // Apple Foundation Model service may be nil if not available
         if let service = service {
             XCTAssertEqual(service.vendor, "Apple")
         }

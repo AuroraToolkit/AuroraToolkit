@@ -2,7 +2,7 @@
 //  IntegrationTestHelpers.swift
 //  AuroraToolkit Integration Tests
 //
-//  Created for enhanced integration testing with Foundation Model support
+//  Created for enhanced integration testing with Apple Foundation Model support
 //
 
 import Foundation
@@ -15,8 +15,8 @@ import FoundationModels
 
 /// Test helper that provides an LLM service for integration tests.
 ///
-/// This helper attempts to use Foundation Model when available (iOS 26+, macOS 26+),
-/// and falls back to a mock service when Foundation Model is not available (e.g., in CI/CD).
+/// This helper attempts to use Apple Foundation Model when available (iOS 26+, macOS 26+),
+/// and falls back to a mock service when Apple Foundation Model is not available (e.g., in CI/CD).
 ///
 /// **Usage:**
 /// ```swift
@@ -27,10 +27,10 @@ enum IntegrationTestHelpers {
     
     /// Returns an LLM service for integration testing.
     ///
-    /// - Returns: A Foundation Model service if available, otherwise a mock service
+    /// - Returns: A Apple Foundation Model service if available, otherwise a mock service
     /// - Throws: XCTSkip if neither service is available (shouldn't happen in practice)
     static func getLLMService() throws -> LLMServiceProtocol {
-        // Try Foundation Model first (iOS 26+, macOS 26+)
+        // Try Apple Foundation Model first (iOS 26+, macOS 26+)
         if #available(iOS 26, macOS 26, visionOS 26, *) {
             #if canImport(FoundationModels)
             if let foundationService = FoundationModelService.createIfAvailable() {
@@ -39,9 +39,9 @@ enum IntegrationTestHelpers {
             #endif
         }
         
-        // Fall back to mock service for CI/CD or when Foundation Model unavailable
+        // Fall back to mock service for CI/CD or when Apple Foundation Model unavailable
         let mockResponse = IntegrationMockLLMResponse(
-            text: "This is a mock response for integration testing. The test is running in an environment where Foundation Model is not available.",
+            text: "This is a mock response for integration testing. The test is running in an environment where Apple Foundation Model is not available.",
             model: "mock-model",
             tokenUsage: LLMTokenUsage(promptTokens: 10, completionTokens: 20, totalTokens: 30)
         )
@@ -53,9 +53,9 @@ enum IntegrationTestHelpers {
         )
     }
     
-    /// Checks if Foundation Model is available for testing.
+    /// Checks if Apple Foundation Model is available for testing.
     ///
-    /// - Returns: `true` if Foundation Model is available, `false` otherwise
+    /// - Returns: `true` if Apple Foundation Model is available, `false` otherwise
     static func isFoundationModelAvailable() -> Bool {
         if #available(iOS 26, macOS 26, visionOS 26, *) {
             #if canImport(FoundationModels)
@@ -81,7 +81,7 @@ enum IntegrationTestHelpers {
 
 // MARK: - Mock Helpers for Integration Tests
 
-/// Mock LLM response for integration tests when Foundation Model is unavailable
+/// Mock LLM response for integration tests when Apple Foundation Model is unavailable
 private struct IntegrationMockLLMResponse: LLMResponseProtocol {
     var text: String
     var model: String?
@@ -100,7 +100,7 @@ private struct IntegrationMockLLMResponse: LLMResponseProtocol {
     }
 }
 
-/// Mock LLM service for integration tests when Foundation Model is unavailable
+/// Mock LLM service for integration tests when Apple Foundation Model is unavailable
 private final class IntegrationMockLLMService: LLMServiceProtocol {
     var name: String
     var vendor: String

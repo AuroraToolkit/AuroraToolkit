@@ -19,7 +19,7 @@ import Foundation
 ///
 /// ### Example Usage
 /// ```swift
-/// // Simple message sending (uses configured service first, then Foundation Model)
+/// // Simple message sending (uses configured service first, then Apple Foundation Model)
 /// let response = try await LLM.send("Hello, world!")
 ///
 /// // Streaming response
@@ -27,7 +27,7 @@ import Foundation
 ///     print(partial)
 /// }
 ///
-/// // Configure a default service if Foundation Model is not available
+/// // Configure a default service if Apple Foundation Model is not available
 /// LLM.configure(with: LLM.anthropic)
 ///
 /// // Using specific service
@@ -41,21 +41,21 @@ public struct LLM {
     private static var _defaultService: LLMServiceProtocol?
     
     /// Get the default service for convenience operations
-    /// - Returns: The configured service first, then Foundation Model if available
+    /// - Returns: The configured service first, then Apple Foundation Model if available
     /// - Throws: `LLMServiceError.noDefaultServiceConfigured` if no service is available
     public static func getDefaultService() throws -> LLMServiceProtocol {
         if let defaultService = _defaultService {
             return defaultService
         }
 
-        // Next, try to use Foundation Model if available
+        // Next, try to use Apple Foundation Model if available
         if #available(iOS 26, macOS 26, visionOS 26, *) {
             if let foundationService = FoundationModelService.createIfAvailable() {
                 return foundationService
             }
         }
         
-        // If default or Foundation Model is not available, throw `noDefaultServiceConfigured` error
+        // If default or Apple Foundation Model is not available, throw `noDefaultServiceConfigured` error
         throw LLMServiceError.noDefaultServiceConfigured
     }
     
@@ -81,7 +81,7 @@ public struct LLM {
         return OllamaService.default
     }
     
-    /// Pre-configured Foundation Model service for simple usage (if available)
+    /// Pre-configured Apple Foundation Model service for simple usage (if available)
     @available(iOS 26, macOS 26, visionOS 26, *)
     public static var foundation: FoundationModelService? {
         return FoundationModelService.default
@@ -97,7 +97,7 @@ public struct LLM {
     
     // MARK: - Simple Send Methods
     
-    /// Send a simple message using the default service (configured service, or Foundation Model if available)
+    /// Send a simple message using the default service (configured service, or Apple Foundation Model if available)
     /// - Parameters:
     ///   - message: The message to send
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
@@ -123,7 +123,7 @@ public struct LLM {
     
     // MARK: - Streaming Methods
     
-    /// Send a message with streaming response using the default service, or Foundation model if available
+    /// Send a message with streaming response using the default service, or Apple Foundation Model if available
     /// - Parameters:
     ///   - message: The message to send
     ///   - onPartialResponse: Closure called with each partial response

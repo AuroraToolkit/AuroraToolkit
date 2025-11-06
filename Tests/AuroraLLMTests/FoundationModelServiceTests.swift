@@ -117,7 +117,7 @@ final class FoundationModelServiceTests: XCTestCase {
 
         // This should succeed but log warnings (we can't easily test logging in unit tests)
         let service = try FoundationModelService(
-            contextWindowSize: 8192 // Exceeds Foundation Models limit of 4096
+            contextWindowSize: 8192 // Exceeds Apple Foundation Models limit of 4096
         )
 
         XCTAssertEqual(service.contextWindowSize, 8192)
@@ -133,7 +133,7 @@ final class FoundationModelServiceTests: XCTestCase {
 
         // This should succeed but log warnings
         let service = try FoundationModelService(
-            maxOutputTokens: 5000 // Exceeds Foundation Models limit of 4096
+            maxOutputTokens: 5000 // Exceeds Apple Foundation Models limit of 4096
         )
 
         XCTAssertEqual(service.maxOutputTokens, 5000)

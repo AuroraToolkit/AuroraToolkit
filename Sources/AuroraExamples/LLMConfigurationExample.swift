@@ -7,15 +7,15 @@ import AuroraLLM
 import Foundation
 
 /// An example demonstrating how to configure the default LLM service for convenience APIs.
-/// This example shows the new Foundation Model-first approach with fallback configuration.
+/// This example shows the new Apple Foundation Model-first approach with fallback configuration.
 struct LLMConfigurationExample {
     func execute() async {
         print("🔧 LLM Configuration Example")
         print("===21=========================")
 
-        // Test 1: Try using convenience API without configuration (will use Foundation Model if available)
+        // Test 1: Try using convenience API without configuration (will use Apple Foundation Model if available)
         print("\n1. Testing convenience API without explicit configuration...")
-        print("   (Will use Foundation Model if available, otherwise will show error)")
+        print("   (Will use Apple Foundation Model if available, otherwise will show error)")
         await testConvenienceAPI(country: "Spain")
 
         // Test 2: Configure Anthropic as default and test
@@ -66,7 +66,7 @@ struct LLMConfigurationExample {
             if let llmError = error as? LLMServiceError {
                 switch llmError {
                 case .noDefaultServiceConfigured:
-                    print("   💡 This means no service is configured and Foundation Model is not available.")
+                    print("   💡 This means no service is configured and Apple Foundation Model is not available.")
                     print("   💡 Use LLM.configure(with: service) to set a default service.")
                 case .missingAPIKey:
                     print("   💡 API key is missing. Set it using SecureStorage.saveAPIKey() or environment variables.")

@@ -113,12 +113,12 @@ struct ConvenienceAPIExample {
             print("LLM.ollama.send Failed: \(error.localizedDescription)")
         }
 
-        // 6. Direct service convenience method (Foundation Models - if available)
+        // 6. Direct service convenience method (Apple Apple Foundation Models - if available)
         if #available(iOS 26, macOS 26, visionOS 26, *) {
             if let foundationService = LLM.foundation {
                 do {
                     let prompt = "Summarize the main idea of a modular architecture."
-                    print("\nSending direct request to Foundation Model via LLM.foundation.send:")
+                    print("\nSending direct request to Apple Foundation Model via LLM.foundation.send:")
                     print("Prompt: \"\(prompt)\"")
                     let fmResponse = try await foundationService.send(prompt)
                     print("LLM.foundation.send Response: \(fmResponse)")
@@ -126,10 +126,10 @@ struct ConvenienceAPIExample {
                     print("LLM.foundation.send Failed: \(error.localizedDescription)")
                 }
             } else {
-                print("\nFoundation Models service not available on this device/platform.")
+                print("\nApple Apple Foundation Models service not available on this device/platform.")
             }
         } else {
-            print("\nFoundation Models service requires iOS 26+, macOS 26+, or visionOS 26+.")
+            print("\nApple Apple Foundation Models service requires iOS 26+, macOS 26+, or visionOS 26+.")
         }
 
         print("\n--- ConvenienceAPIExample Finished ---")
