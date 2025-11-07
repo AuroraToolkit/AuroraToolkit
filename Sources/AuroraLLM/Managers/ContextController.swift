@@ -213,4 +213,56 @@ public class ContextController {
     public func getSummarizer() -> SummarizerProtocol {
         return summarizer
     }
+    
+    /// Generates a comprehensive summary using existing summaries plus any non-summarized items.
+    ///
+    /// This method is more efficient than summarizing all items from scratch, as it reuses
+    /// existing summaries while including any new items that haven't been summarized yet.
+    ///
+    /// - Parameters:
+    ///   - options: Optional summarization options to configure the LLM response.
+    ///
+    /// - Returns: A summary string that combines existing summaries and non-summarized items.
+    ///
+    /// - Throws: An error if summarization fails.
+    public func generateComprehensiveSummary(options: SummarizerOptions? = nil) async throws -> String {
+        var contentParts: [String] = []
+        
+        // Add existing summaries with clear labeling
+        let summaries = context.summaries
+        logger?.debug("[ContextController] Found \(summaries.count) existing summaries", category: "ContextController")
+        if !summaries.isEmpty {
+            var summarySection = "Previous Conversation Summary:\n"
+            for summary in summaries {
+                if let summaryText = summary.text {
+                    summarySection += summaryText + "\n\n"
+                    logger?.debug("[ContextController] Added summary (length: \(summaryText.count) chars)", category: "ContextController")
+                }
+            }
+            contentParts.append(summarySection.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+        
+        // Add non-summarized items with clear labeling
+        let nonSummarizedItems = context.items.filter { !$0.isSummarized }
+        logger?.debug("[ContextController] Found \(nonSummarizedItems.count) non-summarized items", category: "ContextController")
+        if !nonSummarizedItems.isEmpty {
+            var itemsSection = "Recent Conversation Items:\n"
+            for item in nonSummarizedItems {
+                itemsSection += item.text + "\n\n"
+                logger?.debug("[ContextController] Added non-summarized item: \(item.text.prefix(50))...", category: "ContextController")
+            }
+            contentParts.append(itemsSection.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+        
+        guard !contentParts.isEmpty else {
+            throw NSError(domain: "ContextController", code: 1, userInfo: [NSLocalizedDescriptionKey: "No content available to summarize"])
+        }
+        
+        // Create a more explicit prompt that asks to combine both sections
+        let combinedText = contentParts.joined(separator: "\n\n---\n\n")
+        let fullPrompt = "Please provide a comprehensive summary that combines the previous conversation summary with the recent conversation items:\n\n\(combinedText)"
+        
+        logger?.debug("[ContextController] Combined text length: \(fullPrompt.count) characters, \(contentParts.count) parts", category: "ContextController")
+        return try await summarizer.summarize(fullPrompt, options: options, logger: logger)
+    }
 }

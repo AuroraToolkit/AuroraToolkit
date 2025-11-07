@@ -71,7 +71,8 @@ struct ExampleRunner {
             ("ML Convenience API", { await MLConvenienceExample().execute() }),
             ("Tasks Convenience API", { await TasksConvenienceExample().execute() }),
             ("AuroraCore Convenience API", { await AuroraCoreConvenienceExample().execute() }),
-            ("LLM Configuration", { await LLMConfigurationExample().execute() })
+            ("LLM Configuration", { await LLMConfigurationExample().execute() }),
+            ("Context Management", { await ContextManagementExample().execute() })
         ]
         
         while true {
@@ -128,7 +129,8 @@ struct ExampleRunner {
         await example.1()
         
         print()
-        print("✅ \(example.0) completed!")
+        let completionMessage = example.0 == "Context Management" ? "✅ Context management example completed!" : "✅ \(example.0) completed!"
+        print(completionMessage)
         print("Press Enter to continue...")
         _ = readLine()
         print()
@@ -184,7 +186,8 @@ struct ExampleRunner {
             ("ML Convenience API", { await MLConvenienceExample().execute() }),
             ("Tasks Convenience API", { await TasksConvenienceExample().execute() }),
             ("AuroraCore Convenience API", { await AuroraCoreConvenienceExample().execute() }),
-            ("LLM Configuration", { await LLMConfigurationExample().execute() })
+            ("LLM Configuration", { await LLMConfigurationExample().execute() }),
+            ("Context Management", { await ContextManagementExample().execute() })
         ]
         
         await runAllExamples(examples)
@@ -212,7 +215,8 @@ struct ExampleRunner {
             ("ML Convenience API", { await MLConvenienceExample().execute() }),
             ("Tasks Convenience API", { await TasksConvenienceExample().execute() }),
             ("AuroraCore Convenience API", { await AuroraCoreConvenienceExample().execute() }),
-            ("LLM Configuration", { await LLMConfigurationExample().execute() })
+            ("LLM Configuration", { await LLMConfigurationExample().execute() }),
+            ("Context Management", { await ContextManagementExample().execute() })
         ]
         
         if index >= 1 && index <= examples.count {
@@ -247,11 +251,11 @@ if arguments.count > 1 {
         print("  swift run AuroraExamples help      # Show this help")
         print()
         print("Interactive Options:")
-        print("  • Enter a number (1-21) to run a specific example")
+        print("  • Enter a number (1-22) to run a specific example")
         print("  • Enter 'all' or 'a' to run all examples")
         print("  • Enter 'quit', 'q', or 'exit' to exit")
     default:
-        if let index = Int(choice), index >= 1 && index <= 21 {
+        if let index = Int(choice), index >= 1 && index <= 22 {
             print("🎯 Running Example \(index) (Non-Interactive Mode)")
             print("===============================================")
             print()
