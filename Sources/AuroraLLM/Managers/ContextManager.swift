@@ -18,7 +18,7 @@ public class ContextManager {
 
     private let llmServiceFactory: LLMServiceFactory
 
-    init(llmServiceFactory: LLMServiceFactory = LLMServiceFactory()) {
+    public init(llmServiceFactory: LLMServiceFactory = LLMServiceFactory()) {
         self.llmServiceFactory = llmServiceFactory
     }
 
@@ -43,13 +43,22 @@ public class ContextManager {
     /// Removes a `ContextController` by its ID.
     ///
     /// - Parameter contextID: The UUID of the context to be removed.
-    public func removeContext(withID contextID: UUID) {
+    ///
+    /// - Returns: `true` if the context was successfully removed, `false` if the context ID was not found.
+    @discardableResult
+    public func removeContext(withID contextID: UUID) -> Bool {
+        guard contextControllers[contextID] != nil else {
+            return false
+        }
+        
         contextControllers.removeValue(forKey: contextID)
 
         // Update the active context if the removed context was the active one
         if activeContextID == contextID {
             activeContextID = contextControllers.keys.first
         }
+        
+        return true
     }
 
     /// Sets the active context by its ID.

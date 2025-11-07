@@ -14,6 +14,9 @@ import Foundation
 ///
 /// - Note: This factory can be extended by adding new services to the switch case.
 public class LLMServiceFactory {
+    /// Initializes a new `LLMServiceFactory` instance.
+    public init() {}
+    
     /// Creates and returns an LLM service for the given context based on the service name.
     ///
     /// The method checks for the API key in `SecureStorage` and uses it to instantiate the appropriate LLM service, such as OpenAI, Anthropic, or Ollama.
