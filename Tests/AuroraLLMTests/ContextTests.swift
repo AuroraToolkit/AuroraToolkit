@@ -149,9 +149,10 @@ final class ContextTests: XCTestCase {
         context.summarizeItemsInRange(range: 0..<2, summarizer: summarizer)
 
         // Then
-        XCTAssertEqual(context.items.count, 2) // 1 summary + 1 non-summarized item
-        XCTAssertTrue(context.items.first?.isSummarized ?? false)
-        XCTAssertEqual(context.items.first?.text, "Summary of 2 items.")
+        // Summaries are now separate from items, so items count decreases
+        XCTAssertEqual(context.items.count, 1) // 1 non-summarized item remains
+        XCTAssertEqual(context.summaries.count, 1) // 1 summary was created
+        XCTAssertEqual(context.summaries.first?.text, "Summary of 2 items.")
     }
 
     // Test persistence of the context by encoding and decoding
@@ -205,5 +206,139 @@ final class ContextTests: XCTestCase {
         XCTAssertEqual(recentItems.count, 2, "There should be 2 recent items.")
         XCTAssertEqual(recentItems.first?.text, "Item 2", "The first recent item should be 'Item 2'.")
         XCTAssertEqual(recentItems.last?.text, "Item 3", "The last recent item should be 'Item 3'.")
+    }
+    
+    // MARK: - Chronological Order Tests
+    
+    func testItemsAreInChronologicalOrder() {
+        // Given - Add items with different creation dates
+        var context = Context(llmServiceVendor: "TestService")
+        let date1 = Date().addingTimeInterval(-3600) // 1 hour ago
+        let date2 = Date().addingTimeInterval(-1800) // 30 minutes ago
+        let date3 = Date() // Now
+        
+        context.addItem(content: "First item", creationDate: date1)
+        context.addItem(content: "Second item", creationDate: date2)
+        context.addItem(content: "Third item", creationDate: date3)
+        
+        // When
+        let items = context.items
+        
+        // Then - Items should be in chronological order (oldest first)
+        XCTAssertEqual(items.count, 3, "Should have 3 items")
+        XCTAssertEqual(items[0].text, "First item", "First item should be oldest")
+        XCTAssertEqual(items[1].text, "Second item", "Second item should be middle")
+        XCTAssertEqual(items[2].text, "Third item", "Third item should be newest")
+        
+        // Verify creation dates are in ascending order
+        XCTAssertTrue(items[0].creationDate < items[1].creationDate, "First item should be older than second")
+        XCTAssertTrue(items[1].creationDate < items[2].creationDate, "Second item should be older than third")
+    }
+    
+    func testItemsAddedOutOfOrderAreStillChronological() {
+        // Given - Add items out of chronological order
+        var context = Context(llmServiceVendor: "TestService")
+        let date1 = Date().addingTimeInterval(-3600) // 1 hour ago
+        let date2 = Date().addingTimeInterval(-1800) // 30 minutes ago
+        let date3 = Date() // Now
+        
+        // Add in reverse order
+        context.addItem(content: "Third item", creationDate: date3)
+        context.addItem(content: "First item", creationDate: date1)
+        context.addItem(content: "Second item", creationDate: date2)
+        
+        // When
+        let items = context.items
+        
+        // Then - Items should be sorted by creation date (oldest first)
+        XCTAssertEqual(items.count, 3, "Should have 3 items")
+        XCTAssertEqual(items[0].text, "First item", "First item should be oldest")
+        XCTAssertEqual(items[1].text, "Second item", "Second item should be middle")
+        XCTAssertEqual(items[2].text, "Third item", "Third item should be newest")
+        
+        // Verify creation dates are in ascending order
+        XCTAssertTrue(items[0].creationDate < items[1].creationDate, "First item should be older than second")
+        XCTAssertTrue(items[1].creationDate < items[2].creationDate, "Second item should be older than third")
+    }
+    
+    func testElementsAreInChronologicalOrder() {
+        // Given - Add items and summaries with different creation dates
+        var context = Context(llmServiceVendor: "TestService")
+        let date1 = Date().addingTimeInterval(-3600) // 1 hour ago
+        let date2 = Date().addingTimeInterval(-1800) // 30 minutes ago
+        let date3 = Date() // Now
+        
+        context.addItem(content: "First item", creationDate: date1)
+        let summary = SummaryItem(text: "Summary", creationDate: date2, summarizedItemIDs: [UUID()])
+        context.addSummary(summary)
+        context.addItem(content: "Third item", creationDate: date3)
+        
+        // When
+        let elements = context.elements
+        
+        // Then - Elements should be in chronological order
+        XCTAssertEqual(elements.count, 3, "Should have 3 elements")
+        XCTAssertTrue(elements[0].creationDate < elements[1].creationDate, "First element should be older than second")
+        XCTAssertTrue(elements[1].creationDate < elements[2].creationDate, "Second element should be older than third")
+    }
+    
+    func testGetRecentItemsReturnsChronologicallyOrderedItems() {
+        // Given
+        var context = Context(llmServiceVendor: "TestService")
+        let date1 = Date().addingTimeInterval(-3600) // 1 hour ago
+        let date2 = Date().addingTimeInterval(-1800) // 30 minutes ago
+        let date3 = Date() // Now
+        
+        context.addItem(content: "First item", creationDate: date1)
+        context.addItem(content: "Second item", creationDate: date2)
+        context.addItem(content: "Third item", creationDate: date3)
+        
+        // When
+        let recentItems = context.getRecentItems(limit: 2)
+        
+        // Then - Recent items should still be in chronological order
+        XCTAssertEqual(recentItems.count, 2, "Should have 2 recent items")
+        XCTAssertEqual(recentItems[0].text, "Second item", "First recent item should be second oldest")
+        XCTAssertEqual(recentItems[1].text, "Third item", "Second recent item should be newest")
+        XCTAssertTrue(recentItems[0].creationDate < recentItems[1].creationDate, "Recent items should be chronologically ordered")
+    }
+    
+    func testGetRecentElementsReturnsChronologicallyOrderedElements() {
+        // Given
+        var context = Context(llmServiceVendor: "TestService")
+        let date1 = Date().addingTimeInterval(-3600) // 1 hour ago
+        let date2 = Date().addingTimeInterval(-1800) // 30 minutes ago
+        let date3 = Date() // Now
+        
+        context.addItem(content: "First item", creationDate: date1)
+        let summary = SummaryItem(text: "Summary", creationDate: date2, summarizedItemIDs: [UUID()])
+        context.addSummary(summary)
+        context.addItem(content: "Third item", creationDate: date3)
+        
+        // When
+        let recentElements = context.getRecentElements(limit: 2)
+        
+        // Then - Recent elements should still be in chronological order
+        XCTAssertEqual(recentElements.count, 2, "Should have 2 recent elements")
+        XCTAssertTrue(recentElements[0].creationDate < recentElements[1].creationDate, "Recent elements should be chronologically ordered")
+    }
+    
+    func testItemsWithSameCreationDateMaintainInsertionOrder() {
+        // Given - Add items with the same creation date
+        var context = Context(llmServiceVendor: "TestService")
+        let sameDate = Date()
+        
+        context.addItem(content: "First item", creationDate: sameDate)
+        context.addItem(content: "Second item", creationDate: sameDate)
+        context.addItem(content: "Third item", creationDate: sameDate)
+        
+        // When
+        let items = context.items
+        
+        // Then - Items with same date should maintain insertion order
+        XCTAssertEqual(items.count, 3, "Should have 3 items")
+        XCTAssertEqual(items[0].text, "First item", "First item should be first")
+        XCTAssertEqual(items[1].text, "Second item", "Second item should be second")
+        XCTAssertEqual(items[2].text, "Third item", "Third item should be third")
     }
 }

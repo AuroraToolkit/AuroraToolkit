@@ -174,7 +174,7 @@ final class ContextControllerTests: XCTestCase {
     func testSummarizeOlderContextAllSummarized() async throws {
         // Given
         var context = Context(llmServiceVendor: "TestService")
-        context.addItem(content: "Old item", creationDate: Date().addingTimeInterval(-8 * 24 * 60 * 60), isSummary: true)
+        context.addItem(content: "Old item", creationDate: Date().addingTimeInterval(-8 * 24 * 60 * 60), isSummarized: true)
         let contextController = ContextController(context: context, llmService: mockService)
 
         // When

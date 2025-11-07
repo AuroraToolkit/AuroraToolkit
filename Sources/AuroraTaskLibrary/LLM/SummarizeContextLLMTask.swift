@@ -61,20 +61,28 @@ public class SummarizeContextLLMTask: WorkflowComponentProtocol {
             /// Resolve the options from the inputs if it exists, otherwise use the provided `options` parameter or default
             let options = inputs.resolve(key: "options", fallback: options) ?? SummarizerOptions()
 
+            // Get the items being summarized to create references
+            let itemsBeingSummarized = contextController.getItems()
+            let itemIDs = itemsBeingSummarized.map { $0.id }
+            
             // Summarize the items based on the summary type
             let summarizer = contextController.getSummarizer()
             switch summaryType {
             case .single:
                 // Create a single combined summary
                 let combinedSummary = try await summarizer.summarize(itemsToSummarize.joined(separator: "\n"), options: options, logger: logger)
-                contextController.addItem(content: combinedSummary, isSummary: true)
+                let summaryItem = SummaryItem(text: combinedSummary, summarizedItemIDs: itemIDs)
+                contextController.addSummary(summaryItem)
                 return ["summarizedContext": [combinedSummary]]
 
             case .multiple:
                 // Create individual summaries for each item
                 let summaries = try await summarizer.summarizeGroup(itemsToSummarize, type: .multiple, options: options, logger: logger)
+                // For multiple summaries, each summary references all items (or we could reference individual items)
+                // For simplicity, each summary references all items
                 for summary in summaries {
-                    contextController.addItem(content: summary, isSummary: true)
+                    let summaryItem = SummaryItem(text: summary, summarizedItemIDs: itemIDs)
+                    contextController.addSummary(summaryItem)
                 }
                 return ["summarizedContext": summaries]
             }

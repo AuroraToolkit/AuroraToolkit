@@ -43,9 +43,9 @@ final class SummarizeContextLLMTaskTests: XCTestCase {
         _ = try await unwrappedTask.execute()
 
         // Then
-        XCTAssertEqual(contextController.getItems().count, 2, "There should be 2 items in the context (original + summary).")
-        XCTAssertTrue(contextController.getItems().last?.isSummarized ?? false, "The last item should be marked as a summary.")
-        XCTAssertEqual(contextController.getItems().last?.text, "Summary", "The summary text should match the LLM response.")
+        XCTAssertEqual(contextController.getItems().count, 1, "There should be 1 item in the context (original).")
+        XCTAssertEqual(contextController.summarizedContext().count, 1, "There should be 1 summary.")
+        XCTAssertEqual(contextController.summarizedContext().first?.text, "Summary", "The summary text should match the LLM response.")
     }
 
     func testSummarizeContextLLMTaskMultipleItems() async throws {
@@ -63,9 +63,9 @@ final class SummarizeContextLLMTaskTests: XCTestCase {
         _ = try await unwrappedTask.execute()
 
         // Then
-        XCTAssertEqual(contextController.getItems().count, 3, "There should be 3 items in the context (original 2 + summary).")
-        XCTAssertTrue(contextController.getItems().last?.isSummarized ?? false, "The last item should be marked as a summary.")
-        XCTAssertEqual(contextController.getItems().last?.text, "Summary", "The summary text should match the LLM response.")
+        XCTAssertEqual(contextController.getItems().count, 2, "There should be 2 items in the context (originals).")
+        XCTAssertEqual(contextController.summarizedContext().count, 1, "There should be 1 summary.")
+        XCTAssertEqual(contextController.summarizedContext().first?.text, "Summary", "The summary text should match the LLM response.")
     }
 
     func testSummarizeContextLLMTaskEmptyContext() async throws {
@@ -124,9 +124,9 @@ final class SummarizeContextLLMTaskTests: XCTestCase {
         _ = try await unwrappedTask.execute()
 
         // Then
-        XCTAssertEqual(contextController.getItems().count, 3, "There should be 3 items in the context (original 2 + summary).")
-        XCTAssertTrue(contextController.getItems().last?.isSummarized ?? false, "The last item should be marked as a summary.")
-        XCTAssertEqual(contextController.getItems().last?.text, "Summary", "The summary text should match the LLM response.")
+        XCTAssertEqual(contextController.getItems().count, 2, "There should be 2 items in the context (originals).")
+        XCTAssertEqual(contextController.summarizedContext().count, 1, "There should be 1 summary.")
+        XCTAssertEqual(contextController.summarizedContext().first?.text, "Summary", "The summary text should match the LLM response.")
     }
 
     func testSummarizeContextLLMTaskMultipleExecutions() async throws {
@@ -145,8 +145,8 @@ final class SummarizeContextLLMTaskTests: XCTestCase {
         _ = try await unwrappedTask.execute()
 
         // Then
-        XCTAssertEqual(contextController.getItems().count, 4, "There should be 4 items in the context after 2 summarizations (original 2 + 2 summaries).")
-        XCTAssertTrue(contextController.getItems().last?.isSummarized ?? false, "The last item should be marked as a summary.")
-        XCTAssertEqual(contextController.getItems().last?.text, "Summary", "The summary text should match the LLM response.")
+        XCTAssertEqual(contextController.getItems().count, 2, "There should be 2 items in the context (originals).")
+        XCTAssertEqual(contextController.summarizedContext().count, 2, "There should be 2 summaries after 2 summarizations.")
+        XCTAssertEqual(contextController.summarizedContext().last?.text, "Summary", "The summary text should match the LLM response.")
     }
 }

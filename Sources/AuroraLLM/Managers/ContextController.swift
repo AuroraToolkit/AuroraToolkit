@@ -17,7 +17,10 @@ public class ContextController {
     private var context: Context
 
     /// A collection of summarized context items.
-    private var summarizedItems: [ContextItem] = []
+    /// Note: Summaries are now stored in context.elements, but we maintain this for backward compatibility.
+    private var summarizedItems: [SummaryItem] {
+        return context.summaries
+    }
 
     /// LLM service used for generating summaries.
     private var llmService: LLMServiceProtocol
@@ -63,9 +66,9 @@ public class ContextController {
     /// - Parameters:
     ///    - content: The content of the item to be added.
     ///    - creationDate: The date when the item was created. Defaults to the current date.
-    ///    - isSummary: A boolean flag indicating whether the item being added is a summary. Defaults to `false`.
-    public func addItem(content: String, creationDate: Date = Date(), isSummary: Bool = false) {
-        context.addItem(content: content, creationDate: creationDate, isSummary: isSummary)
+    ///    - isSummarized: A boolean flag indicating whether the item has been summarized. Defaults to `false`.
+    public func addItem(content: String, creationDate: Date = Date(), isSummarized: Bool = false) {
+        context.addItem(content: content, creationDate: creationDate, isSummarized: isSummarized)
     }
 
     /// Adds a bookmark to the context for a specific item.
@@ -99,6 +102,8 @@ public class ContextController {
 
         var group: [ContextItem] = []
 
+        // Filter items that haven't been summarized and are older than threshold
+        // Use items computed property which filters elements
         for item in context.items where !item.isSummarized && item.isOlderThan(days: daysThreshold) {
             group.append(item)
         }
@@ -106,7 +111,7 @@ public class ContextController {
         try await summarizeGroup(group)
     }
 
-    /// Summarizes a group of context items using the connected LLM service and stores the result in `summarizedItems`.
+    /// Summarizes a group of context items using the connected LLM service and creates SummaryItem instances with references to the original items.
     ///
     /// - Parameter group: The array of `ContextItem` to be summarized.
     private func summarizeGroup(_ group: [ContextItem], options: SummarizerOptions? = nil) async throws {
@@ -124,10 +129,16 @@ public class ContextController {
             summaries = try await summarizer.summarizeGroup(texts, type: .single, options: options, logger: logger)
         }
 
-        // Create a new summary item
+        // Create summary items with references to original items
+        // Note: If multiple summaries are created, they all reference the same group
+        // In practice, summarizeGroup typically creates a single summary
+        let summaryItemIDs = group.map { $0.id }
         for summary in summaries {
-            let summaryItem = ContextItem(text: summary, isSummary: true)
-            summarizedItems.append(summaryItem)
+            let summaryItem = SummaryItem(
+                text: summary,
+                summarizedItemIDs: summaryItemIDs
+            )
+            context.addSummary(summaryItem)
         }
 
         // Mark the original items as summarized
@@ -147,9 +158,9 @@ public class ContextController {
 
     /// Retrieves the summarized context items.
     ///
-    /// - Returns: An array of `ContextItem` representing the summarized items.
-    public func summarizedContext() -> [ContextItem] {
-        return summarizedItems
+    /// - Returns: An array of `SummaryItem` representing the summarized items.
+    public func summarizedContext() -> [SummaryItem] {
+        return context.summaries
     }
 
     /// Exposes the context items for testing purposes.
@@ -173,6 +184,20 @@ public class ContextController {
         var contextToReturn = context
         contextToReturn.llmServiceVendor = llmService.vendor
         return contextToReturn
+    }
+
+    /// Updates the underlying context.
+    ///
+    /// - Parameter newContext: The new `Context` instance to use.
+    public func updateContext(_ newContext: Context) {
+        context = newContext
+    }
+
+    /// Adds a summary to the context.
+    ///
+    /// - Parameter summary: The `SummaryItem` to add.
+    public func addSummary(_ summary: SummaryItem) {
+        context.addSummary(summary)
     }
 
     /// Exposes the llmService used by the `ContextController`.
