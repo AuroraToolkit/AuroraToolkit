@@ -52,6 +52,7 @@ public struct LLMRequestOptions {
     ///    -  user: An optional string representing a user identifier for tracking purposes.
     ///    -  suffix: An optional string that will be added after the model's response.
     ///    -  preferredDomains: An optional array of strings representing preferred domains for routing.
+    ///    -  transport: The transport mechanism to use for the request. Defaults to `.auto`.
     public init(
         topP: Double? = nil,
         frequencyPenalty: Double? = nil,

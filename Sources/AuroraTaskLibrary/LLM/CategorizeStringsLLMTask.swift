@@ -60,6 +60,7 @@ public class CategorizeStringsLLMTask: WorkflowComponentProtocol {
     ///    - categories: Optional predefined categories.
     ///    - maxTokens: The maximum number of tokens to generate in the response. Defaults to 500.
     ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for logging events and errors.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

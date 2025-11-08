@@ -159,7 +159,9 @@ public class AnthropicService: LLMServiceProtocol {
 
     /// Sends a request to the Anthropic API and retrieves the response asynchronously.
     ///
-    /// - Parameter request: The `LLMRequest` containing the messages and model configuration.
+    /// - Parameters:
+    ///   - request: The `LLMRequest` containing the messages and model configuration.
+    ///   - onPartialResponse: A closure that handles partial responses during streaming.
     /// - Returns: The `LLMResponseProtocol` containing the generated text or an error if the request fails.
     /// - Throws: `LLMServiceError` if the request encounters an issue (e.g., missing API key, invalid response, etc.).
     public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol {

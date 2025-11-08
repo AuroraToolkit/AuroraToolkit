@@ -26,7 +26,6 @@ AuroraCore provides the fundamental building blocks for the Aurora Toolkit ecosy
 
 - ``CustomLogger``
 - ``ExecutionTimer``
-- ``SecureStorage``
 
 ### Convenience APIs
 

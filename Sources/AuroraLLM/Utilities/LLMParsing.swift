@@ -10,7 +10,7 @@ import Foundation
 public extension String {
     /**
         Strips Markdown code block notation from the string, if present.
-        Specifically targets blocks starting with "```json" and ending with "```".
+        Specifically targets blocks starting with triple backticks followed by "json" and ending with triple backticks.
 
         - Returns: The JSON string with the Markdown code block notation removed.
      */

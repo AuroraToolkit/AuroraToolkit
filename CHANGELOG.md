@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.9.6] - 2025-11-09
+
+### Added
+- Context management refactor with enum-based architecture:
+  - `ContentType` enum for type-safe content classification
+  - `SummaryItem` struct for summary metadata and references
+  - `ContextElement` enum wrapping items and summaries with chronological ordering
+- `ContextController.generateComprehensiveSummary()` method for efficiently combining existing summaries with non-summarized items
+- Context management example demonstrating conversation management, summarization, and comprehensive summary generation
+- Comprehensive test coverage for domain routing:
+  - `LLMDomainRouterTests`: 17 tests for basic domain routing functionality
+  - `DualDomainRouterTests`: 14 tests for confidence-based conflict resolution
+  - `CoreMLDomainRouterTests`: 2 tests for on-device classification routing
+  - Updated `LogicDomainRouterTests`: 18 tests for regex-based routing
+- Test coverage for new context management types:
+  - `ContentTypeTests`: Type validation and content classification
+  - `ContextElementTests`: Element wrapping and chronological ordering
+  - `ContextSummaryReferencesTests`: Summary reference tracking and relationships
+
+### Changed
+- Context management architecture refactored to use enum-based design:
+  - `Context` now stores `[ContextElement]` internally with backward-compatible computed properties
+  - Chronological ordering guaranteed for items and summaries
+  - Prepared for multi-modal content support
+- Domain routing standardization:
+  - Added `fallbackDomain` property to `LLMDomainRouterProtocol` for consistency across all router implementations
+  - Renamed `defaultDomain` → `fallbackDomain` in `LogicDomainRouter`
+  - Standardized validation behavior across all routers (warn if fallback is in supportedDomains)
+- Protocol naming standardized across all domain routers
+- Updated `SummarizeContextLLMTask` for new context management API
+
+### Fixed
+- Made `ContextManager` and `LLMServiceFactory` initializers public
+- Fixed documentation warnings and missing parameter documentation
+- Improved README with standardized Apple Foundation Model naming
+
 ## [0.9.4] - 2025-11-02
 
 ### Added

@@ -57,6 +57,7 @@ public class ExtractEntitiesLLMTask: WorkflowComponentProtocol {
     ///    - entityTypes: An optional array of entity types to extract. If not provided, all types will be extracted.
     ///    - maxTokens: The maximum number of tokens allowed for the LLM response. Defaults to 500.
     ///    - inputs: Additional inputs for the task. Defaults to an empty dictionary.
+    ///    - logger: Optional logger for logging events and errors.
     public init(
         name: String? = nil,
         llmService: LLMServiceProtocol,

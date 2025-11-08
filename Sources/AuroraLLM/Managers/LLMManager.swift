@@ -83,7 +83,7 @@ public class LLMManager {
     ///
     /// - Parameters:
     ///    -  service: The service conforming to `LLMServiceProtocol` to be registered.
-    ///    -  withRoutings routing: The `Routing` options, if any, for the service. Defaults to `[.inputTokenLimit(256)]`.
+    ///    -  routing: The `Routing` options, if any, for the service. Defaults to `[.inputTokenLimit(256)]`.
     ///
     /// If a service with the same name already exists, it is replaced. Sets the first registered service as the active service if no active service is set.
     public func registerService(_ service: LLMServiceProtocol, withRoutings routing: [Routing] = [.inputTokenLimit(256)]) {
@@ -226,7 +226,7 @@ public class LLMManager {
     /// - Parameters:
     ///    -  request: The `LLMRequest` containing the messages and parameters.
     ///    -  onPartialResponse: A closure that handles partial responses during streaming.
-    ///    -  routing: The routing options to select the appropriate service. Defaults to `[.inputTokenLimit(256)]`.
+    ///    -  routings: The routing options to select the appropriate service. Defaults to `[.inputTokenLimit(256)]`.
     ///    -  buffer: The buffer percentage to apply to the token limit. Defaults to 0.05 (5%).
     ///    -  trimming: The trimming strategy to apply when tokens exceed the limit. Defaults to `.end`.
     ///

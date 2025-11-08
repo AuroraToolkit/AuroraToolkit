@@ -719,6 +719,7 @@ public struct Workflow {
         /// - Parameters:
         ///    - name: The name of the task group.
         ///    - description: A brief description of the task group (default is an empty string).
+        ///    - mode: The execution mode for the task group. Defaults to `.sequential`.
         ///    - content: A closure that declares the tasks within the group.
         public init(name: String, description: String = "", mode: ExecutionMode = .sequential, @WorkflowBuilder _ content: () -> [Workflow.Component]) {
             id = UUID()

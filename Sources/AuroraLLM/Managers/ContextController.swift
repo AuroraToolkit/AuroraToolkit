@@ -37,6 +37,7 @@ public class ContextController {
     ///    - context: Optional `Context` object. If none is provided, a new context will be created automatically.
     ///    - llmService: The LLM service to be used for summarization.
     ///    - summarizer: Optional `Summarizer` instance. If none is provided, a default summarizer will be created.
+    ///    - logger: Optional logger for logging events and errors.
     public init(
         context: Context? = nil,
         llmService: LLMServiceProtocol,

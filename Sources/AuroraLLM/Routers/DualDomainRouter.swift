@@ -270,6 +270,7 @@ public final class FileConflictLogger: ConflictLoggingStrategyProtocol {
     /// - Parameters:
     ///     - fileName: The base name for the log file.
     ///     - directory: The directory where the log file will be created. Defaults to the app's document directory.
+    ///     - logger: Optional logger for logging events and errors.
     ///
     /// - Note: The file will be created if it doesn't exist, and a CSV header will be added.
     public init(fileName: String, directory: URL? = nil, logger: CustomLogger? = nil) {

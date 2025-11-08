@@ -85,7 +85,7 @@ public struct AuroraCore {
     ///   - name: The name of the task
     ///   - description: Optional description (defaults to empty string)
     ///   - inputs: Optional inputs dictionary
-    ///   - executeBlock: The task execution logic
+    ///   - execute: The task execution logic
     /// - Returns: A configured Workflow.Task instance
     public static func task(
         _ name: String,
@@ -106,7 +106,7 @@ public struct AuroraCore {
     /// - Parameters:
     ///   - description: Optional description (defaults to empty string)
     ///   - inputs: Optional inputs dictionary
-    ///   - executeBlock: The task execution logic
+    ///   - execute: The task execution logic
     /// - Returns: A configured Workflow.Task instance with auto-generated name
     public static func task(
         description: String = "",
