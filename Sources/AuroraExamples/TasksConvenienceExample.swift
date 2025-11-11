@@ -30,7 +30,7 @@ struct TasksConvenienceExample {
         }
         
         let anthropicService = AnthropicService(apiKey: anthropicKey, logger: CustomLogger.shared)
-        Tasks.configure(with: anthropicService)
+        await Tasks.configure(with: anthropicService)
         
         // --- Before: Traditional Task Setup (for comparison) ---
         print("\n--- Traditional Task Setup (Before) ---")

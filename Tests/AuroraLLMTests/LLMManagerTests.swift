@@ -121,16 +121,39 @@ final class LLMManagerTests: XCTestCase {
         let message = "This is a streaming test message."
         let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)])
 
-        var partialResponses = [String]()
-        let onPartialResponse: (String) -> Void = { response in
-            partialResponses.append(response)
+        actor PartialResponseCollector {
+            private var responses: [String] = []
+            
+            func append(_ response: String) {
+                responses.append(response)
+            }
+            
+            func getAll() -> [String] {
+                return responses
+            }
+        }
+        
+        let collector = PartialResponseCollector()
+        // Use a continuation to bridge the synchronous closure to async actor
+        let onPartialResponse: @Sendable (String) -> Void = { response in
+            // Create a task to append to the actor
+            // Note: This is fire-and-forget, but for the mock service which calls synchronously,
+            // we'll add a small delay after the request to ensure the task completes
+            Task {
+                await collector.append(response)
+            }
         }
 
         // When
         let response = await manager.sendStreamingRequest(request, onPartialResponse: onPartialResponse)
+        
+        // Small delay to allow the Task in the closure to complete
+        // This is needed because the mock service calls the closure synchronously
+        try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
 
         // Then
         XCTAssertEqual(response?.text, finalResponseText, "Expected final streaming response text")
+        let partialResponses = await collector.getAll()
         XCTAssertEqual(partialResponses, [streamingResultText], "Expected partial responses to contain the streaming expected result")
     }
 

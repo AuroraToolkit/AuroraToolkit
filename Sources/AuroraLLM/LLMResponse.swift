@@ -15,7 +15,7 @@ import Foundation
 /// - `tokenUsage`: Optional token usage data, providing information about token consumption during the request.
 ///
 /// This protocol allows for consistent interaction with different LLM services while accommodating their unique response formats.
-public protocol LLMResponseProtocol {
+public protocol LLMResponseProtocol: Sendable {
     /// The generated text from the LLM.
     var text: String { get }
 
@@ -40,7 +40,7 @@ extension LLMResponseProtocol {
 
 /// A structure representing token usage information.
 /// This is used to track the number of tokens used for prompts, completions, and the total request.
-public struct LLMTokenUsage {
+public struct LLMTokenUsage: Sendable {
     /// The number of tokens used in the prompt.
     public let promptTokens: Int
 

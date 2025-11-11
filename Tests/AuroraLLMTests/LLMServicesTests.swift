@@ -124,12 +124,27 @@ struct LLMServiceTests {
     private func sendRequestAndCheckResponse(for service: LLMServiceProtocol, with request: LLMRequest) async throws {
         if request.stream {
             // Handle streaming request
-            var accumulatedResponse = ""
-            _ = try await service.sendStreamingRequest(request) { partialText in
-                accumulatedResponse += partialText
+            actor ResponseAccumulator {
+                private var accumulated = ""
+                
+                func append(_ text: String) {
+                    accumulated += text
+                }
+                
+                func get() -> String {
+                    return accumulated
+                }
+            }
+            
+            let accumulator = ResponseAccumulator()
+            _ = try await service.sendStreamingRequest(request) { @Sendable partialText in
+                Task {
+                    await accumulator.append(partialText)
+                }
                 print("Partial Response: \(partialText)")
             }
-
+            
+            let accumulatedResponse = await accumulator.get()
             #expect(!accumulatedResponse.isEmpty, "Accumulated response should not be empty for \(service.name)")
             print("Service: \(service.name), Final Streaming Response: \(accumulatedResponse.prefix(100))...")
         } else {

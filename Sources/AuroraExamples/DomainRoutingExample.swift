@@ -105,7 +105,7 @@ struct DomainRoutingExample {
     }
 }
 
-private class MockLLMService: LLMServiceProtocol {
+private final class MockLLMService: LLMServiceProtocol, @unchecked Sendable {
     var name: String
     var vendor: String
     var apiKey: String?
@@ -155,7 +155,7 @@ private class MockLLMService: LLMServiceProtocol {
     }
 
     /// Streaming request handler
-    func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol {
+    func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: (@Sendable (String) -> Void)?) async throws -> LLMResponseProtocol {
         // Track received request for streaming verification in tests
         receivedStreamingRequests.append(request)
 

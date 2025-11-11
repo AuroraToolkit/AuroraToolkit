@@ -12,7 +12,34 @@ import os.log
 /// `AnthropicService` implements the `LLMServiceProtocol` to interact with the Anthropic API.
 /// It allows for flexible configuration for different models and temperature settings, and now provides
 /// detailed error handling using `LLMServiceError`.
-public class AnthropicService: LLMServiceProtocol {
+///
+/// **⚠️ Thread Safety Warning:**
+/// This service is marked `@unchecked Sendable` for Swift 6 compatibility, but has mutable
+/// configuration properties (`name`, `baseURL`, `systemPrompt`, `defaultModel`, etc.).
+///
+/// **Safe Usage Pattern:**
+/// 1. Create and configure the service on a single thread/context
+/// 2. **Do not mutate properties after the service is shared across concurrent contexts**
+/// 3. If you need different configurations, create separate service instances
+///
+/// **Unsafe Usage (will cause data races):**
+/// ```swift
+/// let service = AnthropicService(...)
+/// Task { service.name = "Service A" }  // ❌ Don't do this
+/// Task { service.name = "Service B" }  // ❌ Concurrent mutation
+/// ```
+///
+/// **Safe Usage:**
+/// ```swift
+/// let service = AnthropicService(...)
+/// service.name = "MyService"  // ✅ Configure once
+/// service.baseURL = "https://..."  // ✅ Before sharing
+/// // Now safe to use from multiple contexts (read-only)
+/// Task {
+///     try await service.sendRequest(...)  // ✅ Safe - read-only usage
+/// }
+/// ```
+public class AnthropicService: LLMServiceProtocol, @unchecked Sendable {
     /// A logger for recording information and errors within the `AnthropicService`.
     public let logger: CustomLogger?
 
@@ -164,7 +191,7 @@ public class AnthropicService: LLMServiceProtocol {
     ///   - onPartialResponse: A closure that handles partial responses during streaming.
     /// - Returns: The `LLMResponseProtocol` containing the generated text or an error if the request fails.
     /// - Throws: `LLMServiceError` if the request encounters an issue (e.g., missing API key, invalid response, etc.).
-    public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol {
+    public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: (@Sendable (String) -> Void)?) async throws -> LLMResponseProtocol {
         try validateStreamingConfig(request, expectStreaming: true)
 
         // Use helper function for consistent system prompt handling
@@ -209,7 +236,7 @@ public class AnthropicService: LLMServiceProtocol {
                 vendor: vendor,
                 model: request.model ?? defaultModel,
                 logger: logger,
-                onPartialResponse: onPartialResponse ?? { _ in },
+                    onPartialResponse: onPartialResponse ?? { @Sendable _ in },
                 continuation: continuation
             )
             let session = URLSession(configuration: .default, delegate: streamingDelegate, delegateQueue: nil)
@@ -218,10 +245,13 @@ public class AnthropicService: LLMServiceProtocol {
         }
     }
 
-    class StreamingDelegate: NSObject, URLSessionDataDelegate {
+    /// StreamingDelegate handles URLSession streaming responses for Anthropic API.
+    /// Marked as @unchecked Sendable because URLSession delegates are called serially from URLSession's internal queue,
+    /// ensuring thread-safe access to mutable state.
+    final class StreamingDelegate: NSObject, URLSessionDataDelegate, @unchecked Sendable {
         private let vendor: String
         private let model: String
-        private let onPartialResponse: (String) -> Void
+        private let onPartialResponse: @Sendable (String) -> Void
         private let continuation: CheckedContinuation<LLMResponseProtocol, Error>
         private var accumulatedContent: [AnthropicLLMResponse.Content] = []
         private var inputTokens: Int = 0
@@ -232,7 +262,7 @@ public class AnthropicService: LLMServiceProtocol {
         init(vendor: String,
              model: String,
              logger: CustomLogger? = nil,
-             onPartialResponse: @escaping (String) -> Void,
+             onPartialResponse: @escaping @Sendable (String) -> Void,
              continuation: CheckedContinuation<LLMResponseProtocol, Error>)
         {
             self.vendor = vendor

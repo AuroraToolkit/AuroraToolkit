@@ -19,7 +19,23 @@ final class StreamingIntegrationTests: XCTestCase {
     func testBasicStreamingRequest() async throws {
         let service = try IntegrationTestHelpers.getLLMService()
         
-        var partialResponses: [String] = []
+        actor PartialResponseCollector {
+            private var responses: [String] = []
+            
+            func append(_ response: String) {
+                responses.append(response)
+            }
+            
+            func count() -> Int {
+                return responses.count
+            }
+            
+            func getAll() -> [String] {
+                return responses
+            }
+        }
+        
+        let collector = PartialResponseCollector()
         let expectation = XCTestExpectation(description: "Streaming should call partial response callback")
         
         let request = LLMRequest(
@@ -28,16 +44,20 @@ final class StreamingIntegrationTests: XCTestCase {
             stream: true
         )
         
-        let response = try await service.sendStreamingRequest(request) { partial in
-            partialResponses.append(partial)
-            if partialResponses.count >= 1 {
-                expectation.fulfill()
+        let response = try await service.sendStreamingRequest(request) { @Sendable partial in
+            Task {
+                await collector.append(partial)
+                let count = await collector.count()
+                if count >= 1 {
+                    expectation.fulfill()
+                }
             }
         }
         
         await fulfillment(of: [expectation], timeout: 10.0)
         
         XCTAssertFalse(response.text.isEmpty, "Response should have text")
+        let partialResponses = await collector.getAll()
         XCTAssertGreaterThanOrEqual(partialResponses.count, 1, "Should receive at least one partial response")
         
         // Verify the complete response matches accumulated partials (or at least contains them)
@@ -59,9 +79,20 @@ final class StreamingIntegrationTests: XCTestCase {
             description: "Test streaming in workflow context"
         ) {
             Workflow.Task(name: "StreamingTask") { _ in
-                var partialTexts: [String] = []
-                
                 let request = IntegrationTestHelpers.makeTestRequest(content: "Say hello")
+                actor PartialTextCollector {
+                    private var texts: [String] = []
+                    
+                    func append(_ text: String) {
+                        texts.append(text)
+                    }
+                    
+                    func count() -> Int {
+                        return texts.count
+                    }
+                }
+                
+                let collector = PartialTextCollector()
                 let requestWithStream = LLMRequest(
                     messages: request.messages,
                     temperature: request.temperature,
@@ -71,13 +102,16 @@ final class StreamingIntegrationTests: XCTestCase {
                     options: request.options
                 )
                 
-                let response = try await service.sendStreamingRequest(requestWithStream) { partial in
-                    partialTexts.append(partial)
+                let response = try await service.sendStreamingRequest(requestWithStream) { @Sendable partial in
+                    Task {
+                        await collector.append(partial)
+                    }
                 }
                 
+                let partialCount = await collector.count()
                 return [
                     "response": response.text,
-                    "partialCount": partialTexts.count
+                    "partialCount": partialCount
                 ]
             }
         }
@@ -104,11 +138,23 @@ final class StreamingIntegrationTests: XCTestCase {
     /// Tests that TaskLibrary can handle streaming responses.
     func testStreamingWithTaskLibrary() async throws {
         let service = try IntegrationTestHelpers.getLLMService()
-        Tasks.configure(with: service)
+        await Tasks.configure(with: service)
         
         // Note: TaskLibrary may not have streaming methods, but we can test
         // that services configured with Tasks can handle streaming
-        var partialResponses: [String] = []
+        actor PartialResponseCollector {
+            private var responses: [String] = []
+            
+            func append(_ response: String) {
+                responses.append(response)
+            }
+            
+            func getAll() -> [String] {
+                return responses
+            }
+        }
+        
+        let collector = PartialResponseCollector()
         
         let request = LLMRequest(
             messages: [LLMMessage(role: .user, content: "Say hello in one word")],
@@ -116,9 +162,13 @@ final class StreamingIntegrationTests: XCTestCase {
             stream: true
         )
         
-        let response = try await service.sendStreamingRequest(request) { partial in
-            partialResponses.append(partial)
+        let response = try await service.sendStreamingRequest(request) { @Sendable partial in
+            Task {
+                await collector.append(partial)
+            }
         }
+        
+        let partialResponses = await collector.getAll()
         
         XCTAssertFalse(response.text.isEmpty, "Should get a response")
         XCTAssertGreaterThanOrEqual(partialResponses.count, 0, "Should receive partial responses")
@@ -133,18 +183,33 @@ final class StreamingIntegrationTests: XCTestCase {
         var allPartialResponses: [[String]] = []
         
         for i in 1...3 {
-            var partials: [String] = []
             let request = LLMRequest(
                 messages: [LLMMessage(role: .user, content: "Say number \(i)")],
                 maxTokens: 50,
                 stream: true
             )
             
-            let response = try await service.sendStreamingRequest(request) { partial in
-                partials.append(partial)
+            actor PartialsCollector {
+                private var partials: [String] = []
+                
+                func append(_ partial: String) {
+                    partials.append(partial)
+                }
+                
+                func getAll() -> [String] {
+                    return partials
+                }
+            }
+            
+            let collector = PartialsCollector()
+            let response = try await service.sendStreamingRequest(request) { @Sendable partial in
+                Task {
+                    await collector.append(partial)
+                }
             }
             
             XCTAssertFalse(response.text.isEmpty, "Call \(i) should have response")
+            let partials = await collector.getAll()
             allPartialResponses.append(partials)
         }
         
@@ -204,7 +269,7 @@ private struct IntegrationMockLLMResponse: LLMResponseProtocol {
     }
 }
 
-private final class IntegrationMockLLMService: LLMServiceProtocol {
+private final class IntegrationMockLLMService: LLMServiceProtocol, @unchecked Sendable {
     var name: String
     var vendor: String
     var apiKey: String? = nil

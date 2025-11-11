@@ -42,9 +42,23 @@ struct StreamingRequestExample {
         print("Message content: \(message)")
 
         // Handle streaming response with a closure for partial responses
-        var partialResponses = [String]()
-        let onPartialResponse: (String) -> Void = { partialText in
-            partialResponses.append(partialText)
+        actor PartialResponseCollector {
+            private var responses: [String] = []
+            
+            func append(_ response: String) {
+                responses.append(response)
+            }
+            
+            func getAll() -> [String] {
+                return responses
+            }
+        }
+        
+        let collector = PartialResponseCollector()
+        let onPartialResponse: @Sendable (String) -> Void = { partialText in
+            Task {
+                await collector.append(partialText)
+            }
             print("Partial response: \(partialText)")
         }
 

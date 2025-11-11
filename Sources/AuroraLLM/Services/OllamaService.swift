@@ -53,7 +53,33 @@ import os.log
 /// - **Pre-warm large models** by running them manually first: `ollama run qwen3:14b "hello"`
 /// - **Monitor system resources** when using models larger than your available RAM
 /// - **Use smaller models** for development and testing to reduce wait times
-public class OllamaService: LLMServiceProtocol {
+/// **⚠️ Thread Safety Warning:**
+/// This service is marked `@unchecked Sendable` for Swift 6 compatibility, but has mutable
+/// configuration properties (`name`, `baseURL`, `systemPrompt`, `defaultModel`, etc.).
+///
+/// **Safe Usage Pattern:**
+/// 1. Create and configure the service on a single thread/context
+/// 2. **Do not mutate properties after the service is shared across concurrent contexts**
+/// 3. If you need different configurations, create separate service instances
+///
+/// **Unsafe Usage (will cause data races):**
+/// ```swift
+/// let service = OllamaService(...)
+/// Task { service.name = "Service A" }  // ❌ Don't do this
+/// Task { service.name = "Service B" }  // ❌ Concurrent mutation
+/// ```
+///
+/// **Safe Usage:**
+/// ```swift
+/// let service = OllamaService(...)
+/// service.name = "MyService"  // ✅ Configure once
+/// service.baseURL = "https://..."  // ✅ Before sharing
+/// // Now safe to use from multiple contexts (read-only)
+/// Task {
+///     try await service.sendRequest(...)  // ✅ Safe - read-only usage
+/// }
+/// ```
+public class OllamaService: LLMServiceProtocol, @unchecked Sendable {
     /// A logger for recording information and errors within the `AnthropicService`.
     private let logger: CustomLogger?
 
@@ -237,7 +263,7 @@ public class OllamaService: LLMServiceProtocol {
     ///
     /// - Returns: The `LLMResponseProtocol` containing the final text or an error if the request fails.
     /// - Throws: `LLMServiceError` if the request encounters an issue (e.g., invalid response, decoding error, etc.).
-    public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol {
+    public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: (@Sendable (String) -> Void)?) async throws -> LLMResponseProtocol {
         try validateStreamingConfig(request, expectStreaming: true)
 
         // Validate the base URL
@@ -280,7 +306,7 @@ public class OllamaService: LLMServiceProtocol {
                 vendor: vendor,
                 model: request.model ?? defaultModel,
                 logger: logger,
-                onPartialResponse: onPartialResponse ?? { _ in },
+                onPartialResponse: onPartialResponse ?? { @Sendable _ in },
                 continuation: continuation
             )
             let session = URLSession(configuration: self.sessionConfiguration, delegate: streamingDelegate, delegateQueue: nil)
@@ -289,10 +315,13 @@ public class OllamaService: LLMServiceProtocol {
         }
     }
 
-    class StreamingDelegate: NSObject, URLSessionDataDelegate {
+    /// StreamingDelegate handles URLSession streaming responses for Ollama API.
+    /// Marked as @unchecked Sendable because URLSession delegates are called serially from URLSession's internal queue,
+    /// ensuring thread-safe access to mutable state.
+    final class StreamingDelegate: NSObject, URLSessionDataDelegate, @unchecked Sendable {
         private let vendor: String
         private let model: String
-        private let onPartialResponse: (String) -> Void
+        private let onPartialResponse: @Sendable (String) -> Void
         private let continuation: CheckedContinuation<LLMResponseProtocol, Error>
         private let logger: CustomLogger?
         private var accumulatedContent = ""
@@ -301,7 +330,7 @@ public class OllamaService: LLMServiceProtocol {
         init(vendor: String,
              model: String,
              logger: CustomLogger? = nil,
-             onPartialResponse: @escaping (String) -> Void,
+             onPartialResponse: @escaping @Sendable (String) -> Void,
              continuation: CheckedContinuation<LLMResponseProtocol, Error>)
         {
             self.vendor = vendor

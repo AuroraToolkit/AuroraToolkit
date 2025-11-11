@@ -42,7 +42,7 @@ public struct AnthropicLLMResponse: LLMResponseProtocol, Codable {
     public let usage: Usage?
 
     /// Nested structure to represent the content data.
-    public struct Content: Codable {
+    public struct Content: Codable, Sendable {
         /// The type of the content, typically indicating "text".
         let type: String
 
@@ -51,7 +51,7 @@ public struct AnthropicLLMResponse: LLMResponseProtocol, Codable {
     }
 
     /// Nested structure to represent token usage data (if available).
-    public struct Usage: Codable {
+    public struct Usage: Codable, Sendable {
         let inputTokens: Int
         let outputTokens: Int
 

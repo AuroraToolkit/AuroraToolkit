@@ -106,7 +106,7 @@ final class ErrorHandlingIntegrationTests: XCTestCase {
     /// Tests that TaskLibrary tasks properly handle and propagate errors.
     func testTaskLibraryErrorHandling() async throws {
         let service = try IntegrationTestHelpers.getLLMService()
-        Tasks.configure(with: service)
+        await Tasks.configure(with: service)
         
         // Test with valid input - should succeed
         do {
@@ -138,7 +138,7 @@ private struct IntegrationMockLLMResponse: LLMResponseProtocol {
     }
 }
 
-private final class IntegrationMockLLMService: LLMServiceProtocol {
+private final class IntegrationMockLLMService: LLMServiceProtocol, @unchecked Sendable {
     var name: String
     var vendor: String
     var apiKey: String? = nil

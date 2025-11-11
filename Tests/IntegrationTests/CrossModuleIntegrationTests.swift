@@ -52,7 +52,7 @@ final class CrossModuleIntegrationTests: XCTestCase {
         let service = try IntegrationTestHelpers.getLLMService()
         
         // Configure Tasks convenience API to use our service
-        Tasks.configure(with: service)
+        await Tasks.configure(with: service)
         
         // Use a task from TaskLibrary
         let texts = ["This is a great product!", "I hate this service."]
@@ -71,7 +71,7 @@ final class CrossModuleIntegrationTests: XCTestCase {
     /// Tests a workflow that chains multiple LLM operations.
     func testWorkflowWithMultipleLLMTasks() async throws {
         let service = try IntegrationTestHelpers.getLLMService()
-        Tasks.configure(with: service)
+        await Tasks.configure(with: service)
         
         var workflow = Workflow(name: "Multi-LLM Test", description: "Test multiple LLM tasks in workflow") {
             // Step 1: Analyze sentiment

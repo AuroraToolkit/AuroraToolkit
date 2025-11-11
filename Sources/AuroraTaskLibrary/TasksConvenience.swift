@@ -34,35 +34,54 @@ public struct Tasks {
     
     // MARK: - Default Service Configuration
     
-    /// Default LLM service for task operations
-    private static var defaultLLMService: LLMServiceProtocol?
+    /// Actor to manage the default service state in a concurrency-safe manner
+    private actor DefaultServiceManager {
+        private var service: LLMServiceProtocol?
+        
+        func set(_ service: LLMServiceProtocol) {
+            self.service = service
+        }
+        
+        func get() -> LLMServiceProtocol? {
+            return service
+        }
+    }
+    
+    /// The configured default service manager for task operations
+    private static let defaultServiceManager = DefaultServiceManager()
     
     /// Configure the default LLM service for all task operations
     /// - Parameter service: The LLM service to use as default
-    public static func configure(with service: LLMServiceProtocol) {
-        defaultLLMService = service
+    public static func configure(with service: LLMServiceProtocol) async {
+        await defaultServiceManager.set(service)
     }
     
     /// Configure with a specific service type
     /// - Parameter serviceType: The type of service to configure
-    public static func configure(with serviceType: LLMServiceType) {
+    public static func configure(with serviceType: LLMServiceType) async {
+        let service: LLMServiceProtocol?
         switch serviceType {
         case .anthropic:
-            defaultLLMService = LLM.anthropic
+            service = LLM.anthropic
         case .openai:
-            defaultLLMService = LLM.openai
+            service = LLM.openai
         case .ollama:
-            defaultLLMService = LLM.ollama
+            service = LLM.ollama
         case .foundation:
             if #available(iOS 26, macOS 26, visionOS 26, *) {
-                defaultLLMService = LLM.foundation
+                service = LLM.foundation
+            } else {
+                service = nil
             }
+        }
+        if let service = service {
+            await defaultServiceManager.set(service)
         }
     }
     
     /// Get the configured default service or throw an error
-    public static func getDefaultService() throws -> LLMServiceProtocol {
-        guard let service = defaultLLMService else {
+    public static func getDefaultService() async throws -> LLMServiceProtocol {
+        guard let service = await defaultServiceManager.get() else {
             throw TasksError.noDefaultServiceConfigured
         }
         return service
@@ -77,7 +96,7 @@ public struct Tasks {
     /// - Returns: Array of sentiment analysis results
     /// - Throws: An error if analysis fails
     public static func analyzeSentiment(_ strings: [String], maxTokens: Int = 500) async throws -> [String] {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let task = AnalyzeSentimentLLMTask(
             name: "SentimentAnalysis",
             llmService: service,
@@ -127,7 +146,7 @@ public struct Tasks {
     /// - Returns: Dictionary mapping input text to sentiment
     /// - Throws: An error if analysis fails
     public static func analyzeSentimentAsDictionary(_ strings: [String], maxTokens: Int = 500) async throws -> [String: String] {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let task = AnalyzeSentimentLLMTask(
             name: "SentimentAnalysis",
             llmService: service,
@@ -161,7 +180,7 @@ public struct Tasks {
     /// - Returns: Dictionary mapping input text to summary
     /// - Throws: An error if summarization fails
     public static func summarizeAsDictionary(_ strings: [String], maxTokens: Int = 300) async throws -> [String: String] {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let summarizer = Summarizer(llmService: service)
         let task = SummarizeStringsLLMTask(
             name: "Summarization",
@@ -191,7 +210,7 @@ public struct Tasks {
     /// - Returns: Dictionary mapping input text to array of keywords
     /// - Throws: An error if keyword extraction fails
     public static func extractKeywordsAsDictionary(_ strings: [String], maxTokens: Int = 200) async throws -> [String: [String]] {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let task = GenerateKeywordsLLMTask(
             name: "KeywordExtraction",
             llmService: service,
@@ -220,7 +239,7 @@ public struct Tasks {
     /// - Returns: Dictionary mapping input text to translated text
     /// - Throws: An error if translation fails
     public static func translateAsDictionary(_ strings: [String], to targetLanguage: String, maxTokens: Int = 500) async throws -> [String: String] {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let task = TranslateStringsLLMTask(
             name: "Translation",
             llmService: service,
@@ -249,7 +268,7 @@ public struct Tasks {
     /// - Returns: Dictionary mapping input text to array of entities
     /// - Throws: An error if entity extraction fails
     public static func extractEntitiesAsDictionary(_ strings: [String], maxTokens: Int = 300) async throws -> [String: [String]] {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let task = ExtractEntitiesLLMTask(
             name: "EntityExtraction",
             llmService: service,
@@ -278,7 +297,7 @@ public struct Tasks {
     /// - Returns: Dictionary mapping category to array of texts in that category
     /// - Throws: An error if categorization fails
     public static func categorizeAsDictionary(_ strings: [String], into categories: [String], maxTokens: Int = 200) async throws -> [String: [String]] {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let task = CategorizeStringsLLMTask(
             name: "Categorization",
             llmService: service,
@@ -307,7 +326,7 @@ public struct Tasks {
     /// - Returns: The summary
     /// - Throws: An error if summarization fails
     public static func summarize(_ text: String, maxTokens: Int = 300) async throws -> String {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let summarizer = Summarizer(llmService: service)
         let task = SummarizeStringsLLMTask(
             name: "Summarization",
@@ -341,7 +360,7 @@ public struct Tasks {
     /// - Returns: Array of extracted keywords
     /// - Throws: An error if keyword extraction fails
     public static func extractKeywords(_ text: String, maxTokens: Int = 200) async throws -> [String] {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let task = GenerateKeywordsLLMTask(
             name: "KeywordExtraction",
             llmService: service,
@@ -374,7 +393,7 @@ public struct Tasks {
     /// - Returns: The translated text
     /// - Throws: An error if translation fails
     public static func translate(_ text: String, to targetLanguage: String, maxTokens: Int = 500) async throws -> String {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let task = TranslateStringsLLMTask(
             name: "Translation",
             llmService: service,
@@ -407,7 +426,7 @@ public struct Tasks {
     /// - Returns: Array of extracted entities
     /// - Throws: An error if entity extraction fails
     public static func extractEntities(_ text: String, maxTokens: Int = 300) async throws -> [String] {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let task = ExtractEntitiesLLMTask(
             name: "EntityExtraction",
             llmService: service,
@@ -440,7 +459,7 @@ public struct Tasks {
     /// - Returns: The assigned category
     /// - Throws: An error if categorization fails
     public static func categorize(_ text: String, into categories: [String], maxTokens: Int = 200) async throws -> String {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         let task = CategorizeStringsLLMTask(
             name: "Categorization",
             llmService: service,

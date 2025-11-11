@@ -78,7 +78,7 @@ final class LLMConvenienceTests: XCTestCase {
         
         // Test that we can create a closure that would call the convenience method
         // This validates the method signature exists and is accessible
-        let streamClosure: (String, @escaping (String) -> Void) async throws -> String = { message, onPartialResponse in
+        let streamClosure: (String, @escaping @Sendable (String) -> Void) async throws -> String = { message, onPartialResponse in
             return try await service.stream(message, onPartialResponse: onPartialResponse)
         }
         XCTAssertNotNil(streamClosure)

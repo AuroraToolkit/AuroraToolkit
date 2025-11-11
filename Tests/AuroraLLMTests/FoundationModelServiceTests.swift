@@ -177,13 +177,29 @@ final class FoundationModelServiceTests: XCTestCase {
         let service = try FoundationModelService()
         let request = makeSampleRequest(content: "Tell me a short joke.")
 
-        var receivedPartialResponse = false
+        actor ResponseCollector {
+            private var received = false
+            
+            func setReceived() {
+                received = true
+            }
+            
+            func getReceived() -> Bool {
+                return received
+            }
+        }
+        
+        let collector = ResponseCollector()
 
         do {
-            let response = try await service.sendStreamingRequest(request) { partial in
-                receivedPartialResponse = true
+            let response = try await service.sendStreamingRequest(request) { @Sendable partial in
+                Task {
+                    await collector.setReceived()
+                }
                 XCTAssertFalse(partial.isEmpty)
             }
+            
+            let receivedPartialResponse = await collector.getReceived()
 
             XCTAssertFalse(response.text.isEmpty)
             XCTAssertEqual(response.model, "foundation-model")

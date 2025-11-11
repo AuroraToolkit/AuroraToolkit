@@ -12,7 +12,34 @@ import os.log
 /// `GoogleService` implements the `LLMServiceProtocol` to interact with the Google Generative AI API (Gemini).
 /// It allows for flexible configuration for different models and temperature settings, handles API key securely,
 /// and provides error handling using `LLMServiceError`.
-public class GoogleService: LLMServiceProtocol {
+///
+/// **⚠️ Thread Safety Warning:**
+/// This service is marked `@unchecked Sendable` for Swift 6 compatibility, but has mutable
+/// configuration properties (`name`, `baseURL`, `systemPrompt`, `defaultModel`, etc.).
+///
+/// **Safe Usage Pattern:**
+/// 1. Create and configure the service on a single thread/context
+/// 2. **Do not mutate properties after the service is shared across concurrent contexts**
+/// 3. If you need different configurations, create separate service instances
+///
+/// **Unsafe Usage (will cause data races):**
+/// ```swift
+/// let service = GoogleService(...)
+/// Task { service.name = "Service A" }  // ❌ Don't do this
+/// Task { service.name = "Service B" }  // ❌ Concurrent mutation
+/// ```
+///
+/// **Safe Usage:**
+/// ```swift
+/// let service = GoogleService(...)
+/// service.name = "MyService"  // ✅ Configure once
+/// service.baseURL = "https://..."  // ✅ Before sharing
+/// // Now safe to use from multiple contexts (read-only)
+/// Task {
+///     try await service.sendRequest(...)  // ✅ Safe - read-only usage
+/// }
+/// ```
+public class GoogleService: LLMServiceProtocol, @unchecked Sendable {
     /// A logger for recording information and errors within the `GoogleService`.
     public let logger: CustomLogger?
 
@@ -176,7 +203,7 @@ public class GoogleService: LLMServiceProtocol {
     ///    - onPartialResponse: An optional closure that receives chunks of the generated text as they arrive.
     /// - Returns: An `LLMResponseProtocol` containing the final aggregated text and other metadata once the stream is complete.
     /// - Throws: `LLMServiceError` if the API key is missing, the URL is invalid, the request fails, the response is invalid, decoding fails, or the stream terminates unexpectedly. Also throws errors during request mapping or network issues.
-    public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: ((String) -> Void)?) async throws -> LLMResponseProtocol {
+    public func sendStreamingRequest(_ request: LLMRequest, onPartialResponse: (@Sendable (String) -> Void)?) async throws -> LLMResponseProtocol {
         guard request.stream else {
             throw LLMServiceError.custom(message: "Streaming flag must be true in sendStreamingRequest().")
         }
@@ -216,7 +243,7 @@ public class GoogleService: LLMServiceProtocol {
                     model: modelName,
                     vendor: self.vendor,
                     logger: logger,
-                    onPartialResponse: onPartialResponse ?? { _ in }, // Provide default empty closure
+                    onPartialResponse: onPartialResponse ?? { @Sendable _ in }, // Provide default empty closure
                     continuation: continuation
                 )
                 // Create a new session for each streaming request to use the delegate
@@ -317,11 +344,13 @@ public class GoogleService: LLMServiceProtocol {
 
     // MARK: - Streaming Delegate Inner Class
 
-    // Handles the asynchronous data stream for streaming requests.
-    private class StreamingDelegate: NSObject, URLSessionDataDelegate {
+    /// StreamingDelegate handles URLSession streaming responses for Google API.
+    /// Marked as @unchecked Sendable because URLSession delegates are called serially from URLSession's internal queue,
+    /// ensuring thread-safe access to mutable state.
+    private final class StreamingDelegate: NSObject, URLSessionDataDelegate, @unchecked Sendable {
         private let model: String
         private let vendor: String
-        private let onPartialResponse: (String) -> Void
+        private let onPartialResponse: @Sendable (String) -> Void
         private let continuation: CheckedContinuation<LLMResponseProtocol, Error>
         private var accumulatedText = ""
         private var finalUsageMetadata: GoogleUsageMetadata?
@@ -333,7 +362,7 @@ public class GoogleService: LLMServiceProtocol {
         init(model: String,
              vendor: String,
              logger: CustomLogger? = nil,
-             onPartialResponse: @escaping (String) -> Void,
+             onPartialResponse: @escaping @Sendable (String) -> Void,
              continuation: CheckedContinuation<LLMResponseProtocol, Error>)
         {
             self.model = model

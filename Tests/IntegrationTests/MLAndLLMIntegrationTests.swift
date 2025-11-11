@@ -124,7 +124,7 @@ final class MLAndLLMIntegrationTests: XCTestCase {
     /// Tests using ML tasks from TaskLibrary with LLM services.
     func testMLTaskLibraryWithLLM() async throws {
         let llmService = try IntegrationTestHelpers.getLLMService()
-        Tasks.configure(with: llmService)
+        await Tasks.configure(with: llmService)
         
         // Test ML sentiment analysis task
         let texts = ["I love this product!", "This is terrible."]

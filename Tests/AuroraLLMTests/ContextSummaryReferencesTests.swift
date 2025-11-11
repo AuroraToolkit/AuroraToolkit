@@ -49,7 +49,6 @@ final class ContextSummaryReferencesTests: XCTestCase {
     func testGetOriginalItemsFromSummary() async throws {
         // Given
         contextController.addItem(content: "Original item", creationDate: Date().addingTimeInterval(-8 * 24 * 60 * 60))
-        let originalItem = contextController.getItems().first!
         
         // When
         try await contextController.summarizeOlderContext()

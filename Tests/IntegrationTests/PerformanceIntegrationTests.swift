@@ -43,7 +43,7 @@ final class PerformanceIntegrationTests: XCTestCase {
     /// Measures performance of a complete workflow execution.
     func testWorkflowExecutionPerformance() async throws {
         let service = try IntegrationTestHelpers.getLLMService()
-        Tasks.configure(with: service)
+        await Tasks.configure(with: service)
         
         let startTime = Date()
         
@@ -118,7 +118,7 @@ final class PerformanceIntegrationTests: XCTestCase {
     /// Measures performance of TaskLibrary convenience methods.
     func testTaskLibraryPerformance() async throws {
         let service = try IntegrationTestHelpers.getLLMService()
-        Tasks.configure(with: service)
+        await Tasks.configure(with: service)
         
         let startTime = Date()
         

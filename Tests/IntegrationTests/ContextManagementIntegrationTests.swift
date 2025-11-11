@@ -104,7 +104,7 @@ final class ContextManagementIntegrationTests: XCTestCase {
     /// Tests using context management tasks from TaskLibrary.
     func testContextTasksIntegration() async throws {
         let service = try IntegrationTestHelpers.getLLMService()
-        Tasks.configure(with: service)
+        await Tasks.configure(with: service)
         
         // This tests that context tasks work with real services
         // Note: Actual context save/load requires file system access

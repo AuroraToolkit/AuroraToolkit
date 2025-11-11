@@ -10,7 +10,7 @@ import XCTest
 @testable import AuroraCore
 @testable import AuroraLLM
 
-final class MockLLMService: LLMServiceProtocol {
+final class MockLLMService: LLMServiceProtocol, @unchecked Sendable {
     var name: String
     var vendor: String
     var apiKey: String?

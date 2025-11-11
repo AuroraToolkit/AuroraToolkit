@@ -13,8 +13,8 @@ import Foundation
 /// The OpenAI API returns a list of choices, and this struct captures the first choice as the primary response.
 /// It also tracks usage statistics such as prompt and completion tokens.
 public struct OpenAILLMResponse: LLMResponseProtocol, Codable {
-    public struct Choice: Codable {
-        public struct Message: Codable {
+    public struct Choice: Codable, Sendable {
+        public struct Message: Codable, Sendable {
             let role: String?
             let content: String?
         }
@@ -46,7 +46,7 @@ public struct OpenAILLMResponse: LLMResponseProtocol, Codable {
     public var model: String?
 
     /// Token usage structure.
-    public struct Usage: Codable {
+    public struct Usage: Codable, Sendable {
         let promptTokens: Int
         let completionTokens: Int
         let totalTokens: Int

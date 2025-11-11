@@ -101,7 +101,7 @@ private struct IntegrationMockLLMResponse: LLMResponseProtocol {
 }
 
 /// Mock LLM service for integration tests when Apple Foundation Model is unavailable
-private final class IntegrationMockLLMService: LLMServiceProtocol {
+private final class IntegrationMockLLMService: LLMServiceProtocol, @unchecked Sendable {
     var name: String
     var vendor: String
     var apiKey: String? = nil

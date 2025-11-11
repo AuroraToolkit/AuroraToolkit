@@ -52,7 +52,7 @@ final class TasksConvenienceTests: XCTestCase {
     
     // MARK: - Service Configuration Tests
     
-    func testTasksServiceConfiguration() {
+    func testTasksServiceConfiguration() async {
         // Test service configuration methods
         let mockResponse = MockLLMResponse(text: "Mock response")
         let mockService = MockLLMService(
@@ -61,11 +61,11 @@ final class TasksConvenienceTests: XCTestCase {
         )
         
         // Test direct service configuration
-        Tasks.configure(with: mockService)
+        await Tasks.configure(with: mockService)
         XCTAssertNotNil(mockService)
         
         // Test service type configuration
-        Tasks.configure(with: .anthropic)
+        await Tasks.configure(with: .anthropic)
         // Note: This will use the actual LLM.anthropic service
     }
     
@@ -136,14 +136,14 @@ final class TasksConvenienceTests: XCTestCase {
     
     // MARK: - Integration Tests
     
-    func testTasksConvenienceIntegration() {
+    func testTasksConvenienceIntegration() async {
         // Test that all convenience APIs work together
         let mockResponse = MockLLMResponse(text: "Mock response")
         let mockService = MockLLMService(
             name: "TestService",
             expectedResult: .success(mockResponse)
         )
-        Tasks.configure(with: mockService)
+        await Tasks.configure(with: mockService)
         
         // Test that we can create a workflow using convenience methods
         let workflowClosure: () async throws -> Void = {

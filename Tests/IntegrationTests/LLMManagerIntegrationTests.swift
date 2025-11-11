@@ -124,7 +124,23 @@ final class LLMManagerIntegrationTests: XCTestCase {
         
         manager.registerService(service)
         
-        var partialResponses: [String] = []
+        actor PartialResponseCollector {
+            private var responses: [String] = []
+            
+            func append(_ response: String) {
+                responses.append(response)
+            }
+            
+            func count() -> Int {
+                return responses.count
+            }
+            
+            func getAll() -> [String] {
+                return responses
+            }
+        }
+        
+        let collector = PartialResponseCollector()
         let expectation = XCTestExpectation(description: "Streaming callback should be called")
         
         let request = LLMRequest(
@@ -133,16 +149,20 @@ final class LLMManagerIntegrationTests: XCTestCase {
             stream: true
         )
         
-        let response = await manager.sendStreamingRequest(request, onPartialResponse: { partial in
-            partialResponses.append(partial)
-            if partialResponses.count >= 1 {
-                expectation.fulfill()
+        let response = await manager.sendStreamingRequest(request, onPartialResponse: { @Sendable partial in
+            Task {
+                await collector.append(partial)
+                let count = await collector.count()
+                if count >= 1 {
+                    expectation.fulfill()
+                }
             }
         })
         
         await fulfillment(of: [expectation], timeout: 10.0)
         
         XCTAssertNotNil(response, "Should get streaming response from manager")
+        let partialResponses = await collector.getAll()
         XCTAssertGreaterThanOrEqual(partialResponses.count, 1, "Should receive partial responses")
     }
     

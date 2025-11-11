@@ -235,7 +235,7 @@ public class LLMManager {
     /// This function trims the content if it exceeds the token limit of the selected service and sends the streaming request.
     public func sendStreamingRequest(
         _ request: LLMRequest,
-        onPartialResponse: ((String) -> Void)?,
+        onPartialResponse: (@Sendable (String) -> Void)?,
         routings: [Routing] = [.inputTokenLimit(256)],
         buffer: Double = 0.05,
         trimming: String.TrimmingStrategy = .end
@@ -268,7 +268,7 @@ public class LLMManager {
     /// This function trims the content if it exceeds the token limit of the selected service and sends the streaming request.
     private func optimizeAndSendRequest(
         _ request: LLMRequest,
-        onPartialResponse: ((String) -> Void)?,
+        onPartialResponse: (@Sendable (String) -> Void)?,
         routings: [Routing] = [.inputTokenLimit(256)],
         buffer: Double = 0.05,
         trimming: String.TrimmingStrategy = .end
@@ -421,7 +421,7 @@ public class LLMManager {
     private func sendRequestToService(
         _ service: LLMServiceProtocol,
         withRequest request: LLMRequest,
-        onPartialResponse: ((String) -> Void)? = nil,
+        onPartialResponse: (@Sendable (String) -> Void)? = nil,
         isRetryingWithFallback: Bool = false
     ) async -> LLMResponseProtocol? {
         do {
