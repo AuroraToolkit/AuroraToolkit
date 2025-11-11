@@ -427,27 +427,40 @@ public struct Workflow {
 
         let timer = ExecutionTimer().start()
 
-        let queue = DispatchQueue(label: "com.workflow.groupOutputs")
-        var groupOutputs: [String: Any] = [:]
-
+        // Actor for thread-safe collection of parallel task outputs
+        actor GroupOutputsCollector {
+            private var outputs: [String: Any] = [:]
+            
+            func addOutputs(_ outputs: [String: Any], forTask taskName: String) {
+                for (key, value) in outputs {
+                    self.outputs["\(taskName).\(key)"] = value
+                }
+            }
+            
+            func getAllOutputs() -> [String: Any] {
+                return outputs
+            }
+        }
+        
+        let collector = GroupOutputsCollector()
+        
+        let groupOutputs: [String: Any]
         switch group.mode {
         case .sequential:
+            var outputs: [String: Any] = [:]
             for task in group.tasks {
                 let taskOutputs = try await executeTask(task, workflowOutputs: workflowOutputs)
                 for (key, value) in taskOutputs {
-                    groupOutputs["\(task.name).\(key)"] = value
+                    outputs["\(task.name).\(key)"] = value
                 }
             }
+            groupOutputs = outputs
         case .parallel:
             try await withThrowingTaskGroup(of: Void.self) { taskGroup in
                 for task in group.tasks {
                     taskGroup.addTask {
                         let taskOutputs = try await self.executeTask(task, workflowOutputs: workflowOutputs)
-                        queue.sync { // Ensure thread safety when updating groupOutputs
-                            for (key, value) in taskOutputs {
-                                groupOutputs["\(task.name).\(key)"] = value
-                            }
-                        }
+                        await collector.addOutputs(taskOutputs, forTask: task.name)
                     }
                 }
 
@@ -459,6 +472,7 @@ public struct Workflow {
                     throw error
                 }
             }
+            groupOutputs = await collector.getAllOutputs()
         }
 
         timer.stop()
