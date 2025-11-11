@@ -9,7 +9,10 @@ import Foundation
 
 /// `AuroraCoreError` defines a comprehensive set of error types that can occur within AuroraCore operations.
 /// These errors provide detailed information about failure points and support proper error handling.
-public enum AuroraCoreError: Error, LocalizedError {
+///
+/// Conforms to `Sendable` for Swift 6 concurrency safety. The `custom` case uses `[String: String]` for context
+/// to ensure all associated values are Sendable-safe.
+public enum AuroraCoreError: Error, LocalizedError, Sendable {
     /// Error thrown when a workflow operation fails.
     case workflowFailed(operation: String, reason: String)
     
@@ -47,7 +50,8 @@ public enum AuroraCoreError: Error, LocalizedError {
     case contextFileManagementFailed(operation: String, reason: String)
     
     /// Custom error type for providing more descriptive error messages.
-    case custom(message: String, context: [String: Any]? = nil)
+    /// - Note: Context values must be strings for Sendable compliance. Use `String(describing:)` to convert other types.
+    case custom(message: String, context: [String: String]? = nil)
     
     public var errorDescription: String? {
         switch self {

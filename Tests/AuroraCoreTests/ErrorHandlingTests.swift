@@ -48,8 +48,8 @@ final class ErrorHandlingTests: XCTestCase {
         let error = AuroraCoreError.custom(message: "test message", context: context)
         
         if case .custom(_, let errorContext) = error {
-            XCTAssertEqual(errorContext?["key1"] as? String, "value1")
-            XCTAssertEqual(errorContext?["key2"] as? String, "value2")
+            XCTAssertEqual(errorContext?["key1"], "value1")
+            XCTAssertEqual(errorContext?["key2"], "value2")
         } else {
             XCTFail("Expected custom error with context")
         }
@@ -328,10 +328,10 @@ final class ErrorHandlingTests: XCTestCase {
     func testErrorContextPreservation() async {
         var workflow = Workflow(name: "Context Test", description: "Test error context preservation") {
             Workflow.Task(name: "ContextTask") { inputs in
-                let context = [
+                let context: [String: String] = [
                     "workflowName": "Context Test",
                     "taskName": "ContextTask",
-                    "inputCount": inputs.count
+                    "inputCount": String(inputs.count)
                 ]
                 
                 throw AuroraCoreError.custom(
@@ -347,8 +347,8 @@ final class ErrorHandlingTests: XCTestCase {
         if let error = workflow.detailsHolder.details?.error as? AuroraCoreError {
             if case .custom(let message, let context) = error {
                 XCTAssertTrue(message.contains("Test error with context"))
-                XCTAssertEqual(context?["workflowName"] as? String, "Context Test")
-                XCTAssertEqual(context?["taskName"] as? String, "ContextTask")
+                XCTAssertEqual(context?["workflowName"], "Context Test")
+                XCTAssertEqual(context?["taskName"], "ContextTask")
             } else {
                 XCTFail("Expected custom error with context")
             }

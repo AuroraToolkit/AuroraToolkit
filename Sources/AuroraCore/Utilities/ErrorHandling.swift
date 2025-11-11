@@ -14,7 +14,7 @@ public struct ErrorHandling {
     /// - Parameters:
     ///   - error: The underlying error
     ///   - operation: The operation that failed
-    ///   - context: Additional context information
+    ///   - context: Additional context information (values will be converted to strings)
     /// - Returns: A standardized error with enhanced context
     public static func wrapError(
         _ error: Error,
@@ -22,7 +22,15 @@ public struct ErrorHandling {
         context: [String: Any]? = nil
     ) -> AuroraCoreError {
         let reason = error.localizedDescription
-        var enhancedContext = context ?? [:]
+        var enhancedContext: [String: String] = [:]
+        
+        // Convert context values to strings for Sendable compliance
+        if let context = context {
+            for (key, value) in context {
+                enhancedContext[key] = String(describing: value)
+            }
+        }
+        
         enhancedContext["underlyingError"] = error.localizedDescription
         enhancedContext["operation"] = operation
         
