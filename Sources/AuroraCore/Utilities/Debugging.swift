@@ -21,7 +21,10 @@ import os
 ///
 /// CustomLogger.shared.log(level: .info, "Custom log message", category: "MyCategory", metadata: ["key": "value"])
 /// ```
-public final class CustomLogger {
+/// CustomLogger is marked as `@unchecked Sendable` because it uses internal synchronization
+/// via DispatchQueue to ensure thread-safe access to mutable state. This allows the shared
+/// instance to be safely accessed from multiple concurrent contexts.
+public final class CustomLogger: @unchecked Sendable {
     public static let shared = CustomLogger()
 
     private var loggers: [String: Logger] = [:]
@@ -69,7 +72,10 @@ public final class CustomLogger {
         category: String = "Unspecified",
         metadata: [String: String] = [:]
     ) {
-        guard level != .debug || enableDebugLogs else { return } // Skip debug logs if disabled
+        let shouldLog = loggerQueue.sync {
+            return enableDebugLogs
+        }
+        guard level != .debug || shouldLog else { return } // Skip debug logs if disabled
         let logger = getLogger(for: category)
 
         // Add metadata if available

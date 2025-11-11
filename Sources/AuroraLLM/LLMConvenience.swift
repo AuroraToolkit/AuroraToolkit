@@ -37,14 +37,27 @@ public struct LLM {
     
     // MARK: - Default Service Management
     
-    /// The configured default service for convenience operations
-    private static var _defaultService: LLMServiceProtocol?
+    /// Actor to manage the default service state in a concurrency-safe manner
+    private actor DefaultServiceManager {
+        private var service: LLMServiceProtocol?
+        
+        func set(_ service: LLMServiceProtocol) {
+            self.service = service
+        }
+        
+        func get() -> LLMServiceProtocol? {
+            return service
+        }
+    }
+    
+    /// The configured default service manager for convenience operations
+    private static let defaultServiceManager = DefaultServiceManager()
     
     /// Get the default service for convenience operations
     /// - Returns: The configured service first, then Apple Foundation Model if available
     /// - Throws: `LLMServiceError.noDefaultServiceConfigured` if no service is available
-    public static func getDefaultService() throws -> LLMServiceProtocol {
-        if let defaultService = _defaultService {
+    public static func getDefaultService() async throws -> LLMServiceProtocol {
+        if let defaultService = await defaultServiceManager.get() {
             return defaultService
         }
 
@@ -91,8 +104,8 @@ public struct LLM {
     
     /// Configure the default service for simple operations
     /// - Parameter service: The LLM service to use as default
-    public static func configure(with service: LLMServiceProtocol) {
-        _defaultService = service
+    public static func configure(with service: LLMServiceProtocol) async {
+        await defaultServiceManager.set(service)
     }
     
     // MARK: - Simple Send Methods
@@ -104,7 +117,7 @@ public struct LLM {
     /// - Returns: The response text
     /// - Throws: An error if the request fails or no default service is configured
     public static func send(_ message: String, maxTokens: Int = 1024) async throws -> String {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         return try await send(message, to: service, maxTokens: maxTokens)
     }
     
@@ -131,7 +144,7 @@ public struct LLM {
     /// - Returns: The complete response text
     /// - Throws: An error if the request fails or no default service is configured
     public static func stream(_ message: String, onPartialResponse: @escaping (String) -> Void, maxTokens: Int = 1024) async throws -> String {
-        let service = try getDefaultService()
+        let service = try await getDefaultService()
         return try await stream(message, to: service, onPartialResponse: onPartialResponse, maxTokens: maxTokens)
     }
     
