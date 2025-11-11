@@ -22,13 +22,16 @@ import os
 /// CustomLogger.shared.log(level: .info, "Custom log message", category: "MyCategory", metadata: ["key": "value"])
 /// ```
 /// CustomLogger is marked as `@unchecked Sendable` because it uses internal synchronization
-/// via DispatchQueue to ensure thread-safe access to mutable state. This allows the shared
+/// via NSLock to ensure thread-safe access to mutable state. This allows the shared
 /// instance to be safely accessed from multiple concurrent contexts.
+/// 
+/// Note: Uses NSLock instead of DispatchQueue for modern Swift concurrency compatibility
+/// while maintaining a synchronous API for logging operations.
 public final class CustomLogger: @unchecked Sendable {
     public static let shared = CustomLogger()
 
     private var loggers: [String: Logger] = [:]
-    private let loggerQueue = DispatchQueue(label: "com.mutantsoup.AuroraCore.loggerQueue")
+    private let lock = NSLock()
 
     #if DEBUG
         private var enableDebugLogs = true
@@ -42,22 +45,23 @@ public final class CustomLogger: @unchecked Sendable {
     /// - Parameter category: The category for the logger.
     /// - Returns: An instance of `Logger` for the specified category.
     func getLogger(for category: String) -> Logger {
-        return loggerQueue.sync {
-            if let logger = loggers[category] {
-                return logger
-            }
-            let logger = Logger(subsystem: "com.mutantsoup.AuroraCore", category: category)
-            loggers[category] = logger
+        lock.lock()
+        defer { lock.unlock() }
+        
+        if let logger = loggers[category] {
             return logger
         }
+        let logger = Logger(subsystem: "com.mutantsoup.AuroraCore", category: category)
+        loggers[category] = logger
+        return logger
     }
 
     /// Toggles the global debug logs on or off.
     /// - Parameter enabled: A boolean value indicating whether debug logs should be enabled.
     public func toggleDebugLogs(_ enabled: Bool) {
-        loggerQueue.sync {
-            enableDebugLogs = enabled
-        }
+        lock.lock()
+        defer { lock.unlock() }
+        enableDebugLogs = enabled
     }
 
     /// Logs a message to the console with optional metadata.
@@ -72,9 +76,11 @@ public final class CustomLogger: @unchecked Sendable {
         category: String = "Unspecified",
         metadata: [String: String] = [:]
     ) {
-        let shouldLog = loggerQueue.sync {
-            return enableDebugLogs
-        }
+        let shouldLog: Bool
+        lock.lock()
+        shouldLog = enableDebugLogs
+        lock.unlock()
+        
         guard level != .debug || shouldLog else { return } // Skip debug logs if disabled
         let logger = getLogger(for: category)
 
