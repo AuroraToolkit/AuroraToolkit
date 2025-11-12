@@ -48,12 +48,12 @@ public final class CustomLogger: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         
-        if let logger = loggers[category] {
+            if let logger = loggers[category] {
+                return logger
+            }
+            let logger = Logger(subsystem: "com.mutantsoup.AuroraCore", category: category)
+            loggers[category] = logger
             return logger
-        }
-        let logger = Logger(subsystem: "com.mutantsoup.AuroraCore", category: category)
-        loggers[category] = logger
-        return logger
     }
 
     /// Toggles the global debug logs on or off.
@@ -61,7 +61,7 @@ public final class CustomLogger: @unchecked Sendable {
     public func toggleDebugLogs(_ enabled: Bool) {
         lock.lock()
         defer { lock.unlock() }
-        enableDebugLogs = enabled
+            enableDebugLogs = enabled
     }
 
     /// Logs a message to the console with optional metadata.

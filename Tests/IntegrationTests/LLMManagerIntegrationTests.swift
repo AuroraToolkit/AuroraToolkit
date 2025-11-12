@@ -154,7 +154,7 @@ final class LLMManagerIntegrationTests: XCTestCase {
                 await collector.append(partial)
                 let count = await collector.count()
                 if count >= 1 {
-                    expectation.fulfill()
+                expectation.fulfill()
                 }
             }
         })

@@ -49,7 +49,7 @@ final class StreamingIntegrationTests: XCTestCase {
                 await collector.append(partial)
                 let count = await collector.count()
                 if count >= 1 {
-                    expectation.fulfill()
+                expectation.fulfill()
                 }
             }
         }
@@ -105,7 +105,7 @@ final class StreamingIntegrationTests: XCTestCase {
                 let response = try await service.sendStreamingRequest(requestWithStream) { @Sendable partial in
                     Task {
                         await collector.append(partial)
-                    }
+                }
                 }
                 
                 let partialCount = await collector.count()
@@ -165,7 +165,7 @@ final class StreamingIntegrationTests: XCTestCase {
         let response = try await service.sendStreamingRequest(request) { @Sendable partial in
             Task {
                 await collector.append(partial)
-            }
+        }
         }
         
         let partialResponses = await collector.getAll()
@@ -193,7 +193,7 @@ final class StreamingIntegrationTests: XCTestCase {
                 private var partials: [String] = []
                 
                 func append(_ partial: String) {
-                    partials.append(partial)
+                partials.append(partial)
                 }
                 
                 func getAll() -> [String] {

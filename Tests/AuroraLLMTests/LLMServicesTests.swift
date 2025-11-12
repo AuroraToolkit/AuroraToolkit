@@ -143,7 +143,7 @@ struct LLMServiceTests {
                 }
                 print("Partial Response: \(partialText)")
             }
-            
+
             let accumulatedResponse = await accumulator.get()
             #expect(!accumulatedResponse.isEmpty, "Accumulated response should not be empty for \(service.name)")
             print("Service: \(service.name), Final Streaming Response: \(accumulatedResponse.prefix(100))...")
