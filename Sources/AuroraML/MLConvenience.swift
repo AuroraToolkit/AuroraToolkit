@@ -44,15 +44,6 @@ public struct ML {
         return IntentExtractionService.default
     }
     
-    // MARK: - Configuration
-    
-    /// Configure the default services for ML operations
-    /// - Parameter service: The ML service to use as default
-    public static func configure(with service: MLServiceProtocol) {
-        // Note: This is a placeholder for future implementation
-        // Currently, services are accessed directly via properties
-    }
-    
     // MARK: - Convenience Methods
     
     /// Classify text using a specified classification service

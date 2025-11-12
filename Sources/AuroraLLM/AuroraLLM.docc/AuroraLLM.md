@@ -9,6 +9,7 @@ AuroraLLM provides a unified interface for working with multiple Large Language 
 ### Key Features
 
 - **Multi-Service Support**: Unified interface for Anthropic, OpenAI, Google, Ollama, and Apple Foundation Models services
+  - *Note: Apple Foundation Models requires iOS 26+/macOS 26+ and Apple Intelligence*
 - **Intelligent Routing**: Domain-based routing to optimize requests across different LLM services
 - **Context Management**: Advanced context storage and retrieval for conversational workflows
 - **Request Optimization**: Automatic token management and request optimization
@@ -31,6 +32,8 @@ AuroraLLM provides a unified interface for working with multiple Large Language 
 - ``OpenAIService``
 - ``OllamaService``
 - ``FoundationModelService``
+
+> **Platform Availability:** ``FoundationModelService`` requires iOS 26+, macOS 26+, or visionOS 26+ and Apple Intelligence to be enabled on supported hardware. For phones, iPhone 15 Pro or later is required. No API key is needed as it uses on-device models.
 
 ### Domain Routing
 
