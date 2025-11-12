@@ -51,6 +51,10 @@ Each example is self-contained and includes detailed explanations, making it eas
 - ``TemperatureMonitorWorkflow``
 - ``TVScriptWorkflowExample``
 
+### Context Management Examples
+
+- ``ContextManagementExample``
+
 ## Getting Started
 
 The examples are organized from simple to complex, making it easy to learn Aurora concepts progressively. You can run examples interactively or via command line:

@@ -116,3 +116,7 @@ AuroraCore follows a modular architecture where each component serves a specific
 The **Workflow System** provides declarative task orchestration with support for complex execution patterns. The **Utility Layer** offers essential development tools including logging, timing, and secure storage.
 
 This foundation enables the other Aurora modules (AuroraLLM, AuroraML, AuroraTaskLibrary) to provide specialized functionality while maintaining consistency and reliability.
+
+## Swift 6 Compatibility
+
+AuroraCore is fully compatible with Swift 6 strict concurrency checking while maintaining backward compatibility with Swift 5.5+. All public APIs are designed with thread safety in mind, using actors for state management and `Sendable` conformance throughout.

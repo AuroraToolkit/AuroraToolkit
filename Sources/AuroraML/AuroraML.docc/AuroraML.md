@@ -174,3 +174,7 @@ AuroraML follows a service-oriented architecture where each ML capability is enc
 The module leverages Apple's Core ML framework for optimal performance on Apple platforms while providing abstractions that make it easy to swap models or extend functionality with custom implementations.
 
 Services are designed to be stateless and thread-safe, allowing for efficient parallel processing and integration into concurrent workflows. The ML Manager provides centralized service registration and management capabilities for complex applications requiring multiple ML services.
+
+## Swift 6 Compatibility
+
+AuroraML is fully compatible with Swift 6 strict concurrency checking while maintaining backward compatibility with Swift 5.5+. The `MLManager` uses an actor for thread-safe service management, and all service protocols are designed with concurrency safety in mind.

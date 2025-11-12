@@ -32,6 +32,8 @@ For more examples, see the [Usage](#usage) section below.
 - **On-Device ML**: Native support for classification, embeddings, semantic search, and more using Core ML
 - **Intelligent Routing**: Domain-based routing to automatically select the best LLM service for each request
 - **Convenience APIs**: Simplified top-level APIs (`LLM.send()`, `ML.classify()`, etc.) for common operations
+- **Swift 6 Compatible**: Fully compatible with Swift 5.5+ and Swift 6 strict concurrency checking with actor-based state management
+- **Production Ready**: Comprehensive testing, error handling, thread-safe design, and stable API surface
 - **Comprehensive Testing**: Full test coverage including integration tests across all modules
 
 
@@ -61,7 +63,7 @@ Practical examples demonstrating real-world usage patterns including multi-model
 To integrate AuroraToolkit into your project using Swift Package Manager, add the following line to your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/AuroraToolkit/AuroraToolkit.git", from: "0.9.5")
+.package(url: "https://github.com/AuroraToolkit/AuroraToolkit.git", from: "1.0.0")
 ```
 
 Then add the desired modules as dependencies to your target. For example:
@@ -176,6 +178,9 @@ For contributors: See [CONTRIBUTING.md](CONTRIBUTING.md) for documentation gener
 
 - **Multimodal LLM support**: Enable multimodal LLMs for use cases beyond plain text
 - **Advanced Workflow templates**: Prebuilt workflow templates for common AI tasks (summarization, Q&A, data extraction)
+- **Agent support**: Intelligent agents that can reason, plan, and execute complex multi-step tasks
+- **Tool calling / Function calling**: Enable LLMs to call external tools and functions (calendar, weather, file system, APIs, etc.)
+- **Structured data extraction**: Type-safe extraction of structured data from LLM responses using Swift types (similar to Apple's `@Generable` macro)
 
 
 ## Contributing

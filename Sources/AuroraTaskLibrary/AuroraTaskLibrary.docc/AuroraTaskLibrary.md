@@ -248,3 +248,7 @@ AuroraTaskLibrary follows a modular architecture where tasks are organized by fu
 **Utility Tasks** provide common data manipulation and processing operations.
 
 All tasks implement `WorkflowComponentProtocol`, ensuring consistent behavior, error handling, and integration patterns across the entire library. This design enables easy composition of complex workflows while maintaining type safety and clear data flow between components.
+
+## Swift 6 Compatibility
+
+AuroraTaskLibrary is fully compatible with Swift 6 strict concurrency checking while maintaining backward compatibility with Swift 5.5+. The `Tasks` convenience API uses actor-based state management for safe concurrent access, and all task components are designed to work seamlessly in concurrent environments.

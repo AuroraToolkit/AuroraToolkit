@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.0] - 2025-11-12
+
+### Added
+- Swift 6 concurrency compatibility with full support for strict concurrency checking
+- Actor-based state management for thread-safe configuration in convenience APIs
+- Comprehensive API audit and stability verification
+- Enhanced documentation with Swift 6 compatibility notes across all modules
+
+### Changed
+- `LLM.configure(with:)` and `LLM.getDefaultService()` are now `async` for Swift 6 concurrency safety
+- `Tasks.configure(with:)` and `Tasks.getDefaultService()` are now `async` for Swift 6 concurrency safety
+- Replaced `DispatchQueue` usage with actors for modern concurrency patterns
+- Modernized `CustomLogger` to use `NSLock` for thread-safe logging operations
+- Removed unused `ML.configure(with:)` placeholder method
+
+### Fixed
+- All Swift 6 strict concurrency warnings resolved
+- Thread safety improvements throughout the codebase
+- `Sendable` conformance added to all protocols and types crossing concurrency boundaries
+- Data race issues resolved with actor-based state management
+
+### Documentation
+- Updated README with Swift 6 compatibility information and future roadmap
+- Added Swift 6 compatibility sections to all module documentation
+- Enhanced API documentation with thread-safety notes
+
 ## [0.9.6] - 2025-11-09
 
 ### Added

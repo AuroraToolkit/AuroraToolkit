@@ -214,3 +214,7 @@ let workflow = Workflow(
 AuroraLLM is designed around a flexible service architecture that allows for easy integration of new LLM providers while maintaining a consistent interface. The module includes intelligent routing capabilities that can direct requests to the most appropriate service based on domain classification, token requirements, or custom logic.
 
 The context management system provides persistent storage for conversation history, enabling sophisticated multi-turn interactions while maintaining efficiency through intelligent context pruning and optimization.
+
+## Swift 6 Compatibility
+
+AuroraLLM is fully compatible with Swift 6 strict concurrency checking while maintaining backward compatibility with Swift 5.5+. All service classes are marked `@unchecked Sendable` with comprehensive thread-safety documentation. The convenience APIs use actor-based state management for safe concurrent access.
