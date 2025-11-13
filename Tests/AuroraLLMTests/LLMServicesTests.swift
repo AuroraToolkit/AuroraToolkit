@@ -138,7 +138,7 @@ struct LLMServiceTests {
             
             let accumulator = ResponseAccumulator()
             _ = try await service.sendStreamingRequest(request) { @Sendable partialText in
-                Task {
+                Task { @Sendable in
                     await accumulator.append(partialText)
                 }
                 print("Partial Response: \(partialText)")

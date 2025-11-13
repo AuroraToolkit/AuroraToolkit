@@ -69,9 +69,9 @@ public struct FoundationModelExample {
 
             print("Prompt: \(streamingPrompt)")
             print("Streaming response: ", terminator: "")
-            _ = try await LLM.foundation?.stream(streamingPrompt, onPartialResponse: { partial in
+            _ = try await LLM.foundation?.stream(streamingPrompt, maxTokens: 100) { partial in
                 print(partial, terminator: "")
-            }, maxTokens: 100) ?? "Foundation model not available"
+            } ?? "Foundation model not available"
             print("\nStreaming complete")
 
             // Example 3: Conversation with context

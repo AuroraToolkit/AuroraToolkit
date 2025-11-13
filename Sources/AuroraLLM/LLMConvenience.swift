@@ -22,16 +22,22 @@ import Foundation
 /// // Simple message sending (uses configured service first, then Apple Foundation Model)
 /// let response = try await LLM.send("Hello, world!")
 ///
-/// // Streaming response
-/// try await LLM.stream("Tell me a story") { partial in
+/// // Specify a model
+/// let response = try await LLM.send("Hello, world!", model: "gpt-4")
+///
+/// // Streaming response with model (closure at the end)
+/// try await LLM.stream("Tell me a story", model: "llama3", maxTokens: 2048) { partial in
 ///     print(partial)
 /// }
 ///
 /// // Configure a default service if Apple Foundation Model is not available
-/// LLM.configure(with: LLM.anthropic)
+/// await LLM.configure(with: LLM.anthropic)
 ///
-/// // Using specific service
-/// let response = try await LLM.send("Hello", to: LLM.anthropic)
+/// // Using specific service with model
+/// let response = try await LLM.send("Hello", to: LLM.ollama, model: "llama3")
+///
+/// // Direct service usage with model
+/// let response = try await LLM.ollama.send("Hello", model: "llama3")
 /// ```
 public struct LLM {
     
@@ -113,23 +119,25 @@ public struct LLM {
     /// Send a simple message using the default service (configured service, or Apple Foundation Model if available)
     /// - Parameters:
     ///   - message: The message to send
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
     /// - Returns: The response text
     /// - Throws: An error if the request fails or no default service is configured
-    public static func send(_ message: String, maxTokens: Int = 1024) async throws -> String {
+    public static func send(_ message: String, model: String? = nil, maxTokens: Int = 1024) async throws -> String {
         let service = try await getDefaultService()
-        return try await send(message, to: service, maxTokens: maxTokens)
+        return try await send(message, to: service, model: model, maxTokens: maxTokens)
     }
     
     /// Send a simple message to a specific service and get a response
     /// - Parameters:
     ///   - message: The message to send
     ///   - service: The service to use
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
     /// - Returns: The response text
     /// - Throws: An error if the request fails
-    public static func send(_ message: String, to service: LLMServiceProtocol, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens)
+    public static func send(_ message: String, to service: LLMServiceProtocol, model: String? = nil, maxTokens: Int = 1024) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model)
         let response = try await service.sendRequest(request)
         return response.text
     }
@@ -139,25 +147,27 @@ public struct LLM {
     /// Send a message with streaming response using the default service, or Apple Foundation Model if available
     /// - Parameters:
     ///   - message: The message to send
-    ///   - onPartialResponse: Closure called with each partial response
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
+    ///   - onPartialResponse: Closure called with each partial response
     /// - Returns: The complete response text
     /// - Throws: An error if the request fails or no default service is configured
-    public static func stream(_ message: String, onPartialResponse: @escaping @Sendable (String) -> Void, maxTokens: Int = 1024) async throws -> String {
+    public static func stream(_ message: String, model: String? = nil, maxTokens: Int = 1024, onPartialResponse: @escaping @Sendable (String) -> Void) async throws -> String {
         let service = try await getDefaultService()
-        return try await stream(message, to: service, onPartialResponse: onPartialResponse, maxTokens: maxTokens)
+        return try await stream(message, to: service, model: model, maxTokens: maxTokens, onPartialResponse: onPartialResponse)
     }
     
     /// Send a message with streaming response to a specific service
     /// - Parameters:
     ///   - message: The message to send
     ///   - service: The service to use
-    ///   - onPartialResponse: Closure called with each partial response
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
+    ///   - onPartialResponse: Closure called with each partial response
     /// - Returns: The complete response text
     /// - Throws: An error if the request fails
-    public static func stream(_ message: String, to service: LLMServiceProtocol, onPartialResponse: @escaping @Sendable (String) -> Void, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, stream: true)
+    public static func stream(_ message: String, to service: LLMServiceProtocol, model: String? = nil, maxTokens: Int = 1024, onPartialResponse: @escaping @Sendable (String) -> Void) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model, stream: true)
         let response = try await service.sendStreamingRequest(request, onPartialResponse: onPartialResponse)
         return response.text
     }
@@ -193,11 +203,12 @@ extension AnthropicService {
     /// Send a simple message and get a response
     /// - Parameters:
     ///   - message: The message to send
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
     /// - Returns: The response text
     /// - Throws: An error if the request fails
-    public func send(_ message: String, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens)
+    public func send(_ message: String, model: String? = nil, maxTokens: Int = 1024) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model)
         let response = try await sendRequest(request)
         return response.text
     }
@@ -205,12 +216,13 @@ extension AnthropicService {
     /// Send a message with streaming response
     /// - Parameters:
     ///   - message: The message to send
-    ///   - onPartialResponse: Closure called with each partial response
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
+    ///   - onPartialResponse: Closure called with each partial response
     /// - Returns: The complete response text
     /// - Throws: An error if the request fails
-    public func stream(_ message: String, onPartialResponse: @escaping @Sendable (String) -> Void, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, stream: true)
+    public func stream(_ message: String, model: String? = nil, maxTokens: Int = 1024, onPartialResponse: @escaping @Sendable (String) -> Void) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model, stream: true)
         let response = try await sendStreamingRequest(request, onPartialResponse: onPartialResponse)
         return response.text
     }
@@ -245,11 +257,12 @@ extension OpenAIService {
     /// Send a simple message and get a response
     /// - Parameters:
     ///   - message: The message to send
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
     /// - Returns: The response text
     /// - Throws: An error if the request fails
-    public func send(_ message: String, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens)
+    public func send(_ message: String, model: String? = nil, maxTokens: Int = 1024) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model)
         let response = try await sendRequest(request)
         return response.text
     }
@@ -257,12 +270,13 @@ extension OpenAIService {
     /// Send a message with streaming response
     /// - Parameters:
     ///   - message: The message to send
-    ///   - onPartialResponse: Closure called with each partial response
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
+    ///   - onPartialResponse: Closure called with each partial response
     /// - Returns: The complete response text
     /// - Throws: An error if the request fails
-    public func stream(_ message: String, onPartialResponse: @escaping @Sendable (String) -> Void, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, stream: true)
+    public func stream(_ message: String, model: String? = nil, maxTokens: Int = 1024, onPartialResponse: @escaping @Sendable (String) -> Void) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model, stream: true)
         let response = try await sendStreamingRequest(request, onPartialResponse: onPartialResponse)
         return response.text
     }
@@ -296,11 +310,12 @@ extension GoogleService {
     /// Send a simple message and get a response
     /// - Parameters:
     ///   - message: The message to send
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
     /// - Returns: The response text
     /// - Throws: An error if the request fails
-    public func send(_ message: String, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens)
+    public func send(_ message: String, model: String? = nil, maxTokens: Int = 1024) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model)
         let response = try await sendRequest(request)
         return response.text
     }
@@ -308,12 +323,13 @@ extension GoogleService {
     /// Send a message with streaming response
     /// - Parameters:
     ///   - message: The message to send
-    ///   - onPartialResponse: Closure called with each partial response
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
+    ///   - onPartialResponse: Closure called with each partial response
     /// - Returns: The complete response text
     /// - Throws: An error if the request fails
-    public func stream(_ message: String, onPartialResponse: @escaping @Sendable (String) -> Void, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, stream: true)
+    public func stream(_ message: String, model: String? = nil, maxTokens: Int = 1024, onPartialResponse: @escaping @Sendable (String) -> Void) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model, stream: true)
         let response = try await sendStreamingRequest(request, onPartialResponse: onPartialResponse)
         return response.text
     }
@@ -328,11 +344,12 @@ extension OllamaService {
     /// Send a simple message and get a response
     /// - Parameters:
     ///   - message: The message to send
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
     /// - Returns: The response text
     /// - Throws: An error if the request fails
-    public func send(_ message: String, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens)
+    public func send(_ message: String, model: String? = nil, maxTokens: Int = 1024) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model)
         let response = try await sendRequest(request)
         return response.text
     }
@@ -340,12 +357,13 @@ extension OllamaService {
     /// Send a message with streaming response
     /// - Parameters:
     ///   - message: The message to send
-    ///   - onPartialResponse: Closure called with each partial response
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
+    ///   - onPartialResponse: Closure called with each partial response
     /// - Returns: The complete response text
     /// - Throws: An error if the request fails
-    public func stream(_ message: String, onPartialResponse: @escaping @Sendable (String) -> Void, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, stream: true)
+    public func stream(_ message: String, model: String? = nil, maxTokens: Int = 1024, onPartialResponse: @escaping @Sendable (String) -> Void) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model, stream: true)
         let response = try await sendStreamingRequest(request, onPartialResponse: onPartialResponse)
         return response.text
     }
@@ -361,11 +379,12 @@ extension FoundationModelService {
     /// Send a simple message and get a response
     /// - Parameters:
     ///   - message: The message to send
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
     /// - Returns: The response text
     /// - Throws: An error if the request fails
-    public func send(_ message: String, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens)
+    public func send(_ message: String, model: String? = nil, maxTokens: Int = 1024) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model)
         let response = try await sendRequest(request)
         return response.text
     }
@@ -373,12 +392,13 @@ extension FoundationModelService {
     /// Send a message with streaming response
     /// - Parameters:
     ///   - message: The message to send
-    ///   - onPartialResponse: Closure called with each partial response
+    ///   - model: Optional model name to use (defaults to service's default model)
     ///   - maxTokens: Maximum number of tokens to generate (default: 1024)
+    ///   - onPartialResponse: Closure called with each partial response
     /// - Returns: The complete response text
     /// - Throws: An error if the request fails
-    public func stream(_ message: String, onPartialResponse: @escaping @Sendable (String) -> Void, maxTokens: Int = 1024) async throws -> String {
-        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, stream: true)
+    public func stream(_ message: String, model: String? = nil, maxTokens: Int = 1024, onPartialResponse: @escaping @Sendable (String) -> Void) async throws -> String {
+        let request = LLMRequest(messages: [LLMMessage(role: .user, content: message)], maxTokens: maxTokens, model: model, stream: true)
         let response = try await sendStreamingRequest(request, onPartialResponse: onPartialResponse)
         return response.text
     }

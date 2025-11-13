@@ -102,10 +102,10 @@ struct ConvenienceAPIExample {
             print("LLM.openai.stream Failed: \(error.localizedDescription)")
         }
 
-        // 5. Direct service convenience method (Ollama)
+        // 5. Direct service convenience method (Ollama - default model)
         do {
             let prompt = "What is the best way to learn Swift?"
-            print("\nSending direct request to Ollama via LLM.ollama.send:")
+            print("\nSending direct request to Ollama via LLM.ollama.send (default model):")
             print("Prompt: \"\(prompt)\"")
             let ollamaResponse = try await LLM.ollama.send(prompt)
             print("LLM.ollama.send Response: \(ollamaResponse)")
@@ -113,7 +113,25 @@ struct ConvenienceAPIExample {
             print("LLM.ollama.send Failed: \(error.localizedDescription)")
         }
 
-        // 6. Direct service convenience method (Apple Apple Foundation Models - if available)
+        // 6. Direct service convenience method (Ollama - specific model)
+        do {
+            let prompt = "Explain recursion in one sentence."
+            print("\nSending direct request to Ollama via LLM.ollama.send with model 'gemma3:1b':")
+            print("Prompt: \"\(prompt)\"")
+            let ollamaResponse = try await LLM.ollama.send(prompt, model: "gemma3:1b")
+            print("LLM.ollama.send (gemma3:1b) Response: \(ollamaResponse)")
+        } catch {
+            print("LLM.ollama.send (gemma3:1b) Failed: \(error.localizedDescription)")
+            if let llmError = error as? LLMServiceError {
+                print("   Error type: \(llmError)")
+                if case .invalidResponse(let statusCode) = llmError {
+                    print("   Status code: \(statusCode)")
+                    print("   Note: This may indicate the model 'gemma3:1b' is not available. Ensure it's installed with: ollama pull gemma3:1b")
+                }
+            }
+        }
+
+        // 7. Direct service convenience method (Apple Apple Foundation Models - if available)
         if #available(iOS 26, macOS 26, visionOS 26, *) {
             if let foundationService = LLM.foundation {
                 do {
