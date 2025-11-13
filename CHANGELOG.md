@@ -4,13 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [1.0.0] - 2025-11-12
+## [1.0.0] - 2025-11-13
 
 ### Added
 - Swift 6 concurrency compatibility with full support for strict concurrency checking
 - Actor-based state management for thread-safe configuration in convenience APIs
 - Comprehensive API audit and stability verification
 - Enhanced documentation with Swift 6 compatibility notes across all modules
+- Model parameter support in all LLM convenience methods (`send` and `stream`) for specifying custom models
 
 ### Changed
 - `LLM.configure(with:)` and `LLM.getDefaultService()` are now `async` for Swift 6 concurrency safety

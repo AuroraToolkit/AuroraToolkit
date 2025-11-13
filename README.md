@@ -100,8 +100,17 @@ let response = try await LLM.foundation?.send("What are the privacy benefits of 
 let response = try await LLM.google.send("Summarize the benefits of renewable energy")
 let response = try await LLM.openai.send("Write a haiku about coding")
 
+// Specify a custom model
+let response = try await LLM.ollama.send("Hello", model: "gemma3:1b")
+let response = try await LLM.send("Hello", to: LLM.openai, model: "gpt-4")
+
 // Streaming responses
 try await LLM.stream("Tell me a story") { partial in
+    print(partial, terminator: "")
+}
+
+// Streaming with custom model
+try await LLM.stream("Tell me a story", model: "llama3", maxTokens: 2048) { partial in
     print(partial, terminator: "")
 }
 ```
