@@ -83,6 +83,12 @@ public protocol LLMServiceProtocol: Sendable {
     /// Each service defines its own default (e.g., "claude-haiku-4-5" for Anthropic, "gpt-4o-mini" for OpenAI).
     var defaultModel: String { get set }
 
+    /// A list of models supported by this service.
+    ///
+    /// This property allows consumers to inspect which models are available for a given service.
+    /// It can be used for strict routing or UI display purposes.
+    var supportedModels: [String] { get }
+
     /// Sends a request to the LLM service asynchronously and returns the response.
     ///
     /// - Parameter request: The `LLMRequest` object containing the prompt and configuration for the LLM.

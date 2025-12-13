@@ -21,6 +21,8 @@ final class MockLLMService: LLMServiceProtocol, @unchecked Sendable {
     var outputTokenPolicy: TokenAdjustmentPolicy
     var systemPrompt: String?
     var defaultModel: String
+    var supportedModels: [String] = []
+
     private let expectedResult: Result<LLMResponseProtocol, Error>
     private let streamingExpectedResult: String?
 
@@ -30,7 +32,7 @@ final class MockLLMService: LLMServiceProtocol, @unchecked Sendable {
     var receivedRoutingStrategy: String.TrimmingStrategy?
     var receivedFallbackCount = 0
 
-    init(name: String, vendor: String = "MockLLM", apiKey: String? = nil, requiresAPIKey: Bool = false, contextWindowSize: Int = 8192, maxOutputTokens: Int = 4096, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, defaultModel: String = "mock-model", expectedResult: Result<LLMResponseProtocol, Error>, streamingExpectedResult: String? = nil) {
+    init(name: String, vendor: String = "MockLLM", apiKey: String? = nil, requiresAPIKey: Bool = false, contextWindowSize: Int = 8192, maxOutputTokens: Int = 4096, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, defaultModel: String = "mock-model", supportedModels: [String] = [], expectedResult: Result<LLMResponseProtocol, Error>, streamingExpectedResult: String? = nil) {
         self.name = name
         self.vendor = vendor
         self.apiKey = apiKey
@@ -43,6 +45,7 @@ final class MockLLMService: LLMServiceProtocol, @unchecked Sendable {
         self.defaultModel = defaultModel
         self.expectedResult = expectedResult
         self.streamingExpectedResult = streamingExpectedResult
+        self.supportedModels = Array(Set(supportedModels + [defaultModel]))
     }
 
     /// Non-streaming request handler

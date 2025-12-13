@@ -149,6 +149,7 @@ private final class IntegrationMockLLMService: LLMServiceProtocol, @unchecked Se
     var outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits
     var systemPrompt: String? = nil
     var defaultModel: String = "mock-model"
+    var supportedModels: [String] = []
     
     private let expectedResult: Result<LLMResponseProtocol, Error>
     

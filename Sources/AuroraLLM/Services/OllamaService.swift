@@ -110,6 +110,9 @@ public class OllamaService: LLMServiceProtocol, @unchecked Sendable {
     /// The default model to use when no model is specified in the request. Defaults to "gemma3".
     public var defaultModel: String
 
+    /// List of supported models for this service instance.
+    public var supportedModels: [String] = []
+
     /// The URL session used to send basic requests.
     var urlSession: URLSession
 
@@ -137,6 +140,7 @@ public class OllamaService: LLMServiceProtocol, @unchecked Sendable {
         name: String = "Ollama",
         baseURL: String = "http://localhost:11434",
         defaultModel: String = "gemma3",
+        supportedModels: [String] = [],
         contextWindowSize: Int = 4096,
         maxOutputTokens: Int = 4096,
         inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
@@ -154,6 +158,7 @@ public class OllamaService: LLMServiceProtocol, @unchecked Sendable {
         self.outputTokenPolicy = outputTokenPolicy
         self.systemPrompt = systemPrompt
         self.defaultModel = defaultModel
+        self.supportedModels = Array(Set(supportedModels + [defaultModel]))
 
         // Create configuration optimized for local LLM model loading times
         if let urlSession = urlSession {

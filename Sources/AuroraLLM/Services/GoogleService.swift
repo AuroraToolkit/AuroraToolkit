@@ -70,6 +70,9 @@ public class GoogleService: LLMServiceProtocol, @unchecked Sendable {
     /// The default model to use when no model is specified in the request. Defaults to "gemini-2.5-flash-lite".
     public var defaultModel: String
 
+    /// List of supported models for this service instance.
+    public var supportedModels: [String] = []
+
     /// The URL session used to send network requests.
     var urlSession: URLSession
 
@@ -83,6 +86,7 @@ public class GoogleService: LLMServiceProtocol, @unchecked Sendable {
     ///    - baseURL: The base URL for the Google Generative AI API. Defaults to `"https://generativelanguage.googleapis.com"`.
     ///    - apiKey: The API key used for authenticating requests.
     ///    - defaultModel: The default model to use when no model is specified. Defaults to "gemini-2.5-flash-lite".
+    ///    - supportedModels: A list of models supported by this service instance. Defaults to an empty list.
     ///    - contextWindowSize: The context window size supported by the model being used. Defaults to `1,048,576` (e.g., Gemini 1.5 Pro).
     ///    - maxOutputTokens: The maximum number of tokens the model can generate in a single response. Defaults to `8192` (e.g., Gemini 1.5 Pro).
     ///    - inputTokenPolicy: The policy for handling requests exceeding the input token limit. Defaults to `.adjustToServiceLimits`.
@@ -95,6 +99,7 @@ public class GoogleService: LLMServiceProtocol, @unchecked Sendable {
         baseURL: String = "https://generativelanguage.googleapis.com",
         apiKey: String?, // API Key provided on initialization
         defaultModel: String = "gemini-2.5-flash-lite",
+        supportedModels: [String] = [],
         contextWindowSize: Int = 1_048_576, // Example: Gemini 1.5 Pro context window
         maxOutputTokens: Int = 8192, // Example: Gemini 1.5 Pro max output tokens
         inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
@@ -107,6 +112,7 @@ public class GoogleService: LLMServiceProtocol, @unchecked Sendable {
         self.baseURL = baseURL
         self.apiKey = apiKey
         self.defaultModel = defaultModel
+        self.supportedModels = Array(Set(supportedModels + [defaultModel]))
         self.contextWindowSize = contextWindowSize
         self.maxOutputTokens = maxOutputTokens // Store the service's max output capability
         self.inputTokenPolicy = inputTokenPolicy

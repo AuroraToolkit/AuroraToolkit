@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2025-12-13
+
+### Added
+- `supportedModels` property to `LLMServiceProtocol` for explicit model support declaration independent of routing
+- Configurable `supportedModels` in all LLM service initializers (`OpenAIService`, `AnthropicService`, `GoogleService`, `OllamaService`, `FoundationModelService`) with automatic deduplication
+- Strict model routing support in `LLMManager`:
+  - `Routing.models` now strictly validates service support
+  - Returns `nil` if the requested model is not supported by any registered service (instead of falling back)
+  - Non-strict requests correctly fall back to active/fallback services
+- Public read-only access to `LLMManager.services` registry
+
+### Changed
+- `LLMManager.selectService` routing logic refined to prevent silent fallbacks for explicit model requests
+- Updated `MockLLMService` to include `supportedModels` and strict routing validation support
+
 ## [1.0.0] - 2025-11-13
 
 ### Added

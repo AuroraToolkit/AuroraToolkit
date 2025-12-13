@@ -78,6 +78,10 @@ public class FoundationModelService: LLMServiceProtocol, @unchecked Sendable {
     /// The default model to use when no model is specified in the request. Defaults to "foundation-model".
     public var defaultModel: String
 
+    /// List of supported models for FoundationModelService.
+    /// Note: "foundation-model" is used as a generic identifier since Apple's on-device models do not use specific model names in the same way as web APIs.
+    public var supportedModels: [String] = []
+
     /// The Apple Foundation Models session used to interact with the on-device model.
     private var session: LanguageModelSession?
 
@@ -97,6 +101,7 @@ public class FoundationModelService: LLMServiceProtocol, @unchecked Sendable {
     public init(
         name: String = "FoundationModel",
         defaultModel: String = "foundation-model",
+        supportedModels: [String] = [],
         contextWindowSize: Int = 4096, // Apple Foundation Models documented limit
         maxOutputTokens: Int = 2048,   // Leave room for input tokens
         inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
@@ -107,6 +112,7 @@ public class FoundationModelService: LLMServiceProtocol, @unchecked Sendable {
         self.name = name
         self.logger = logger
         self.defaultModel = defaultModel
+        self.supportedModels = Array(Set(supportedModels + [defaultModel]))
 
         // Validate and warn about token limits
         if contextWindowSize > 4096 {

@@ -16,6 +16,7 @@ public class LLMManager {
     public enum Routing: CustomStringConvertible, Equatable {
         case inputTokenLimit(Int)
         case domain([String])
+        case models([String])
 
         /// A human-readable description of each routing strategy.
         public var description: String {
@@ -24,6 +25,8 @@ public class LLMManager {
                 return "Input Token Limit (\(limit))"
             case let .domain(domains):
                 return "Domain (\(domains.joined(separator: ", ")))"
+            case let .models(models):
+                return "Models (\(models.joined(separator: ", ")))"
             }
         }
     }
@@ -32,7 +35,7 @@ public class LLMManager {
     private let logger: CustomLogger?
 
     /// A dictionary mapping service names to their respective `LLMServiceProtocol` instances with `Routing` options.
-    private(set) var services: [String: (service: LLMServiceProtocol, routings: [Routing])] = [:]
+    public private(set) var services: [String: (service: LLMServiceProtocol, routings: [Routing])] = [:]
 
     /// The name of the currently active service.
     private(set) var activeServiceName: String?
@@ -509,12 +512,15 @@ public class LLMManager {
 
         // Step 3: Attempt fallback routing if available
         if let fallbackService {
-            logger?.debug("Routing to fallback service: \(fallbackService.name)", category: "LLMManager")
-            return fallbackService
+            // Only use fallback if we have NO strict routing rules, OR if the fallback explicitly meets the rules
+            if routings.isEmpty || serviceMeetsCriteria(fallbackService, routings: routings, for: request, trimming: trimming) {
+                logger?.debug("Routing to fallback service: \(fallbackService.name)", category: "LLMManager")
+                return fallbackService
+            }
         }
 
         // Step 4: No suitable service found
-        logger?.debug("No suitable service found for routing strategies \(routings), and no fallback available.", category: "LLMManager")
+        logger?.debug("No suitable service found for routing strategies \(routings), and no fallback available (or fallback did not meet strict criteria).", category: "LLMManager")
         return nil
     }
 
@@ -550,6 +556,10 @@ public class LLMManager {
                 }
             case let .domain(preferredDomains):
                 if !evaluateDomainSupport(service, preferredDomains: preferredDomains) {
+                    return false
+                }
+            case let .models(preferredModels):
+                if !evaluateModelSupport(service, preferredModels: preferredModels) {
                     return false
                 }
             }
@@ -651,5 +661,26 @@ public class LLMManager {
         logger?.debug("Service \(service.name) - Preferred domains: \(lowercasePreferredDomains), Service domains met: \(serviceDomainsRequirementMet)", category: "LLMManager")
 
         return serviceDomainsRequirementMet
+    }
+
+    /// Evaluates whether a service supports the specified models.
+    ///
+    /// - Parameters:
+    ///    - service: The `LLMServiceProtocol` instance representing the service being evaluated.
+    ///    - preferredModels: An array of preferred model names.
+    ///
+    /// - Returns: `true` if the service supports at least one of the preferred models; `false` otherwise.
+    private func evaluateModelSupport(
+        _ service: LLMServiceProtocol,
+        preferredModels: [String]
+    ) -> Bool {
+        let lowercasePreferredModels = Set(preferredModels.map { $0.lowercased() })
+        let serviceModels = Set(service.supportedModels.map { $0.lowercased() })
+
+        let modelSupported = !lowercasePreferredModels.isDisjoint(with: serviceModels)
+        
+        logger?.debug("Service \(service.name) - Supported models: \(serviceModels), Preferred models: \(lowercasePreferredModels), Match: \(modelSupported)", category: "LLMManager")
+        
+        return modelSupported
     }
 }

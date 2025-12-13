@@ -45,35 +45,38 @@ APIKeyLoader.load()
 // MARK: - Example Menu System
 
 struct ExampleRunner {
+    static let registeredExamples: [(String, () async -> Void)] = [
+        ("Basic Request", { await BasicRequestExample().execute() }),
+        ("Streaming Request", { await StreamingRequestExample().execute() }),
+        ("LLM Routing", { await LLMRoutingExample().execute() }),
+        ("Domain Routing", { await DomainRoutingExample().execute() }),
+        ("Dual Domain Routing", { await DualDomainRoutingExample().execute() }),
+        ("Siri Style Domain Routing", { await SiriStyleDomainRoutingExample().execute() }),
+        ("Logic Domain Routing", { await LogicDomainRouterExample().execute() }),
+        ("Strict Model Routing", { await StrictRoutingExample().execute() }),
+        ("TV Script Workflow", { await TVScriptWorkflowExample().execute() }),
+        ("Translate Text Workflow", { await LeMondeTranslationWorkflow().execute() }),
+        ("Customer Feedback Analysis Workflow", { await CustomerFeedbackAnalysisWorkflow().execute() }),
+        ("Temperature Monitor Workflow", { await TemperatureMonitorWorkflow().execute() }),
+        ("Blog Post Categorization Workflow", { await BlogCategoryWorkflowExample().execute() }),
+        ("Support Ticket Analysis Workflow", { await SupportTicketWorkflowExample().execute(on: "My account is locked after too many login attempts.") }),
+        ("Github Issues Triage Workflow", { await IssueTriageWorkflowExample().execute(on: "App crashes with error E401 when I press Save") }),
+        ("Apple Foundation Model", { await FoundationModelExample().execute() }),
+        ("Two Model Conversation", { await MultiModelConversationExample().execute() }),
+        ("Convenience API", { await ConvenienceAPIExample().execute() }),
+        ("ML Convenience API", { await MLConvenienceExample().execute() }),
+        ("Tasks Convenience API", { await TasksConvenienceExample().execute() }),
+        ("AuroraCore Convenience API", { await AuroraCoreConvenienceExample().execute() }),
+        ("LLM Configuration", { await LLMConfigurationExample().execute() }),
+        ("Context Management", { await ContextManagementExample().execute() })
+    ]
+
     static func run() async {
         print("🚀 Aurora Core Examples")
         print("======================")
         print()
         
-        let examples: [(String, () async -> Void)] = [
-            ("Basic Request", { await BasicRequestExample().execute() }),
-            ("Streaming Request", { await StreamingRequestExample().execute() }),
-            ("LLM Routing", { await LLMRoutingExample().execute() }),
-            ("Domain Routing", { await DomainRoutingExample().execute() }),
-            ("Dual Domain Routing", { await DualDomainRoutingExample().execute() }),
-            ("Siri Style Domain Routing", { await SiriStyleDomainRoutingExample().execute() }),
-            ("Logic Domain Routing", { await LogicDomainRouterExample().execute() }),
-            ("TV Script Workflow", { await TVScriptWorkflowExample().execute() }),
-            ("Translate Text Workflow", { await LeMondeTranslationWorkflow().execute() }),
-            ("Customer Feedback Analysis Workflow", { await CustomerFeedbackAnalysisWorkflow().execute() }),
-            ("Temperature Monitor Workflow", { await TemperatureMonitorWorkflow().execute() }),
-            ("Blog Post Categorization Workflow", { await BlogCategoryWorkflowExample().execute() }),
-            ("Support Ticket Analysis Workflow", { await SupportTicketWorkflowExample().execute(on: "My account is locked after too many login attempts.") }),
-            ("Github Issues Triage Workflow", { await IssueTriageWorkflowExample().execute(on: "App crashes with error E401 when I press Save") }),
-            ("Apple Foundation Model", { await FoundationModelExample().execute() }),
-            ("Two Model Conversation", { await MultiModelConversationExample().execute() }),
-            ("Convenience API", { await ConvenienceAPIExample().execute() }),
-            ("ML Convenience API", { await MLConvenienceExample().execute() }),
-            ("Tasks Convenience API", { await TasksConvenienceExample().execute() }),
-            ("AuroraCore Convenience API", { await AuroraCoreConvenienceExample().execute() }),
-            ("LLM Configuration", { await LLMConfigurationExample().execute() }),
-            ("Context Management", { await ContextManagementExample().execute() })
-        ]
+        let examples = registeredExamples
         
         while true {
             printMenu(examples)
@@ -165,62 +168,12 @@ struct ExampleRunner {
     // MARK: - Non-Interactive Methods
     
     static func runAllExamplesDirectly() async {
-        let examples: [(String, () async -> Void)] = [
-            ("Basic Request", { await BasicRequestExample().execute() }),
-            ("Streaming Request", { await StreamingRequestExample().execute() }),
-            ("LLM Routing", { await LLMRoutingExample().execute() }),
-            ("Domain Routing", { await DomainRoutingExample().execute() }),
-            ("Dual Domain Routing", { await DualDomainRoutingExample().execute() }),
-            ("Siri Style Domain Routing", { await SiriStyleDomainRoutingExample().execute() }),
-            ("Logic Domain Routing", { await LogicDomainRouterExample().execute() }),
-            ("TV Script Workflow", { await TVScriptWorkflowExample().execute() }),
-            ("Translate Text Workflow", { await LeMondeTranslationWorkflow().execute() }),
-            ("Customer Feedback Analysis Workflow", { await CustomerFeedbackAnalysisWorkflow().execute() }),
-            ("Temperature Monitor Workflow", { await TemperatureMonitorWorkflow().execute() }),
-            ("Blog Post Categorization Workflow", { await BlogCategoryWorkflowExample().execute() }),
-            ("Support Ticket Analysis Workflow", { await SupportTicketWorkflowExample().execute(on: "My account is locked after too many login attempts.") }),
-            ("Github Issues Triage Workflow", { await IssueTriageWorkflowExample().execute(on: "App crashes with error E401 when I press Save") }),
-            ("Apple Foundation Model", { await FoundationModelExample().execute() }),
-            ("Two Model Conversation", { await MultiModelConversationExample().execute() }),
-            ("Convenience API", { await ConvenienceAPIExample().execute() }),
-            ("ML Convenience API", { await MLConvenienceExample().execute() }),
-            ("Tasks Convenience API", { await TasksConvenienceExample().execute() }),
-            ("AuroraCore Convenience API", { await AuroraCoreConvenienceExample().execute() }),
-            ("LLM Configuration", { await LLMConfigurationExample().execute() }),
-            ("Context Management", { await ContextManagementExample().execute() })
-        ]
-        
-        await runAllExamples(examples)
+        await runAllExamples(registeredExamples)
     }
     
     static func runSingleExampleDirectly(_ index: Int) async {
-        let examples: [(String, () async -> Void)] = [
-            ("Basic Request", { await BasicRequestExample().execute() }),
-            ("Streaming Request", { await StreamingRequestExample().execute() }),
-            ("LLM Routing", { await LLMRoutingExample().execute() }),
-            ("Domain Routing", { await DomainRoutingExample().execute() }),
-            ("Dual Domain Routing", { await DualDomainRoutingExample().execute() }),
-            ("Siri Style Domain Routing", { await SiriStyleDomainRoutingExample().execute() }),
-            ("Logic Domain Routing", { await LogicDomainRouterExample().execute() }),
-            ("TV Script Workflow", { await TVScriptWorkflowExample().execute() }),
-            ("Translate Text Workflow", { await LeMondeTranslationWorkflow().execute() }),
-            ("Customer Feedback Analysis Workflow", { await CustomerFeedbackAnalysisWorkflow().execute() }),
-            ("Temperature Monitor Workflow", { await TemperatureMonitorWorkflow().execute() }),
-            ("Blog Post Categorization Workflow", { await BlogCategoryWorkflowExample().execute() }),
-            ("Support Ticket Analysis Workflow", { await SupportTicketWorkflowExample().execute(on: "My account is locked after too many login attempts.") }),
-            ("Github Issues Triage Workflow", { await IssueTriageWorkflowExample().execute(on: "App crashes with error E401 when I press Save") }),
-            ("Apple Foundation Model", { await FoundationModelExample().execute() }),
-            ("Two Model Conversation", { await MultiModelConversationExample().execute() }),
-            ("Convenience API", { await ConvenienceAPIExample().execute() }),
-            ("ML Convenience API", { await MLConvenienceExample().execute() }),
-            ("Tasks Convenience API", { await TasksConvenienceExample().execute() }),
-            ("AuroraCore Convenience API", { await AuroraCoreConvenienceExample().execute() }),
-            ("LLM Configuration", { await LLMConfigurationExample().execute() }),
-            ("Context Management", { await ContextManagementExample().execute() })
-        ]
-        
-        if index >= 1 && index <= examples.count {
-            await runSingleExample(examples[index - 1])
+        if index >= 1 && index <= registeredExamples.count {
+            await runSingleExample(registeredExamples[index - 1])
         } else {
             print("❌ Invalid example number: \(index)")
         }
@@ -251,11 +204,12 @@ if arguments.count > 1 {
         print("  swift run AuroraExamples help      # Show this help")
         print()
         print("Interactive Options:")
-        print("  • Enter a number (1-22) to run a specific example")
+        print("  • Enter a number (1-\(ExampleRunner.registeredExamples.count)) to run a specific example")
         print("  • Enter 'all' or 'a' to run all examples")
         print("  • Enter 'quit', 'q', or 'exit' to exit")
     default:
-        if let index = Int(choice), index >= 1 && index <= 22 {
+        let maxIndex = ExampleRunner.registeredExamples.count
+        if let index = Int(choice), index >= 1 && index <= maxIndex {
             print("🎯 Running Example \(index) (Non-Interactive Mode)")
             print("===============================================")
             print()

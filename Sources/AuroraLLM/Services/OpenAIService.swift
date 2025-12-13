@@ -70,6 +70,9 @@ public class OpenAIService: LLMServiceProtocol, @unchecked Sendable {
     /// The default model to use when no model is specified in the request. Defaults to "gpt-4o-mini".
     public var defaultModel: String
 
+    /// List of supported models for this service instance.
+    public var supportedModels: [String] = []
+
     /// The API key for authenticating requests
     private let apiKey: String?
 
@@ -88,13 +91,15 @@ public class OpenAIService: LLMServiceProtocol, @unchecked Sendable {
     ///    - inputTokenPolicy: The policy to handle input tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
     ///    - outputTokenPolicy: The policy to handle output tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
     ///    - systemPrompt: The default system prompt for this service, used to set the behavior or persona of the model.
+    ///    - supportedModels: A list of models supported by this service instance. Defaults to an empty list.
     ///    - urlSession: The `URLSession` instance used for network requests. Defaults to a `.default` configuration.
     ///    - logger: An optional `CustomLogger` instance for logging. Defaults to `nil`.
-    public init(name: String = "OpenAI", baseURL: String = "https://api.openai.com", apiKey: String?, defaultModel: String = "gpt-4o-mini", contextWindowSize: Int = 128_000, maxOutputTokens: Int = 16384, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, urlSession: URLSession = URLSession(configuration: .default), logger: CustomLogger? = nil) {
+    public init(name: String = "OpenAI", baseURL: String = "https://api.openai.com", apiKey: String?, defaultModel: String = "gpt-4o-mini", supportedModels: [String] = [], contextWindowSize: Int = 128_000, maxOutputTokens: Int = 16384, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, urlSession: URLSession = URLSession(configuration: .default), logger: CustomLogger? = nil) {
         self.name = name
         self.baseURL = baseURL
         self.apiKey = apiKey
         self.defaultModel = defaultModel
+        self.supportedModels = Array(Set(supportedModels + [defaultModel]))
         self.contextWindowSize = contextWindowSize
         self.maxOutputTokens = maxOutputTokens
         self.inputTokenPolicy = inputTokenPolicy

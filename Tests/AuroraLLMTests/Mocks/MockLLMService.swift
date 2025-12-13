@@ -23,6 +23,7 @@ final class MockLLMService: LLMServiceProtocol, @unchecked Sendable {
     var defaultModel: String
     private let expectedResult: Result<LLMResponseProtocol, Error>
     private let streamingExpectedResult: String?
+    private var shouldThrowError: Bool = false
 
     // Properties to track calls and parameters for verification
     var receivedRequests: [LLMRequest] = []
@@ -30,7 +31,20 @@ final class MockLLMService: LLMServiceProtocol, @unchecked Sendable {
     var receivedRoutingStrategy: String.TrimmingStrategy?
     var receivedFallbackCount = 0
 
-    init(name: String, vendor: String = "MockLLM", apiKey: String? = nil, requiresAPIKey: Bool = false, contextWindowSize: Int = 8192, maxOutputTokens: Int = 4096, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, defaultModel: String = "mock-model", expectedResult: Result<LLMResponseProtocol, Error>, streamingExpectedResult: String? = nil) {
+    init(name: String,
+         vendor: String = "MockLLM",
+         apiKey: String? = nil,
+         requiresAPIKey: Bool = false,
+         contextWindowSize: Int = 8192,
+         maxOutputTokens: Int = 4096,
+         inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
+         outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
+         systemPrompt: String? = nil,
+         defaultModel: String = "mock-model",
+         supportedModels: [String] = [],
+         expectedResult: Result<LLMResponseProtocol, Error>,
+         streamingExpectedResult: String? = nil,
+         shouldThrowError: Bool = false) {
         self.name = name
         self.vendor = vendor
         self.apiKey = apiKey
@@ -43,7 +57,12 @@ final class MockLLMService: LLMServiceProtocol, @unchecked Sendable {
         self.defaultModel = defaultModel
         self.expectedResult = expectedResult
         self.streamingExpectedResult = streamingExpectedResult
+        self.shouldThrowError = shouldThrowError
+        self.supportedModels = Array(Set(supportedModels + [defaultModel]))
     }
+
+    /// List of supported models (default empty for mock)
+    var supportedModels: [String] = []
 
     /// Non-streaming request handler
     func sendRequest(_ request: LLMRequest) async throws -> LLMResponseProtocol {

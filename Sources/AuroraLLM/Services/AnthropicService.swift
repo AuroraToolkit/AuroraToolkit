@@ -70,6 +70,9 @@ public class AnthropicService: LLMServiceProtocol, @unchecked Sendable {
     /// The default model to use when no model is specified in the request. Defaults to "claude-haiku-4-5".
     public var defaultModel: String
 
+    /// List of supported models for this service instance.
+    public var supportedModels: [String] = []
+
     /// The URL session used to send basic requests.
     var urlSession: URLSession
 
@@ -88,13 +91,15 @@ public class AnthropicService: LLMServiceProtocol, @unchecked Sendable {
     ///    - inputTokenPolicy: The policy to handle input tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
     ///    - outputTokenPolicy: The policy to handle output tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
     ///    - systemPrompt: The default system prompt for this service, used to set the behavior or persona of the model.
+    ///    - supportedModels: A list of models supported by this service instance. Defaults to an empty list.
     ///    - urlSession: The `URLSession` instance used for network requests. Defaults to a `.default` configuration.
     ///    - logger: An optional logger for recording information and errors within the service.
-    public init(name: String = "Anthropic", baseURL: String = "https://api.anthropic.com", apiKey: String?, defaultModel: String = "claude-haiku-4-5", contextWindowSize: Int = 200_000, maxOutputTokens: Int = 4096, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, urlSession: URLSession = URLSession(configuration: .default), logger: CustomLogger? = nil) {
+    public init(name: String = "Anthropic", baseURL: String = "https://api.anthropic.com", apiKey: String?, defaultModel: String = "claude-haiku-4-5", supportedModels: [String] = [], contextWindowSize: Int = 200_000, maxOutputTokens: Int = 4096, inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits, systemPrompt: String? = nil, urlSession: URLSession = URLSession(configuration: .default), logger: CustomLogger? = nil) {
         self.name = name
         self.baseURL = baseURL
         self.apiKey = apiKey
         self.defaultModel = defaultModel
+        self.supportedModels = Array(Set(supportedModels + [defaultModel]))
         self.contextWindowSize = contextWindowSize
         self.maxOutputTokens = maxOutputTokens
         self.inputTokenPolicy = inputTokenPolicy

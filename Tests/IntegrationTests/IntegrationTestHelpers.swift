@@ -112,13 +112,15 @@ private final class IntegrationMockLLMService: LLMServiceProtocol, @unchecked Se
     var outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits
     var systemPrompt: String? = nil
     var defaultModel: String = "mock-model"
+    var supportedModels: [String] = []
     
     private let expectedResult: Result<LLMResponseProtocol, Error>
     
-    init(name: String, vendor: String, expectedResult: Result<LLMResponseProtocol, Error>) {
+    init(name: String, vendor: String, supportedModels: [String] = [], expectedResult: Result<LLMResponseProtocol, Error>) {
         self.name = name
         self.vendor = vendor
         self.expectedResult = expectedResult
+        self.supportedModels = Array(Set(supportedModels + [defaultModel]))
     }
     
     func sendRequest(_ request: LLMRequest) async throws -> LLMResponseProtocol {
