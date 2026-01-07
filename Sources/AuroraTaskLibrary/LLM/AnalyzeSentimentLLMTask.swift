@@ -90,66 +90,39 @@ public class AnalyzeSentimentLLMTask: WorkflowComponentProtocol {
             let resolvedDetailed = inputs.resolve(key: "detailed", fallback: detailed)
 
             // Build the prompt for the LLM
-            var sentimentPrompt = """
-            Analyze the sentiment of the following strings. For each string, return the sentiment (Positive, Neutral, or Negative).
+            let jsonInput: [String: Any] = [
+                "strings": resolvedStrings,
+                "detailed": resolvedDetailed
+            ]
+            let jsonData = try? JSONSerialization.data(withJSONObject: jsonInput, options: [])
+            let jsonString = jsonData.flatMap { String(data: $0, encoding: .utf8) } ?? resolvedStrings.joined(separator: "\n")
 
-            Return the result as a JSON object with each string as a key and the sentiment as the value.
-            Only return the JSON object, and nothing else.
+            // Build the prompt for the LLM
+            let sentimentPrompt = """
+            You are a sentiment analysis expert. Analyze the sentiment of the provided strings.
 
-            """
+            Format the results as a single valid JSON object where:
+            - Each key is an EXACT original string from the input.
+            - Each value is \(resolvedDetailed ? "an object containing the 'sentiment' (Positive, Neutral, or Negative) and a 'confidence' score (0 to 100)" : "the sentiment (Positive, Neutral, or Negative)") .
 
-            if resolvedDetailed {
-                sentimentPrompt += """
-                Return the result as a JSON object where each input string is a key, and the value is an object containing the sentiment (Positive, Neutral, or Negative) and a confidence score as a percentage.
-
-                Example (for format illustration purposes only):
-                Input Strings:
-                - "I love this product!"
-                - "The service was okay."
-                - "I'm very disappointed with the quality."
-
-                Expected Output JSON:
-                {
-                  "I love this product!": {"sentiment": "Positive", "confidence": 95},
-                  "The service was okay.": {"sentiment": "Neutral", "confidence": 70},
-                  "I'm very disappointed with the quality.": {"sentiment": "Negative", "confidence": 90}
-                }
-                """
-            } else {
-                sentimentPrompt += """
-                Return the result as a JSON object where each input string is a key, and the value is the sentiment (Positive, Neutral, or Negative).
-
-                Example (for format illustration purposes only):
-                Input Strings:
-                - "I love this product!"
-                - "The service was okay."
-                - "I'm very disappointed with the quality."
-
-                Expected Output JSON:
-                {
-                  "I love this product!": "Positive",
-                  "The service was okay.": "Neutral",
-                  "I'm very disappointed with the quality.": "Negative"
-                }
-                """
+            Expected Output JSON structure:
+            {
+              "original string 1": \(resolvedDetailed ? "{\"sentiment\": \"Positive\", \"confidence\": 95}" : "\"Positive\""),
+              "original string 2": \(resolvedDetailed ? "{\"sentiment\": \"Negative\", \"confidence\": 90}" : "\"Negative\"")
             }
 
-            sentimentPrompt += """
+            Important:
+            1. Return ONLY the JSON object.
+            2. Do not include markdown code fences (like ```json), explanations, or any other text.
+            3. Analyze ALL strings provided in the input.
 
-            Important Instructions:
-            1. Only return the JSON object with the sentiment analysis.
-            2. Do not include any additional text, examples, or explanations in the output.
-            3. Ensure the JSON object is properly formatted and valid.
-            4. Ensure the JSON object is properly terminated and complete. Do not cut off or truncate the response.
-            5. Do not include anything else, like markdown notation around it or any extraneous characters. The ONLY thing you should return is properly formatted, valid JSON and absolutely nothing else.
-            6. Only process the following texts:
-
-            \(resolvedStrings.joined(separator: "\n"))
+            Input data (JSON):
+            \(jsonString)
             """
 
             let request = LLMRequest(
                 messages: [
-                    LLMMessage(role: .system, content: "You are a sentiment analysis expert. Do NOT reveal any reasoning or chain-of-thought. Always respond with a single valid JSON object and nothing else (no markdown, explanations, or code fences)."),
+                    LLMMessage(role: .system, content: "You are a professional sentiment analysis expert. You will receive a JSON object containing strings to analyze. You MUST respond ONLY with a valid JSON object mapping original strings to their sentiment analysis. No conversation, no thoughts, no markdown."),
                     LLMMessage(role: .user, content: sentimentPrompt),
                 ],
                 maxTokens: maxTokens

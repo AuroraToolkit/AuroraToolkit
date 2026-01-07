@@ -82,49 +82,38 @@ public class ClusterStringsLLMTask: WorkflowComponentProtocol {
 
             let resolvedMaxClusters = inputs.resolve(key: "maxClusters", fallback: maxClusters)
 
-            // Build the prompt for the LLM
-            var clusteringPrompt = """
-            Cluster the following strings based on semantic similarity. Return the result as a JSON object with cluster IDs as keys and arrays of strings as values.
-            Only return the JSON object, and nothing else.
+            let jsonInput: [String: Any] = [
+                "strings": resolvedStrings,
+                "maxClusters": resolvedMaxClusters as Any
+            ]
+            let jsonData = try? JSONSerialization.data(withJSONObject: jsonInput, options: [])
+            let jsonString = jsonData.flatMap { String(data: $0, encoding: .utf8) } ?? resolvedStrings.joined(separator: "\n")
 
-            """
+            let clusteringPrompt = """
+            You are an expert data analyst. Cluster the provided list of strings based on semantic similarity.
 
-            if let maxClusters = resolvedMaxClusters {
-                clusteringPrompt += " Limit the number of clusters to \(maxClusters)."
-            }
+            Format the results as a single valid JSON object where keys are cluster IDs (e.g., "Cluster 1", "Cluster 2") and values are arrays of strings belonging to each cluster.
 
-            clusteringPrompt += """
-
-            Example (for format illustration purposes only):
-            Input Strings:
-            - "The stock market dropped today."
-            - "AI is transforming software development."
-            - "The S&P 500 index fell by 2%."
-
-            Output JSON:
+            Expected Output JSON structure:
             {
-              "Cluster 1": ["The stock market dropped today.", "The S&P 500 index fell by 2%."],
-              "Cluster 2": ["AI is transforming software development."]
+              "Cluster 1": ["original string 1", "original string 2"],
+              "Cluster 2": ["original string 3"]
             }
 
-            Important Instructions:
-            1. Do not include any other text, examples, or explanations in the output.
-            2. Only return the JSON object with cluster IDs and string arrays.
-            3. Ensure that the clusters are meaningful and relevant.
-            4. Cluster the strings based on **semantic meaning and context**. Strings that describe similar topics, themes, or ideas should belong to the same cluster. For example:
-                - Group strings about technology or artificial intelligence together.
-                - Group strings about finance, economy, or stock markets together.
-            5. Ensure the JSON object is properly formatted and valid.
-            6. Ensure the JSON object is properly terminated and complete. Do not cut off or truncate the response.
-            7. Do not include anything else, like markdown notation around it or any extraneous characters. The ONLY thing you should return is properly formatted, valid JSON and absolutely nothing else.
-            8. Only process the following texts:
+            Important:
+            1. Return ONLY the JSON object.
+            2. Do not include markdown code fences (like ```json), explanations, or any other text.
+            3. Ensure ALL input strings are assigned to exactly one cluster.
+            4. Do not modify the strings in any way (preserve punctuation and casing exactly).
+            \(resolvedMaxClusters != nil ? "5. Limit the number of clusters to \(resolvedMaxClusters!)." : "")
 
-            \(resolvedStrings.joined(separator: "\n"))
+            Input data (JSON):
+            \(jsonString)
             """
 
             let request = LLMRequest(
                 messages: [
-                    LLMMessage(role: .system, content: "You are an expert in semantic similarity clustering. Do NOT reveal any reasoning or chain-of-thought. Always respond with a single valid JSON object and nothing else (no markdown, explanations, or code fences)."),
+                    LLMMessage(role: .system, content: "You are a professional data analysis expert. You will receive a JSON object containing strings to cluster. You MUST respond ONLY with a valid JSON object mapping cluster names to arrays of original strings. No conversation, no thoughts, no markdown."),
                     LLMMessage(role: .user, content: clusteringPrompt),
                 ],
                 maxTokens: maxTokens

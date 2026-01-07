@@ -45,7 +45,7 @@ public class GenerateTitlesLLMTask: WorkflowComponentProtocol {
         llmService: LLMServiceProtocol,
         strings: [String]? = nil,
         languages: [String]? = nil,
-        maxTokens: Int = 100,
+        maxTokens: Int = 500,
         inputs: [String: Any?] = [:],
         logger: CustomLogger? = nil
     ) {
@@ -69,47 +69,41 @@ public class GenerateTitlesLLMTask: WorkflowComponentProtocol {
                 )
             }
 
+            let jsonInput: [String: Any] = [
+                "texts": resolvedStrings,
+                "languages": resolvedLanguages
+            ]
+            let jsonData = try? JSONSerialization.data(withJSONObject: jsonInput, options: [])
+            let jsonString = jsonData.flatMap { String(data: $0, encoding: .utf8) } ?? resolvedStrings.joined(separator: "\n")
+
             // Build the prompt
             let prompt = """
-            Generate succinct and informative titles for each of the following texts.
-            Return the result as a JSON object where keys are the original texts and values are dictionaries with language codes as keys and their generated titles as values.
+            You are an expert editor. Generate a succinct, informative, and engaging title for each of the provided texts in the requested languages.
 
-            Example (for format illustration purposes only):
-            Input Texts:
-            - "Scientists discover a new element with groundbreaking properties."
-            - "The latest smartphone offers features that are revolutionizing the industry."
+            Format the results as a single valid JSON object where:
+            - Each key is an EXACT original text from the input.
+            - Each value is a dictionary where keys are language codes and values are the generated titles.
 
-            Languages: ["en", "es"]
-
-            Output JSON:
+            Expected Output JSON structure:
             {
-              "titles": {
-                "Scientists discover a new element with groundbreaking properties.": {
-                  "en": "Scientists Unveil Groundbreaking New Element",
-                  "es": "Científicos Descubren un Elemento Innovador"
-                },
-                "The latest smartphone offers features that are revolutionizing the industry.": {
-                  "en": "Revolutionary Features in the Latest Smartphone",
-                  "es": "Características Revolucionarias del Último Teléfono Inteligente"
-                }
+              "original text 1": {
+                "en": "Title in English",
+                "es": "Título en Español"
               }
             }
 
-            Important Instructions:
-            1. Titles should be concise, accurate, and engaging.
-            2. Ensure titles are unique and relevant to the content of the text.
-            3. Generate titles in the following languages: \(resolvedLanguages.joined(separator: ", ")).
-            4. Ensure the JSON object is properly formatted and valid.
-            5. Ensure the JSON object is properly terminated and complete. Do not cut off or truncate the response.
-            6. Do not include anything else, like markdown notation around it or any extraneous characters. The ONLY thing you should return is properly formatted, valid JSON and absolutely nothing else.
-            7. Only analyze the following texts:
+            Important:
+            1. Return ONLY the JSON object.
+            2. Do not include markdown code fences (like ```json), explanations, or any other text.
+            3. Generate titles for ALL texts and ALL languages provided in the input.
 
-            \(resolvedStrings.joined(separator: "\n"))
+            Input data (JSON):
+            \(jsonString)
             """
 
             let request = LLMRequest(
                 messages: [
-                    LLMMessage(role: .system, content: "You are an expert in title generation. Do NOT reveal any reasoning or chain-of-thought. Always respond with a single valid JSON object and nothing else (no markdown, explanations, or code fences)."),
+                    LLMMessage(role: .system, content: "You are a professional editor and title generation expert. You will receive a JSON object containing texts and requested languages. You MUST respond ONLY with a valid JSON object mapping original texts to their generated titles. No conversation, no thoughts, no markdown."),
                     LLMMessage(role: .user, content: prompt),
                 ],
                 maxTokens: resolvedMaxTokens

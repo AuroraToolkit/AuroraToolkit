@@ -9,7 +9,7 @@ import Foundation
 
 /// Represents the response from Ollama's LLM models, conforming to `LLMResponseProtocol`.
 ///
-/// The Ollama API returns a generated text directly in the `response` field, along with model metadata.
+/// The Ollama Chat API returns a message object containing the role and content, along with model metadata.
 public struct OllamaLLMResponse: LLMResponseProtocol, Codable {
     /// The vendor associated with the response.
     public var vendor: String? = "Ollama"
@@ -18,33 +18,69 @@ public struct OllamaLLMResponse: LLMResponseProtocol, Codable {
     public var model: String?
 
     ///  The timestamp when the response was created.
-    public var createdAt: String
+    public var createdAt: String?
 
-    /// The generated text returned by the Ollama API.
-    public let response: String
+    /// The generated message returned by the Ollama Chat API.
+    public let message: OllamaMessage?
 
     /// A boolean indicating if the model has finished generating the response.
     public let done: Bool
 
+    /// The number of tokens in the prompt.
+    public let promptEvalCount: Int?
+
     /// The number of tokens in the generated response.
     public let evalCount: Int?
 
-    /// Token usage is not provided in the Ollama API, so it's `nil`.
+    /// Represents a message in the Ollama chat response.
+    public struct OllamaMessage: Codable, Sendable {
+        public let role: String
+        public let content: String
+    }
+
+    /// Token usage provided by the Ollama Chat API.
     public var tokenUsage: LLMTokenUsage? {
-        return nil
+        guard let promptTokens = promptEvalCount, let completionTokens = evalCount else {
+            return nil
+        }
+        return LLMTokenUsage(
+            promptTokens: promptTokens,
+            completionTokens: completionTokens,
+            totalTokens: promptTokens + completionTokens
+        )
     }
 
     // MARK: - LLMResponseProtocol Conformance
 
-    /// Returns the generated text content from the Ollama response.
+    /// Returns the generated text content from the Ollama response message.
     public var text: String {
-        return response
+        return message?.content ?? ""
     }
 
     private enum CodingKeys: String, CodingKey {
+        case model
         case createdAt = "created_at"
-        case response
+        case message
         case done
+        case promptEvalCount = "prompt_eval_count"
         case evalCount = "eval_count"
+    }
+
+    public init(
+        vendor: String? = "Ollama",
+        model: String? = nil,
+        createdAt: String? = nil,
+        message: OllamaMessage? = nil,
+        done: Bool,
+        promptEvalCount: Int? = nil,
+        evalCount: Int? = nil
+    ) {
+        self.vendor = vendor
+        self.model = model
+        self.createdAt = createdAt
+        self.message = message
+        self.done = done
+        self.promptEvalCount = promptEvalCount
+        self.evalCount = evalCount
     }
 }

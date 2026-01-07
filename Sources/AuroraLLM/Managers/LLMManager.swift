@@ -512,8 +512,10 @@ public class LLMManager {
 
         // Step 3: Attempt fallback routing if available
         if let fallbackService {
-            // Only use fallback if we have NO strict routing rules, OR if the fallback explicitly meets the rules
-            if routings.isEmpty || serviceMeetsCriteria(fallbackService, routings: routings, for: request, trimming: trimming) {
+            // Check if there are strict model routing rules.
+            let modelRoutings = routings.filter { if case .models = $0 { return true }; return false }
+
+            if modelRoutings.isEmpty || serviceMeetsCriteria(fallbackService, routings: modelRoutings, for: request, trimming: trimming) {
                 logger?.debug("Routing to fallback service: \(fallbackService.name)", category: "LLMManager")
                 return fallbackService
             }

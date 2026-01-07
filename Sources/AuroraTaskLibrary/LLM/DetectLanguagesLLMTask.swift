@@ -76,40 +76,38 @@ public class DetectLanguagesLLMTask: WorkflowComponentProtocol {
                 throw NSError(domain: "DetectLanguagesLLMTask", code: 1, userInfo: [NSLocalizedDescriptionKey: "No strings provided for language detection."])
             }
 
+            let jsonInput: [String: Any] = [
+                "strings": resolvedStrings
+            ]
+            let jsonData = try? JSONSerialization.data(withJSONObject: jsonInput, options: [])
+            let jsonString = jsonData.flatMap { String(data: $0, encoding: .utf8) } ?? resolvedStrings.joined(separator: "\n")
+
             // Build the detection prompt
             let detectionPrompt = """
-            Your job is to detect the language of a set of provided text strings, and format your results as JSON.
-            You must return the results as a JSON object with the original strings as keys and their detected language codes (ISO 639-1 format) as values.
-            Only return the JSON object, and nothing else.
+            You are a language detection expert. Identify the language(s) of the provided strings using ISO 639-1 language codes.
 
-            Example (for format illustration purposes only):
-            Input Strings:
-            - "Bonjour tout le monde."
-            - "Hello world!"
+            Format the results as a single valid JSON object where:
+            - Each key is an EXACT original string from the input.
+            - Each value is its detected ISO 639-1 language code (e.g., "en", "fr", "es").
 
-            Output JSON:
+            Expected Output JSON structure:
             {
-              "Bonjour tout le monde.": "fr",
-              "Hello world!": "en"
+              "original string 1": "en",
+              "original string 2": "fr"
             }
 
-            Important Instructions:
-            1. Analyze the input strings and determine the language of each string.
-            2. Use ISO 639-1 format for language codes (e.g., "es" for Spanish, "fr" for French).
-            3. Return the result as a JSON object with the original strings as keys and their detected language codes as values.
-            4. Ensure the JSON object is properly terminated and complete. Do not cut off or truncate the response.
-            5. Ensure the JSON object is formatted correctly.
-            6. Do not infer or guess the meaning of strings—only analyze the languages explicitly present.
-            7. Do not include anything else, like markdown notation around it or any extraneous characters.
-            8. The *ONLY* thing you should return is properly formatted, valid JSON and absolutely nothing else.
-            9. Only analyze the following texts:
+            Important:
+            1. Return ONLY the JSON object.
+            2. Do not include markdown code fences (like ```json), explanations, or any other text.
+            3. Analyze ALL strings provided in the input.
 
-            \(resolvedStrings.joined(separator: "\n"))
+            Input data (JSON):
+            \(jsonString)
             """
 
             let request = LLMRequest(
                 messages: [
-                    LLMMessage(role: .system, content: "You are a language detection expert. Do NOT reveal any reasoning or chain-of-thought. Always respond with a single valid JSON object and nothing else (no markdown, explanations, or code fences)."),
+                    LLMMessage(role: .system, content: "You are a language detection expert. You will receive a JSON object containing strings to detect. You MUST respond ONLY with a valid JSON object mapping original strings to their detected language codes. No conversation, no thoughts, no markdown."),
                     LLMMessage(role: .user, content: detectionPrompt),
                 ],
                 maxTokens: maxTokens

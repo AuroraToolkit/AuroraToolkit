@@ -206,26 +206,35 @@ public class OllamaService: LLMServiceProtocol, @unchecked Sendable {
             throw LLMServiceError.invalidURL
         }
 
-        components.path = "/api/generate"
+        components.path = "/api/chat"
         guard let url = components.url else {
             throw LLMServiceError.invalidURL
         }
 
-        // Use helper function and combine all messages into a single prompt
-        let messages = prepareMessages(from: request, serviceSystemPrompt: systemPrompt)
-        let prompt = messages.map { "\($0.role.rawValue.capitalized): \($0.content)" }.joined(separator: "\n")
+        // Use helper function to prepare messages for the chat API
+        let messagesPayload = prepareOpenAIMessagesPayload(from: request, serviceSystemPrompt: systemPrompt)
+
+        // Construct options for Ollama
+        var options: [String: Any] = [
+            "temperature": request.temperature,
+            "num_predict": request.maxTokens,
+            "top_p": request.options?.topP ?? 1.0,
+            "stop": request.options?.stopSequences ?? []
+        ]
+
+        if let presencePenalty = request.options?.presencePenalty {
+            options["presence_penalty"] = presencePenalty
+        }
+        if let frequencyPenalty = request.options?.frequencyPenalty {
+            options["frequency_penalty"] = frequencyPenalty
+        }
 
         // Construct the request body as per Ollama API
         let body: [String: Any] = [
             "model": request.model ?? defaultModel,
-            "prompt": prompt,
-            "max_tokens": request.maxTokens,
-            "temperature": request.temperature,
-            "top_p": request.options?.topP ?? 1.0,
-            "frequency_penalty": request.options?.frequencyPenalty ?? 0.0,
-            "presence_penalty": request.options?.presencePenalty ?? 0.0,
-            "stop": request.options?.stopSequences ?? [],
-            "stream": false,
+            "messages": messagesPayload,
+            "options": options,
+            "stream": false
         ]
 
         // Serialize the request body into JSON
@@ -276,26 +285,35 @@ public class OllamaService: LLMServiceProtocol, @unchecked Sendable {
             throw LLMServiceError.invalidURL
         }
 
-        components.path = "/api/generate"
+        components.path = "/api/chat"
         guard let url = components.url else {
             throw LLMServiceError.invalidURL
         }
 
-        // Use helper function and combine all messages into a single prompt
-        let messages = prepareMessages(from: request, serviceSystemPrompt: systemPrompt)
-        let prompt = messages.map { "\($0.role.rawValue.capitalized): \($0.content)" }.joined(separator: "\n")
+        // Use helper function to prepare messages for the chat API
+        let messagesPayload = prepareOpenAIMessagesPayload(from: request, serviceSystemPrompt: systemPrompt)
+
+        // Construct options for Ollama
+        var options: [String: Any] = [
+            "temperature": request.temperature,
+            "num_predict": request.maxTokens,
+            "top_p": request.options?.topP ?? 1.0,
+            "stop": request.options?.stopSequences ?? []
+        ]
+
+        if let presencePenalty = request.options?.presencePenalty {
+            options["presence_penalty"] = presencePenalty
+        }
+        if let frequencyPenalty = request.options?.frequencyPenalty {
+            options["frequency_penalty"] = frequencyPenalty
+        }
 
         // Construct the request body as per Ollama API
         let body: [String: Any] = [
             "model": request.model ?? defaultModel,
-            "prompt": prompt,
-            "max_tokens": request.maxTokens,
-            "temperature": request.temperature,
-            "top_p": request.options?.topP ?? 1.0,
-            "frequency_penalty": request.options?.frequencyPenalty ?? 0.0,
-            "presence_penalty": request.options?.presencePenalty ?? 0.0,
-            "stop": request.options?.stopSequences ?? [],
-            "stream": true,
+            "messages": messagesPayload,
+            "options": options,
+            "stream": true
         ]
 
         let jsonData = try JSONSerialization.data(withJSONObject: body, options: [])
@@ -348,27 +366,40 @@ public class OllamaService: LLMServiceProtocol, @unchecked Sendable {
         func urlSession(_: URLSession, dataTask _: URLSessionDataTask, didReceive data: Data) {
             logger?.debug("Streaming response received. Processing...", category: "OllamaService.StreamingDelegate")
 
-            do {
-                let partialResponse = try JSONDecoder().decode(OllamaLLMResponse.self, from: data)
-                let partialContent = partialResponse.response
-                accumulatedContent += partialContent
-                onPartialResponse(partialContent)
+            // Ollama streams JSON objects delimited by newlines.
+            // A single data chunk might contain multiple JSON objects or even partial ones.
+            // For simplicity and robustness, we'll convert to string and split by newline.
+            guard let content = String(data: data, encoding: .utf8) else {
+                logger?.error("Failed to decode data as UTF-8", category: "OllamaService.StreamingDelegate")
+                return
+            }
 
-                if partialResponse.done {
-                    // Finalize the response
-                    let finalResponse = OllamaLLMResponse(
-                        vendor: vendor,
-                        model: model,
-                        createdAt: partialResponse.createdAt,
-                        response: accumulatedContent,
-                        done: true,
-                        evalCount: partialResponse.evalCount
-                    )
-                    continuation.resume(returning: finalResponse)
-                    return
+            let lines = content.components(separatedBy: .newlines).filter { !$0.isEmpty }
+            for line in lines {
+                do {
+                    guard let lineData = line.data(using: .utf8) else { continue }
+                    let partialResponse = try JSONDecoder().decode(OllamaLLMResponse.self, from: lineData)
+                    let partialContent = partialResponse.message?.content ?? ""
+                    accumulatedContent += partialContent
+                    onPartialResponse(partialContent)
+
+                    if partialResponse.done {
+                        // Finalize the response
+                        let finalResponse = OllamaLLMResponse(
+                            vendor: vendor,
+                            model: model,
+                            createdAt: partialResponse.createdAt,
+                            message: OllamaLLMResponse.OllamaMessage(role: "assistant", content: accumulatedContent),
+                            done: true,
+                            promptEvalCount: partialResponse.promptEvalCount,
+                            evalCount: partialResponse.evalCount
+                        )
+                        continuation.resume(returning: finalResponse)
+                        return
+                    }
+                } catch {
+                    logger?.error("Decoding error for line: \(line), error: \(error.localizedDescription)", category: "OllamaService.StreamingDelegate")
                 }
-            } catch {
-                logger?.error("Decoding error: \(error.localizedDescription)", category: "OllamaService.StreamingDelegate")
             }
         }
 

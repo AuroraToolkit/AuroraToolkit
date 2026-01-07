@@ -83,3 +83,7 @@ auto-save-list
 tramp
 .\#*
 
+
+# Test outputs
+*_output.txt
+test_output.txt

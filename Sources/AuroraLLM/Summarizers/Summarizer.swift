@@ -42,7 +42,8 @@ public class Summarizer: SummarizerProtocol {
         ]
 
         do {
-            let result = try await sendToLLM(messages, options: options)
+            let fullResponse = try await sendToLLM(messages, options: options)
+            let (_, result) = fullResponse.extractThoughtsAndStripJSON()
             logger?.debug("Summarizer [summarize] Single text summarization completed successfully", category: "Summarizer")
             return result
         } catch {
@@ -100,15 +101,16 @@ public class Summarizer: SummarizerProtocol {
                 ]
 
                 // Send the request to the LLM
-                let response = try await sendToLLM(messages, options: options)
+                let fullResponse = try await sendToLLM(messages, options: options)
 
                 // Parse the JSON response
-                guard let responseData = response.data(using: .utf8),
+                let (_, rawResponse) = fullResponse.extractThoughtsAndStripJSON()
+                guard let responseData = rawResponse.data(using: .utf8),
                       let jsonResponse = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any],
                       let summaries = jsonResponse["summaries"] as? [String]
                 else {
-                    logger?.error("Summarizer [summarizeGroup] Failed to parse JSON response: \(response)", category: "Summarizer")
-                    throw NSError(domain: "Summarizer", code: 2, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON response from LLM: \(response)"])
+                    logger?.error("Summarizer [summarizeGroup] Failed to parse JSON response: \(fullResponse)", category: "Summarizer")
+                    throw NSError(domain: "Summarizer", code: 2, userInfo: [NSLocalizedDescriptionKey: "Invalid JSON response from LLM: \(fullResponse)"])
                 }
 
                 result = summaries
@@ -131,17 +133,22 @@ public class Summarizer: SummarizerProtocol {
     private func summaryInstruction(for type: SummaryType) -> String {
         switch type {
         case .single:
-            return "Summarize the following text:\n"
+            return "You are a professional editor. Summarize the following text concisely."
         case .multiple:
             return """
-            You are an assistant that summarizes text. I will provide a JSON object containing a list of texts under the key "texts".
-            For each text, provide a concise summary in the same JSON format under the key "summaries".
+            You are a professional editor. I will provide a JSON object containing a list of strings under the key "texts".
+            For each string, provide a concise summary.
+            Return the result as a single valid JSON object under the key "summaries" which is an array of strings.
 
-            For example:
-            Input: {"texts": ["Text 1", "Text 2"]}
-            Output: {"summaries": ["Summary of Text 1", "Summary of Text 2"]}
+            Example Output:
+            {
+              "summaries": ["Summary 1", "Summary 2"]
+            }
 
-            Here is the input:
+            Important:
+            1. Return ONLY the JSON object.
+            2. Do not include markdown code fences (like ```json), explanations, or any other text.
+            3. Provide summaries for ALL texts provided in the input.
             """
         }
     }

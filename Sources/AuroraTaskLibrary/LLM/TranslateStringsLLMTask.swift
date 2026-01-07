@@ -89,41 +89,40 @@ public class TranslateStringsLLMTask: WorkflowComponentProtocol {
             let resolvedTargetLanguage = inputs.resolve(key: "targetLanguage", fallback: targetLanguage)
             let resolvedSourceLanguage = inputs.resolve(key: "sourceLanguage", fallback: sourceLanguage)
 
+            let jsonInput: [String: Any] = [
+                "strings": resolvedStrings,
+                "targetLanguage": resolvedTargetLanguage,
+                "sourceLanguage": resolvedSourceLanguage as Any
+            ]
+            let jsonData = try? JSONSerialization.data(withJSONObject: jsonInput, options: [])
+            let jsonString = jsonData.flatMap { String(data: $0, encoding: .utf8) } ?? resolvedStrings.joined(separator: "\n")
+
             let translationPrompt = """
-            Translate the following text\(resolvedSourceLanguage != nil ? " from \(resolvedSourceLanguage!)" : "") into \(resolvedTargetLanguage).
+            You are a professional translator. Translate the provided list of strings into the target language.
 
-            Return the result as a JSON object where each original string is a key, and the value is the translated string.
+            Format the results as a single valid JSON object where:
+            - Each key is an EXACT original string from the input.
+            - Each value is its translated version.
 
-            Example (for format illustration purposes only):
-            Input Strings:
-            - "Hello, how are you?"
-            - "This is an example sentence."
-
-            Source language: English
-            Target language: French
-
-            Expected Output JSON:
+            Expected Output JSON structure:
             {
-              "Hello, how are you?": "Bonjour, comment ça va?",
-              "This is an example sentence.": "Ceci est une phrase d'exemple."
+              "original string 1": "translated string 1",
+              "original string 2": "translated string 2"
             }
 
-            Important Instructions:
-            1. Return the translations as a JSON object mapping original strings to their translations.
-            2. Preserve the exact original strings as keys in the JSON object.
-            3. Only translate the provided input strings. Do not include any additional text, examples, or explanations in the output.
-            4. Escape all special characters in the translations as required for valid JSON, especially double quotes (e.g., use `\"` for `"`).
-            5. Ensure the JSON object is properly terminated and complete. Do not cut off or truncate the response.
-            6. Ensure the JSON is properly formatted and valid.
-            7. Do not include anything else, like markdown notation around it or any extraneous characters. The ONLY thing you should return is properly formatted, valid JSON and absolutely nothing else.
-            8. Only process the following texts:
+            Important:
+            1. Return ONLY the JSON object.
+            2. Do not include markdown code fences (like ```json), explanations, or any other text.
+            3. Preserve all punctuation and casing from the original strings.
+            4. Translate ALL strings provided in the input.
 
-            \(resolvedStrings.joined(separator: "\n"))
+            Input data:
+            \(jsonString)
             """
 
             let request = LLMRequest(
                 messages: [
-                    LLMMessage(role: .system, content: "You are a professional translator. Do NOT reveal any reasoning or chain-of-thought. Always respond with a single valid JSON object and nothing else (no markdown, explanations, or code fences)."),
+                    LLMMessage(role: .system, content: "You are a professional translation expert. You will receive a JSON object containing strings to translate. You MUST respond ONLY with a valid JSON object mapping original strings to their translations. No conversation, no thoughts, no markdown."),
                     LLMMessage(role: .user, content: translationPrompt),
                 ],
                 maxTokens: maxTokens
