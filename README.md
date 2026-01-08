@@ -63,7 +63,7 @@ Practical examples demonstrating real-world usage patterns including multi-model
 To integrate AuroraToolkit into your project using Swift Package Manager, add the following line to your `Package.swift` file:
 
 ```swift
-.package(url: "https://github.com/AuroraToolkit/AuroraToolkit.git", from: "1.0.0")
+.package(url: "https://github.com/AuroraToolkit/AuroraToolkit.git", from: "1.1.0")
 ```
 
 Then add the desired modules as dependencies to your target. For example:
