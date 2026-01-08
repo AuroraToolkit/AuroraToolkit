@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-01-08
+
+### Added
+- Migration of `OllamaService` from legacy `/api/generate` to the modern `/api/chat` endpoint.
+- Full token usage tracking support for Ollama requests (`eval_count`, `prompt_eval_count`).
+- New comprehensive unit tests for `OllamaService` chat API and streaming.
+- `extractThoughtsAndStripJSON()` integration in `Summarizer` for more robust cleaning of LLM reasoning blocks.
+
+### Changed
+- Refined prompt engineering across `AuroraTaskLibrary` (Translation, Titles, Clustering, Sentiment, Language Detection) to ensure more reliable JSON responses.
+- Increased default `maxTokens` in `GenerateTitlesLLMTask` from 100 to 500.
+- Improved streaming robustness in `OllamaService` to handle newline-delimited JSON chunks.
+- Softened sentiment in integration tests to improve compatibility with Apple Foundation Model content filters.
+- Updated `.gitignore` to exclude test artifacts (`*_output.txt`).
+
+### Fixed
+- Corrected `OllamaService` default port from 11400 to 11434 in `LLMServiceFactory`.
+- Fixed `LLMManager` fallback routing logic to correctly respect strict model routing constraints.
+- Resolved integration test failures with Apple Foundation Model by implementing graceful skipping on system errors.
+
 ## [1.0.1] - 2025-12-13
 
 ### Added
