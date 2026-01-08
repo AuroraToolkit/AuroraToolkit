@@ -125,7 +125,7 @@ public class OllamaService: LLMServiceProtocol, @unchecked Sendable {
     ///    - vendor: The name of the service vendor (default is `"Ollama"`).
     ///    - name: The name of the service instance (default is `"Ollama"`).
     ///    - baseURL: The base URL for the Ollama API (default is `"http://localhost:11434"`).
-    ///    - contextWindowSize: The size of the context window used by the service. Defaults to 4096.
+    ///    - contextWindowSize: The size of the context window used by the service. Defaults to 8192.
     ///    - maxOutputTokens: The maximum number of tokens allowed for output in a single request. Defaults to 4096.
     ///    - inputTokenPolicy: The policy to handle input tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
     ///    - outputTokenPolicy: The policy to handle output tokens exceeding the service's limit. Defaults to `.adjustToServiceLimits`.
@@ -141,7 +141,7 @@ public class OllamaService: LLMServiceProtocol, @unchecked Sendable {
         baseURL: String = "http://localhost:11434",
         defaultModel: String = "gemma3",
         supportedModels: [String] = [],
-        contextWindowSize: Int = 4096,
+        contextWindowSize: Int = 8192,
         maxOutputTokens: Int = 4096,
         inputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,
         outputTokenPolicy: TokenAdjustmentPolicy = .adjustToServiceLimits,

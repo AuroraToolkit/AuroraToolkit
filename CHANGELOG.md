@@ -21,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 - Corrected `OllamaService` default port from 11400 to 11434 in `LLMServiceFactory`.
+- Fixed `OllamaService` default token limits to ensure the context window (8192) is larger than the max output tokens (4096), preventing accidental prompt trimming.
 - Fixed `LLMManager` fallback routing logic to correctly respect strict model routing constraints.
 - Resolved integration test failures with Apple Foundation Model by implementing graceful skipping on system errors.
 
